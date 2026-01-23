@@ -1,5 +1,10 @@
 # Worklog
 
+### 2026-01-23 - Workspaces model + thread attachments
+- **Outcome:** Server stores workspace profiles, exposes workspace routes/actions, and threads carry local metadata plus workspace attachments in the UI.
+- **Why:** Separate repo profiles from conversations, allow per-workspace defaults, and support thread attachments in the interface.
+- **Links:** commit `4ee6ca7a9fee8b39f92e835fbc9d55c2a1542b73`
+
 ### 2026-01-23 - Codex app-server threads bridge
 - **Outcome:** Server spawns `codex app-server`, exposes thread routes, and UI ships a Threads tab with diagnostics + smoke check.
 - **Why:** Surface existing Codex threads in the phone UI and make app-server spawning easier to diagnose.

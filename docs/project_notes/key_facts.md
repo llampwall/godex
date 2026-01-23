@@ -33,6 +33,11 @@
 - Diagnostics: `GET /diag/codex` returns spawn config + `codex --version`
 - Smoke check: `pnpm smoke` (calls `/diag/codex`)
 
+## Workspaces
+- Workspaces are repo profiles with fields: `title`, `repo_path`, `notify_policy`, `default_thread_id`, `test_command_override`.
+- Workspaces API: `GET/POST /workspaces`, `GET/PATCH/DELETE /workspaces/:id`.
+- Workspace actions: attach threads (`POST /workspaces/:id/threads`), git status/diff (`POST /workspaces/:id/git/status`, `/git/diff`), tests (`POST /workspaces/:id/test`), and utility actions (`POST /workspaces/:id/open-folder`, `/open-code`, `/runs/clear`).
+
 ## External services
 - Optional notifications: `NTFY_URL`, `NTFY_TOPIC` (uses ntfy.sh by default)
 

@@ -6,12 +6,14 @@
 ## Goals
 - Provide remote access to Codex CLI runs from a phone through a lightweight UI.
 - Serve the UI via Vite dev server during development or from built assets via the server.
+- Clarify repo profiles (workspaces) vs conversational threads, with workspace defaults and attachments.
 
 ## Current state
 - Working: pnpm workspace with `apps/server` and `apps/ui`, plus root scripts for dev/build/start.
 - Working: server serves built UI at `/ui`; dev uses Vite UI on `UI_PORT` when assets are not built.
 - Working: sessions persist `notify_mode`; server can send ntfy notifications and UI exposes per-session controls.
 - Working: Threads UI bridges to `codex app-server` so existing Codex threads can be listed and resumed.
+- Working: Workspaces are stored server-side as repo profiles; threads can be attached with local metadata (pinned/archived/title override).
 
 ## Repo map
 - `apps/server`: backend server for API + SSE, and optional static UI serving.
