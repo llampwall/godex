@@ -11,6 +11,7 @@
 - Working: pnpm workspace with `apps/server` and `apps/ui`, plus root scripts for dev/build/start.
 - Working: server serves built UI at `/ui`; dev uses Vite UI on `UI_PORT` when assets are not built.
 - Working: sessions persist `notify_mode`; server can send ntfy notifications and UI exposes per-session controls.
+- Working: Threads UI bridges to `codex app-server` so existing Codex threads can be listed and resumed.
 
 ## Repo map
 - `apps/server`: backend server for API + SSE, and optional static UI serving.
@@ -23,9 +24,11 @@
 - Components:
   - UI: browser client from `apps/ui` (Vite dev server or served by `apps/server`).
   - Server: API + SSE endpoints in `apps/server`.
+  - Codex app-server: spawned by the server to fetch existing Codex threads.
 - Data flow:
   1) UI loads with `?token=<CODEX_RELAY_TOKEN>` (and optional `serverPort`).
   2) UI calls server API with `Authorization: Bearer <CODEX_RELAY_TOKEN>`; SSE uses `?token=`.
+  3) Threads UI calls server routes, which proxy to the local `codex app-server`.
 
 ## Active constraints
 - None yet. (When you add one, reference ADR-### from `adrs.md`.)
@@ -33,6 +36,7 @@
 ## Known hazards
 - `CODEX_RELAY_TOKEN` is required for API requests and SSE streams; missing/incorrect tokens break UI and API access.
 - Setting `CODEX_FULL_ACCESS=1` allows full-access Codex runs; use only when explicitly needed.
+- Threads require `codex` on PATH (or `CODEX_BIN` set) so the server can spawn `codex app-server`.
 
 ## How to get oriented fast
 - Start here: `README.md`

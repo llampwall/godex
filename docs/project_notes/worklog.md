@@ -1,5 +1,10 @@
 # Worklog
 
+### 2026-01-23 - Codex app-server threads bridge
+- **Outcome:** Server spawns `codex app-server`, exposes thread routes, and UI ships a Threads tab with diagnostics + smoke check.
+- **Why:** Surface existing Codex threads in the phone UI and make app-server spawning easier to diagnose.
+- **Links:** commit `e5f4b2b530400d96b93b4999f29437624ec2c881`
+
 ### 2026-01-23 - SSE replay toggle + local store tracked
 - **Outcome:** Runs SSE stream can skip replay with `replay=0`, post-commit prompts are passed via a temp stdin file, and `.godex` store files are committed.
 - **Why:** Prevent duplicate output when UI opts out of replay and capture local store state per request.

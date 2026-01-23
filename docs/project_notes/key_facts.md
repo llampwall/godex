@@ -9,7 +9,7 @@
 ## Local development
 - Runtime: Node.js (pnpm workspace)
 - Package manager: pnpm@9.12.3
-- Env var names: `SERVER_HOST`, `SERVER_PORT`, `UI_HOST`, `UI_PORT`, `CODEX_RELAY_TOKEN`, `CODEX_FULL_ACCESS`, `NTFY_URL`, `NTFY_TOPIC`
+- Env var names: `SERVER_HOST`, `SERVER_PORT`, `UI_HOST`, `UI_PORT`, `CODEX_RELAY_TOKEN`, `CODEX_FULL_ACCESS`, `CODEX_BIN`, `GODEX_APP_SERVER_CWD`, `NTFY_URL`, `NTFY_TOPIC`
 - Default hosts: `SERVER_HOST=0.0.0.0`, `UI_HOST=0.0.0.0`
 - Ports: server `SERVER_PORT` (default 6969), UI dev server `UI_PORT` (default 5174)
 - Auth: API requires `Authorization: Bearer <CODEX_RELAY_TOKEN>`; SSE uses `?token=<CODEX_RELAY_TOKEN>`
@@ -27,12 +27,19 @@
 - Build: `pnpm build`
 - Start: `pnpm start` (builds then starts `apps/server`)
 
+## Threads + diagnostics
+- Threads UI uses `codex app-server` (spawned by the server); requires `codex` on PATH or `CODEX_BIN` set.
+- Thread detail route: `/ui/t/:thread_id`
+- Diagnostics: `GET /diag/codex` returns spawn config + `codex --version`
+- Smoke check: `pnpm smoke` (calls `/diag/codex`)
+
 ## External services
 - Optional notifications: `NTFY_URL`, `NTFY_TOPIC` (uses ntfy.sh by default)
 
 ## Operational commands
 - `pnpm build`
 - `pnpm start`
+- `pnpm smoke`
 - `pnpm typecheck`
 - `pnpm test:server`
 - `pnpm test:ui`
