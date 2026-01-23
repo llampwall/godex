@@ -1,5 +1,5 @@
 import { resolve } from "node:path";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import dotenv from "dotenv";
 import Fastify from "fastify";
 import cors from "@fastify/cors";
@@ -65,12 +65,32 @@ export const buildServer = () => {
   const uiLogoPath = resolve(uiDist, "godex.png");
   let uiIndexHtml: string | null = null;
   let uiLogo: Buffer | null = null;
+  const uiRootFiles = new Map<string, string>();
 
   if (existsSync(uiIndexPath)) {
     uiIndexHtml = readFileSync(uiIndexPath, "utf8");
   }
   if (existsSync(uiLogoPath)) {
     uiLogo = readFileSync(uiLogoPath);
+  }
+
+  if (existsSync(uiDist)) {
+    const rootFiles = [
+      ["manifest.webmanifest", "application/manifest+json"],
+      ["pwa-192.png", "image/png"],
+      ["pwa-512.png", "image/png"],
+      ["sw.js", "application/javascript"]
+    ];
+    for (const [name, type] of rootFiles) {
+      const filePath = resolve(uiDist, name);
+      if (existsSync(filePath)) {
+        uiRootFiles.set(name, type);
+      }
+    }
+    const workbox = readdirSync(uiDist).find((entry) => entry.startsWith("workbox-") && entry.endsWith(".js"));
+    if (workbox) {
+      uiRootFiles.set(workbox, "application/javascript");
+    }
   }
 
   if (existsSync(resolve(uiDist, "assets"))) {
@@ -86,6 +106,17 @@ export const buildServer = () => {
     }
     reply.type("image/png").send(uiLogo);
   });
+
+  for (const [fileName, contentType] of uiRootFiles.entries()) {
+    app.get(`/ui/${fileName}`, async (_req, reply) => {
+      const filePath = resolve(uiDist, fileName);
+      if (!existsSync(filePath)) {
+        return reply.code(404).send({ ok: false, error: "file not found" });
+      }
+      const buffer = readFileSync(filePath);
+      reply.type(contentType).send(buffer);
+    });
+  }
 
   const serveUi = async (_req: unknown, reply: any) => {
     if (!uiIndexHtml) {

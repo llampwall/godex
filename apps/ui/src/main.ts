@@ -1,3 +1,4 @@
+import { registerSW } from "virtual:pwa-register";
 
 const root = document.querySelector<HTMLDivElement>("#app");
 
@@ -14,6 +15,10 @@ if (tokenParam) {
 
 const getToken = () => localStorage.getItem("godex_token") ?? "";
 const apiBase = () => window.location.origin;
+
+if ("serviceWorker" in navigator) {
+  registerSW({ immediate: true });
+}
 
 const withToken = (path: string) => {
   const token = getToken();
@@ -38,6 +43,36 @@ const apiFetch = async (path: string, init?: RequestInit) => {
 };
 
 let healthInterval: number | null = null;
+let offlineListenerAttached = false;
+
+const setOfflineBanner = (isOffline: boolean, message = "Offline / Server unreachable") => {
+  const banner = document.querySelector<HTMLDivElement>("#offline-banner");
+  if (!banner) return;
+  if (isOffline) {
+    banner.textContent = message;
+    banner.classList.remove("hidden");
+  } else {
+    banner.classList.add("hidden");
+  }
+};
+
+const attachOnlineListeners = () => {
+  if (offlineListenerAttached) return;
+  offlineListenerAttached = true;
+  window.addEventListener("online", () => setOfflineBanner(false));
+  window.addEventListener("offline", () => setOfflineBanner(true));
+};
+
+const showToast = (message: string) => {
+  const toast = document.querySelector<HTMLDivElement>("#toast");
+  if (!toast) return;
+  toast.textContent = message;
+  toast.classList.remove("hidden");
+  window.setTimeout(() => {
+    toast.classList.add("hidden");
+  }, 2500);
+};
+
 
 const updateHealth = async () => {
   const el = document.querySelector<HTMLDivElement>("#server-status");
@@ -50,8 +85,10 @@ const updateHealth = async () => {
     const workspaces = data.workspace_count ?? 0;
     const linked = data.linked_threads_count ?? 0;
     el.textContent = `server ok | port ${port} | pid ${data.pid ?? "?"} | uptime ${uptime}s | active ${active} | workspaces ${workspaces} | links ${linked}`;
+    setOfflineBanner(false);
   } catch (err) {
     el.textContent = "server status unavailable";
+    setOfflineBanner(true);
   }
 };
 
@@ -66,13 +103,17 @@ const renderLayout = (activeTab: "workspaces" | "threads", content: string, bann
         <a class="tab ${activeTab === "workspaces" ? "active" : ""}" href="${withToken("/ui")}" style="color: cornflowerblue; margin-left: auto;">workspaces</a>
         <a class="tab ${activeTab === "threads" ? "active" : ""}" href="${withToken("/ui/threads")}">threads</a>
       </nav>
+      <div id="offline-banner" class="banner offline hidden">Offline / Server unreachable</div>
       ${banner ? `<div class="banner">${banner}</div>` : ""}
+      <div id="toast" class="toast hidden"></div>
       <section class="content">
         ${content}
       </section>
     </main>
   `;
 
+  attachOnlineListeners();
+  setOfflineBanner(!navigator.onLine);
   void updateHealth();
   if (healthInterval) {
     window.clearInterval(healthInterval);
@@ -176,6 +217,117 @@ const buildModal = (title: string, body: string) => `
     </div>
   </div>
 `;
+
+const getSpeechRecognition = () => {
+  const w = window as any;
+  return w.SpeechRecognition || w.webkitSpeechRecognition || null;
+};
+
+type DictationTargets = {
+  button: HTMLButtonElement | null;
+  textarea: HTMLTextAreaElement | null;
+  status?: HTMLElement | null;
+};
+
+const attachDictation = (targets: DictationTargets) => {
+  const { button, textarea, status } = targets;
+  if (!button || !textarea) return;
+  const SpeechRecognition = getSpeechRecognition();
+  if (!SpeechRecognition) {
+    button.addEventListener("click", () => showToast("Dictation not supported"));
+    return;
+  }
+
+  let listening = false;
+  let recognition: any = null;
+
+  const updateStatus = (text: string, interim = false) => {
+    if (!status) return;
+    status.textContent = text;
+    status.classList.toggle("active", Boolean(text));
+    status.classList.toggle("interim", interim);
+  };
+
+  const appendText = (value: string) => {
+    const trimmed = value.trim();
+    if (!trimmed) return;
+    const existing = textarea.value.trim();
+    textarea.value = existing ? `${existing} ${trimmed}` : trimmed;
+    textarea.focus();
+  };
+
+  const stop = () => {
+    listening = false;
+    recognition?.stop();
+    button.classList.remove("active");
+    updateStatus("");
+  };
+
+  const start = () => {
+    if (listening) return;
+    recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = navigator.language || "en-US";
+
+    recognition.onresult = (event: any) => {
+      let interim = "";
+      let finalText = "";
+      for (let i = event.resultIndex; i < event.results.length; i += 1) {
+        const result = event.results[i];
+        const transcript = result[0]?.transcript ?? "";
+        if (result.isFinal) {
+          finalText += transcript;
+        } else {
+          interim += transcript;
+        }
+      }
+      if (finalText.trim()) {
+        appendText(finalText);
+      }
+      if (listening) {
+        if (interim.trim()) {
+          updateStatus(`Listening... ${interim.trim()}`, true);
+        } else {
+          updateStatus("Listening...");
+        }
+      }
+    };
+
+    recognition.onerror = (event: any) => {
+      if (event.error === "not-allowed" || event.error === "service-not-allowed") {
+        showToast("Mic permission denied");
+      } else {
+        showToast("Dictation error");
+      }
+      stop();
+    };
+
+    recognition.onend = () => {
+      listening = false;
+      button.classList.remove("active");
+      updateStatus("");
+    };
+
+    try {
+      recognition.start();
+      listening = true;
+      button.classList.add("active");
+      updateStatus("Listening...");
+    } catch (err) {
+      showToast("Dictation error");
+      stop();
+    }
+  };
+
+  button.addEventListener("click", () => {
+    if (listening) {
+      stop();
+    } else {
+      start();
+    }
+  });
+};
 
 const openThreadPicker = async (onPick: (thread: any, setDefault: boolean) => Promise<void>, includeArchived = true) => {
   const modalHost = document.querySelector<HTMLDivElement>("#modal-host");
@@ -295,6 +447,69 @@ const openWorkspacePicker = async (title: string, onPick: (workspace: any, setDe
   } catch (err) {
     if (list) list.textContent = String(err);
   }
+};
+
+type ShareDraft = {
+  id: string;
+  text: string;
+  created_at: string;
+};
+
+const SHARE_DRAFTS_KEY = "godex_share_drafts";
+
+const readShareDrafts = (): ShareDraft[] => {
+  try {
+    const raw = localStorage.getItem(SHARE_DRAFTS_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+};
+
+const writeShareDrafts = (drafts: ShareDraft[]) => {
+  const trimmed = drafts.slice(0, 20);
+  localStorage.setItem(SHARE_DRAFTS_KEY, JSON.stringify(trimmed));
+};
+
+const removeShareDraft = (id: string) => {
+  const drafts = readShareDrafts().filter((draft) => draft.id !== id);
+  writeShareDrafts(drafts);
+};
+
+const generateShareId = () => {
+  if ("crypto" in window && "randomUUID" in crypto) {
+    return crypto.randomUUID();
+  }
+  return `draft-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+};
+
+const createShareDraftFromParams = (): ShareDraft | null => {
+  const params = new URLSearchParams(window.location.search);
+  const title = (params.get("title") || "").trim();
+  const text = (params.get("text") || "").trim();
+  const url = (params.get("url") || "").trim();
+  if (!title && !text && !url) return null;
+  const parts = [text, url].filter(Boolean);
+  const combined = parts.length ? parts.join("\n") : title;
+  const draft: ShareDraft = {
+    id: generateShareId(),
+    text: combined,
+    created_at: new Date().toISOString()
+  };
+  const drafts = readShareDrafts();
+  drafts.unshift(draft);
+  writeShareDrafts(drafts);
+  if (window.location.search) {
+    window.history.replaceState({}, "", withToken("/ui/share"));
+  }
+  return draft;
+};
+
+const getLatestShareDraft = (): ShareDraft | null => {
+  const drafts = readShareDrafts();
+  return drafts.length ? drafts[0] : null;
 };
 
 const renderWorkspacesList = async () => {
@@ -419,10 +634,12 @@ const renderWorkspaceDetail = async (workspaceId: string) => {
           <option value="off">off</option>
         </select>
       </div>
-      <div class="input-row single">
+      <div class="input-row single with-mic">
         <textarea id="message" rows="1" placeholder="send prompt to default thread..."></textarea>
+        <button id="workspace-mic" class="mic" aria-label="dictation">mic</button>
         <button id="send" class="send">send</button>
       </div>
+      <div class="dictation-status" id="workspace-dictation"></div>
       <div class="helper" id="thread-helper"></div>
       <div class="actions below thirds">
         <button id="git-status">git status</button>
@@ -457,6 +674,8 @@ const renderWorkspaceDetail = async (workspaceId: string) => {
   const output = document.querySelector<HTMLPreElement>("#output");
   const sendBtn = document.querySelector<HTMLButtonElement>("#send");
   const msg = document.querySelector<HTMLTextAreaElement>("#message");
+  const dictationBtn = document.querySelector<HTMLButtonElement>("#workspace-mic");
+  const dictationStatus = document.querySelector<HTMLDivElement>("#workspace-dictation");
   const gitStatus = document.querySelector<HTMLButtonElement>("#git-status");
   const gitDiff = document.querySelector<HTMLButtonElement>("#git-diff");
   const runTests = document.querySelector<HTMLButtonElement>("#run-tests");
@@ -473,6 +692,8 @@ const renderWorkspaceDetail = async (workspaceId: string) => {
 
   let workspace: any = null;
   let threadsCache: any[] = [];
+
+  attachDictation({ button: dictationBtn, textarea: msg, status: dictationStatus });
 
   const refreshRuns = async () => {
     const data = await apiFetch(`/workspaces/${workspaceId}`);
@@ -994,10 +1215,12 @@ const renderThreadDetail = async (threadId: string) => {
         <button id="archive-thread" class="ghost">archive locally</button>
       </div>
       <pre id="thread-output" class="output"></pre>
-      <div class="input-row">
+      <div class="input-row with-mic">
         <textarea id="thread-message" rows="2" placeholder="send message..."></textarea>
+        <button id="thread-mic" class="mic" aria-label="dictation">mic</button>
         <button id="thread-send" class="send">send</button>
       </div>
+      <div class="dictation-status" id="thread-dictation"></div>
       <div class="input-row">
         <select id="thread-link">
           <option value="">link to workspace (optional)</option>
@@ -1012,12 +1235,16 @@ const renderThreadDetail = async (threadId: string) => {
   const output = document.querySelector<HTMLPreElement>("#thread-output");
   const sendBtn = document.querySelector<HTMLButtonElement>("#thread-send");
   const input = document.querySelector<HTMLTextAreaElement>("#thread-message");
+  const dictationBtn = document.querySelector<HTMLButtonElement>("#thread-mic");
+  const dictationStatus = document.querySelector<HTMLDivElement>("#thread-dictation");
   const linkSelect = document.querySelector<HTMLSelectElement>("#thread-link");
   const attachWorkspace = document.querySelector<HTMLButtonElement>("#attach-workspace");
   const setDefault = document.querySelector<HTMLButtonElement>("#set-default");
   const archiveBtn = document.querySelector<HTMLButtonElement>("#archive-thread");
 
   let threadMeta: any = null;
+
+  attachDictation({ button: dictationBtn, textarea: input, status: dictationStatus });
 
   const loadWorkspaces = async () => {
     if (!linkSelect) return;
@@ -1115,10 +1342,159 @@ const renderThreadDetail = async (threadId: string) => {
   await loadThread();
 };
 
+const renderShare = async () => {
+  const draftFromShare = createShareDraftFromParams();
+  const draft = draftFromShare ?? getLatestShareDraft();
+  const banner = getToken() ? undefined : "missing token. add ?token=... before sending.";
+
+  renderLayout("workspaces", `
+    <div class="toolbar">
+      <div class="location">/share</div>
+      <a href="${withToken("/ui")}" class="link outline">back</a>
+    </div>
+    <div class="card">
+      <div class="section-header">
+        <h3>new message</h3>
+      </div>
+      ${draft ? `
+        <div class="meta-row">
+          <span class="meta">draft created: ${formatTimestamp(draft.created_at)}</span>
+        </div>
+        <label for="share-text">message</label>
+        <textarea id="share-text" rows="4"></textarea>
+        <label for="share-workspace">workspace (optional)</label>
+        <select id="share-workspace">
+          <option value="">no workspace</option>
+        </select>
+        <label for="share-thread">thread (optional)</label>
+        <select id="share-thread">
+          <option value="">use workspace default thread</option>
+        </select>
+        <div class="helper" id="share-helper"></div>
+        <div class="actions below">
+          <button id="share-send" class="send">send</button>
+          <button id="share-clear" class="ghost">clear draft</button>
+        </div>
+      ` : `
+        <div class="helper-text">no shared content yet. use android share to send text or a url to godex.</div>
+      `}
+    </div>
+  `, banner);
+
+  if (!draft) return;
+
+  const textarea = document.querySelector<HTMLTextAreaElement>("#share-text");
+  if (textarea) textarea.value = draft.text;
+
+  const workspaceSelect = document.querySelector<HTMLSelectElement>("#share-workspace");
+  const threadSelect = document.querySelector<HTMLSelectElement>("#share-thread");
+  const helper = document.querySelector<HTMLDivElement>("#share-helper");
+  const sendBtn = document.querySelector<HTMLButtonElement>("#share-send");
+  const clearBtn = document.querySelector<HTMLButtonElement>("#share-clear");
+
+  let workspaceDefaultThread: string | null = null;
+
+  const refreshWorkspaceDefault = async () => {
+    workspaceDefaultThread = null;
+    if (!workspaceSelect?.value) {
+      if (helper) helper.textContent = "";
+      return;
+    }
+    try {
+      const data = await apiFetch(`/workspaces/${workspaceSelect.value}`);
+      workspaceDefaultThread = data.workspace?.default_thread_id ?? null;
+      if (helper) {
+        helper.innerHTML = workspaceDefaultThread
+          ? `<div class="helper-text">default thread: ${workspaceDefaultThread}</div>`
+          : `<div class="helper-text">no default thread set for this workspace.</div>`;
+      }
+    } catch (err) {
+      if (helper) helper.textContent = String(err);
+    }
+  };
+
+  const loadWorkspaces = async () => {
+    if (!workspaceSelect) return;
+    try {
+      const data = await apiFetch("/workspaces");
+      for (const workspace of data.workspaces ?? []) {
+        const option = document.createElement("option");
+        option.value = workspace.id;
+        option.textContent = workspace.title;
+        workspaceSelect.appendChild(option);
+      }
+    } catch (err) {
+      if (helper) helper.textContent = String(err);
+    }
+  };
+
+  const loadThreads = async () => {
+    if (!threadSelect) return;
+    try {
+      const data = await apiFetch("/threads?limit=100&include_archived=1");
+      for (const thread of data.data ?? []) {
+        const option = document.createElement("option");
+        option.value = thread.thread_id;
+        option.textContent = getThreadTitle(thread);
+        threadSelect.appendChild(option);
+      }
+    } catch {
+      // ignore
+    }
+  };
+
+  workspaceSelect?.addEventListener("change", async () => {
+    await refreshWorkspaceDefault();
+  });
+
+  sendBtn?.addEventListener("click", async () => {
+    if (!textarea) return;
+    const text = textarea.value.trim();
+    if (!text) return;
+    const workspaceId = workspaceSelect?.value || "";
+    const threadId = threadSelect?.value || "";
+    let targetThread = threadId;
+    if (!targetThread && workspaceId) {
+      if (!workspaceDefaultThread) {
+        await refreshWorkspaceDefault();
+      }
+      targetThread = workspaceDefaultThread || "";
+    }
+    if (!targetThread) {
+      showToast("Pick a thread or workspace default thread");
+      return;
+    }
+    try {
+      await apiFetch(`/threads/${targetThread}/message`, {
+        method: "POST",
+        body: JSON.stringify({ text, workspace_id: workspaceId || undefined })
+      });
+      removeShareDraft(draft.id);
+      showToast("Sent");
+      window.location.href = withToken(`/ui/t/${targetThread}`);
+    } catch (err) {
+      showToast(String(err));
+    }
+  });
+
+  clearBtn?.addEventListener("click", () => {
+    removeShareDraft(draft.id);
+    window.location.href = withToken("/ui/share");
+  });
+
+  await loadWorkspaces();
+  await loadThreads();
+  await refreshWorkspaceDefault();
+};
+
 const route = () => {
   const path = window.location.pathname.replace(/\/+$/, "");
   if (path === "" || path === "/" || path === "/ui") {
     void renderWorkspacesList();
+    return;
+  }
+  if (path === "/ui/share") {
+    void renderShare();
     return;
   }
   if (path === "/ui/threads" || path === "/ui/t") {
@@ -1153,6 +1529,9 @@ style.textContent = `
   .tab:hover { border-color: #2a2420; }
   .banner { background: #efe9de; color: #2a2420; padding: 10px 12px; border-bottom: 1px solid #d6d0c6; font-size: 12px; }
   .banner.hidden { display: none; }
+  .banner.offline { background: #2a2420; color: #f5efe6; }
+  .toast { position: fixed; right: 16px; bottom: 16px; background: #efe9de; color: #2a2420; border: 1px solid #d6d0c6; padding: 8px 10px; border-radius: 6px; font-size: 12px; z-index: 60; box-shadow: 0 6px 20px rgba(0,0,0,0.2); }
+  .toast.hidden { display: none; }
   .content { display: flex; flex-direction: column; padding: 0; }
   .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)) }
   .card { color: cornflowerblue; background: #000; border-radius: 3px; padding: 12px; box-shadow: none; border: 1px solid #e0d9ce; margin: 0; }
@@ -1180,7 +1559,12 @@ style.textContent = `
   .link { text-decoration: none; color: #2a2420; font-weight: 600; }
   .link.outline { color: #e4a05b; padding: 6px 10px; border-radius: 3px; text-transform: lowercase; }
   .input-row { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; }
+  .input-row.with-mic { grid-template-columns: 1fr auto auto; }
   .input-row.single textarea { height: 34px; resize: none; overflow: hidden; }
+  .mic { background: #0f0d0b; border: 1px solid #6a6056; color: #e4a05b; padding: 8px 10px; }
+  .mic.active { background: #e4a05b; color: #000; }
+  .dictation-status { font-size: 12px; color: #b7a48a; min-height: 16px; margin-top: 6px; }
+  .dictation-status.interim { color: #8a7f74; }
   .meta-block { color: #4c4036; margin-bottom: 8px; }
   .notify-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; color: #f5efe6; }
   .notify-row label { margin: 0; font-size: 12px; letter-spacing: 0.08em; }

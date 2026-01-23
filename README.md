@@ -61,6 +61,19 @@ http://central-command:SERVER_PORT/ui?token=YOUR_TOKEN
 
 If UI assets are not built, use the Vite dev server as described above.
 
+## PWA + dictation + share
+
+- Install: open the UI in Chrome (Android) and use the browser menu "Install app".
+- Offline: the UI shell loads from cache and shows an "Offline / Server unreachable" banner when the server is down.
+- Dictation: tap the mic button next to message inputs (Chrome only; requires mic permission).
+- Share sheet: from Android, Share text or a URL to "godex" to create a draft message.
+
+Notes:
+- Start the backend before using the UI: run `pnpm start`.
+- If using HTTPS via Caddy, run `caddy run --config P:\software\caddy\Caddyfile` in a separate terminal.
+- The app still needs a valid token in localStorage. If you have not set one, open the UI once with `?token=...` first.
+- Share drafts are stored locally and survive refresh until sent or cleared.
+
 ## Concepts
 
 - **Workspaces**: repo profiles (not conversations). Fields include `title`, `repo_path`, `notify_policy`, `default_thread_id`, and `test_command_override`.
