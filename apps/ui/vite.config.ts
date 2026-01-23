@@ -9,6 +9,7 @@ const uiPort = Number(process.env.UI_PORT ?? 7777);
 export default defineConfig({
   server: {
     host: uiHost,
-    port: uiPort
+    port: uiPort,
+    allowedHosts: ["central-command"]
   }
 });
