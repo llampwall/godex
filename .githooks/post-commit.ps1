@@ -86,7 +86,6 @@ function Write-OutputLines([string]$text) {
 
 function Invoke-Coder([string]$prompt, [int]$timeoutSec) {
   $psi = New-Object System.Diagnostics.ProcessStartInfo
-  $psi.FileName = $coderPath
   $psi.UseShellExecute = $false
   $psi.RedirectStandardInput = $true
   $psi.RedirectStandardOutput = $false
@@ -96,12 +95,13 @@ function Invoke-Coder([string]$prompt, [int]$timeoutSec) {
   $psi.Environment['TERM'] = 'dumb'
   $psi.Environment['NO_COLOR'] = '1'
   if ($env:CODE_HOME -and $env:CODE_HOME.Trim() -ne '') { $psi.Environment['CODE_HOME'] = $env:CODE_HOME }
-  $quotedPrompt = '"' + ($prompt -replace '"','""') + '"'
-  $argString = 'exec --full-auto --sandbox workspace-write ' + $quotedPrompt
-  Log ("codex args: " + $argString)
+  $argString = 'exec --full-auto --sandbox workspace-write -'
+  $tmpFile = [System.IO.Path]::GetTempFileName()
+  [System.IO.File]::WriteAllText($tmpFile, $prompt)
+  Log ("codex args: " + $argString + " < " + $tmpFile)
   Log ("codex cwd: " + $repoRoot)
   $psi.FileName = 'cmd.exe'
-  $psi.Arguments = '/c ""' + $coderPath + '" ' + $argString + ' >> "' + $logFile + '" 2>>&1"'
+  $psi.Arguments = '/c ""' + $coderPath + '" ' + $argString + ' < "' + $tmpFile + '" >> "' + $logFile + '" 2>>&1"'
   $psi.WorkingDirectory = $repoRoot
   $p = New-Object System.Diagnostics.Process
   $p.StartInfo = $psi
@@ -110,9 +110,12 @@ function Invoke-Coder([string]$prompt, [int]$timeoutSec) {
     try { & taskkill /T /F /PID $p.Id | Out-Null } catch { try { $p.Kill() } catch {} }
     Log ('codex timed out after ' + $timeoutSec + 's (killed process tree)')
     Remove-Item -Force -ErrorAction SilentlyContinue $lockFile
+    if (Test-Path $tmpFile) { Remove-Item -Force -ErrorAction SilentlyContinue $tmpFile }
     return 124
   }
-  return $p.ExitCode
+  $exit = $p.ExitCode
+  if (Test-Path $tmpFile) { Remove-Item -Force -ErrorAction SilentlyContinue $tmpFile }
+  return $exit
 }
 
 function Commit-NotesIfChanged([string]$message) {
@@ -262,9 +265,7 @@ try {
   }
 
   $summary = & git show -1 --name-status --stat --no-color 2>&1
-  $full = & git show -1 --unified=0 --no-color 2>&1
   $summaryText = ($summary | ForEach-Object { Strip-Ansi $_ }) -join "`n"
-  $fullText = ($full | ForEach-Object { Strip-Ansi $_ }) -join "`n"
   Log "commit summary:"
   $summary | ForEach-Object {
     $clean = Strip-Ansi $_
@@ -282,10 +283,7 @@ try {
     '- Enforce no duplication: worklog links should not repeat; ADRs are constraints; key_facts are lookup truths; bugs are recurring/scary only.',
     '',
     'Commit summary:',
-    $summaryText,
-    '',
-    'Commit diff:',
-    $fullText
+    $summaryText
   )
   $prompt = $promptLines -join "`n"
   $maxPromptChars = 40000

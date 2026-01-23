@@ -20,6 +20,7 @@ export const registerRunRoutes = (app: FastifyInstance, store: Store, runManager
 
   app.get("/runs/:id/stream", async (req, reply) => {
     const { id } = req.params as { id: string };
+    const query = req.query as { replay?: string } | undefined;
     const run = store.getRun(id);
     if (!run) {
       return reply.code(404).send({ ok: false, error: "run not found" });
@@ -32,9 +33,11 @@ export const registerRunRoutes = (app: FastifyInstance, store: Store, runManager
       "Access-Control-Allow-Origin": "*"
     });
 
-    const events = store.getRunEvents(id, 500);
-    for (const event of events) {
-      writeEvent(reply.raw, "chunk", event);
+    if (!query || query.replay !== "0") {
+      const events = store.getRunEvents(id, 500);
+      for (const event of events) {
+        writeEvent(reply.raw, "chunk", event);
+      }
     }
 
     const unsubscribe = runManager.subscribe(id, (event) => {
