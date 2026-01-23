@@ -1,41 +1,46 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { RunManager } from "../src/run_manager";
-import type { NotifyMode, Run, RunEvent, Session, Store } from "../src/store";
+import type { NotifyPolicy, Run, RunEvent, Workspace, Store, ThreadMeta, WorkspaceThread } from "../src/store";
 
 const now = () => new Date().toISOString();
 
 const createMemoryStore = (): Store => {
-  const sessions = new Map<string, Session>();
+  const workspaces = new Map<string, Workspace>();
   const runs = new Map<string, Run>();
   const runEvents = new Map<string, RunEvent[]>();
+  const threadMeta = new Map<string, ThreadMeta>();
+  const workspaceThreads: WorkspaceThread[] = [];
 
   return {
     init: () => {},
-    listSessions: () => Array.from(sessions.values()),
-    getSession: (id) => sessions.get(id) ?? null,
-    createSession: ({ title, repo_path }) => {
+    listWorkspaces: () => Array.from(workspaces.values()),
+    getWorkspace: (id) => workspaces.get(id) ?? null,
+    createWorkspace: ({ title, repo_path }) => {
       const ts = now();
-      const session: Session = {
-        id: `session-${sessions.size + 1}`,
+      const workspace: Workspace = {
+        id: `workspace-${workspaces.size + 1}`,
         title,
         repo_path,
         status: "idle",
-        notify_mode: "needs_input_failed",
+        notify_policy: "needs_input+failed",
+        default_thread_id: null,
+        test_command_override: null,
         created_at: ts,
         updated_at: ts
       };
-      sessions.set(session.id, session);
-      return session;
+      workspaces.set(workspace.id, workspace);
+      return workspace;
     },
-    updateSession: (id, patch) => {
-      const existing = sessions.get(id);
+    updateWorkspace: (id, patch) => {
+      const existing = workspaces.get(id);
       if (!existing) return null;
-      const updated = { ...existing, ...patch, updated_at: now() } as Session;
-      if (!updated.notify_mode) updated.notify_mode = "needs_input_failed";
-      sessions.set(id, updated);
+      const updated = { ...existing, ...patch, updated_at: now() } as Workspace;
+      if (!updated.notify_policy) updated.notify_policy = "needs_input+failed";
+      workspaces.set(id, updated);
       return updated;
     },
-    listRunsBySession: (session_id) => Array.from(runs.values()).filter((run) => run.session_id === session_id),
+    deleteWorkspace: (id) => workspaces.delete(id),
+    listRunsByWorkspace: (workspace_id) => Array.from(runs.values()).filter((run) => run.workspace_id === workspace_id),
     getRun: (id) => runs.get(id) ?? null,
     createRun: (input) => {
       const ts = now();
@@ -68,8 +73,40 @@ const createMemoryStore = (): Store => {
       const events = runEvents.get(run_id) ?? [];
       return events.slice(Math.max(0, events.length - limit));
     },
-    clearRunsForSession: () => 0,
-    markStaleRuns: () => 0
+    clearRunsForWorkspace: () => 0,
+    markStaleRuns: () => 0,
+    listThreadMeta: () => Array.from(threadMeta.values()),
+    getThreadMeta: (thread_id) => threadMeta.get(thread_id) ?? null,
+    upsertThreadMeta: (input) => {
+      const existing = threadMeta.get(input.thread_id);
+      const updated: ThreadMeta = {
+        thread_id: input.thread_id,
+        title_override: input.title_override ?? existing?.title_override ?? null,
+        last_seen_at: input.last_seen_at ?? now(),
+        pinned: input.pinned ?? existing?.pinned ?? false,
+        archived: input.archived ?? existing?.archived ?? false
+      };
+      threadMeta.set(input.thread_id, updated);
+      return updated;
+    },
+    listWorkspaceThreads: () => workspaceThreads,
+    attachThreadToWorkspace: (workspace_id, thread_id) => {
+      const entry = { workspace_id, thread_id, created_at: now() };
+      workspaceThreads.push(entry);
+      return entry;
+    },
+    detachThreadFromWorkspace: (workspace_id, thread_id) => {
+      const before = workspaceThreads.length;
+      for (let i = workspaceThreads.length - 1; i >= 0; i -= 1) {
+        const entry = workspaceThreads[i];
+        if (entry.workspace_id === workspace_id && entry.thread_id === thread_id) {
+          workspaceThreads.splice(i, 1);
+        }
+      }
+      return before !== workspaceThreads.length;
+    },
+    countWorkspaces: () => workspaces.size,
+    countWorkspaceThreads: () => workspaceThreads.length
   };
 };
 
@@ -105,14 +142,14 @@ describe("notifications", () => {
   it("notifies on failed when mode allows", async () => {
     const store = createMemoryStore();
     const manager = new RunManager(store);
-    const session = store.createSession({ title: "demo", repo_path: process.cwd() });
+    const workspace = store.createWorkspace({ title: "demo", repo_path: process.cwd() });
 
     const fetchMock = vi.fn().mockResolvedValue({ ok: true });
     (globalThis as any).fetch = fetchMock;
 
     const runId = await manager.startRun({
       type: "test",
-      session_id: session.id,
+      workspace_id: workspace.id,
       command: process.execPath,
       args: ["-e", "console.error('Something failed'); process.exit(1)"] ,
       cwd: process.cwd()
@@ -129,8 +166,8 @@ describe("notifications", () => {
   it("notifies on long done when mode is all", async () => {
     const store = createMemoryStore();
     const manager = new RunManager(store);
-    const session = store.createSession({ title: "demo", repo_path: process.cwd() });
-    store.updateSession(session.id, { notify_mode: "all" as NotifyMode });
+    const workspace = store.createWorkspace({ title: "demo", repo_path: process.cwd() });
+    store.updateWorkspace(workspace.id, { notify_policy: "all" as NotifyPolicy });
 
     const fetchMock = vi.fn().mockResolvedValue({ ok: true });
     (globalThis as any).fetch = fetchMock;
@@ -143,7 +180,7 @@ describe("notifications", () => {
 
     const runId = await manager.startRun({
       type: "test",
-      session_id: session.id,
+      workspace_id: workspace.id,
       command: process.execPath,
       args: ["-e", "console.log('ok')"],
       cwd: process.cwd()

@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { Store, RunStream, SessionStatus, NotifyMode } from "./store.js";
+import { Store, RunStream, WorkspaceStatus, NotifyPolicy } from "./store.js";
 
 const dynamicImport = (specifier: string) => {
   if (process.env.VITEST) {
@@ -40,7 +40,7 @@ const loadStripAnsi = async (logger?: Logger) => {
 
 export interface RunStartInput {
   type: string;
-  session_id: string;
+  workspace_id: string | null;
   command: string;
   args?: string[];
   cwd: string;
@@ -48,7 +48,7 @@ export interface RunStartInput {
 
 export interface ExternalRunStartInput {
   type: string;
-  session_id: string;
+  workspace_id: string | null;
   command: string;
   cwd: string;
 }
@@ -127,7 +127,7 @@ const collapseWhitespace = (input: string) => input.replace(/\s+/g, " ").trim();
 
 const buildSummary = (
   events: { chunk: string }[],
-  status: SessionStatus,
+  status: WorkspaceStatus,
   stripAnsi: (input: string) => string
 ) => {
   const lines = events
@@ -150,7 +150,7 @@ const truncateSummary = (input: string, max = 160) => {
   return input.slice(0, max - 3) + "...";
 };
 
-const shouldNotify = (mode: NotifyMode, status: SessionStatus, durationSec: number) => {
+const shouldNotify = (mode: NotifyPolicy, status: WorkspaceStatus, durationSec: number) => {
   if (mode === "off") return false;
   if (status === "failed" || status === "needs_input") return true;
   if (status === "idle") return mode === "all" && durationSec >= 30;
@@ -194,11 +194,14 @@ export class RunManager {
     const run_id = randomUUID();
     this.store.createRun({
       id: run_id,
-      session_id: input.session_id,
+      workspace_id: input.workspace_id,
       type: input.type,
       command: input.command,
       cwd: input.cwd
     });
+    if (input.workspace_id) {
+      this.store.updateWorkspace(input.workspace_id, { updated_at: now() });
+    }
     this.activeRuns.add(run_id);
     this.logger?.info({ run_id, type: input.type, cwd: input.cwd, command: input.command }, "external run started");
     return run_id;
@@ -244,17 +247,17 @@ export class RunManager {
     this.logger?.info({ run_id, exit_code }, "external run finished");
   }
 
-  private async maybeNotify(session_id: string, status: SessionStatus, summary: string) {
+  private async maybeNotify(workspace_id: string, status: WorkspaceStatus, summary: string) {
     const url = process.env.NTFY_URL;
     const topic = process.env.NTFY_TOPIC;
     if (!url || !topic) return;
-    const session = this.store.getSession(session_id);
-    if (!session) return;
+    const workspace = this.store.getWorkspace(workspace_id);
+    if (!workspace) return;
 
     const base = url.replace(/\/$/, "");
-    const link = `${base}/ui/s/${session.id}`;
-    const title = `${session.title} · ${status}`;
-    const body = `session: ${session.title}\nstatus: ${status}\nsummary: ${summary || "(none)"}\n${link}`;
+    const link = `${base}/ui/w/${workspace.id}`;
+    const title = `${workspace.title} · ${status}`;
+    const body = `workspace: ${workspace.title}\nstatus: ${status}\nsummary: ${summary || "(none)"}\n${link}`;
 
     try {
       await fetch(`${base}/${topic}`, {
@@ -277,11 +280,15 @@ export class RunManager {
 
     this.store.createRun({
       id: run_id,
-      session_id: input.session_id,
+      workspace_id: input.workspace_id,
       type: input.type,
       command: fullCommand,
       cwd: input.cwd
     });
+
+    if (input.workspace_id) {
+      this.store.updateWorkspace(input.workspace_id, { updated_at: now() });
+    }
 
     this.activeRuns.add(run_id);
     this.logger?.info({ run_id, type: input.type, cwd: input.cwd, command: fullCommand }, "run started");
@@ -298,17 +305,23 @@ export class RunManager {
       this.store.updateRun(run_id, { status: "done", exit_code, last_snippet: lastSnippet });
       this.activeRuns.delete(run_id);
 
-      let sessionStatus: SessionStatus = "idle";
+      const workspaceId = input.workspace_id;
+      let workspaceStatus: WorkspaceStatus = "idle";
       if (exit_code !== 0) {
-        sessionStatus = "failed";
+        workspaceStatus = "failed";
       } else if (needsInput) {
-        sessionStatus = "needs_input";
+        workspaceStatus = "needs_input";
       }
 
-      const prevSession = this.store.getSession(input.session_id);
-      const prevStatus = prevSession?.status ?? "idle";
-      const notifyMode = prevSession?.notify_mode ?? "needs_input_failed";
-      this.store.updateSession(input.session_id, { status: sessionStatus });
+      let prevStatus: WorkspaceStatus = "idle";
+      let notifyPolicy: NotifyPolicy = "needs_input+failed";
+
+      if (workspaceId) {
+        const prevWorkspace = this.store.getWorkspace(workspaceId);
+        prevStatus = prevWorkspace?.status ?? "idle";
+        notifyPolicy = prevWorkspace?.notify_policy ?? "needs_input+failed";
+        this.store.updateWorkspace(workspaceId, { status: workspaceStatus, updated_at: now() });
+      }
 
       if (errorMessage) {
         const ts = now();
@@ -331,14 +344,14 @@ export class RunManager {
       const durationSec = Math.round((Date.now() - startMs) / 1000);
       const events = this.store.getRunEvents(run_id, 200);
       const stripSummary = stripAnsi ?? fallbackStrip;
-      const summary = truncateSummary(buildSummary(events, sessionStatus, stripSummary));
+      const summary = truncateSummary(buildSummary(events, workspaceStatus, stripSummary));
 
-      const transitioned = prevStatus !== sessionStatus;
-      if ((transitioned || sessionStatus === "idle") && shouldNotify(notifyMode as NotifyMode, sessionStatus, durationSec)) {
-        void this.maybeNotify(input.session_id, sessionStatus, summary);
+      const transitioned = prevStatus !== workspaceStatus;
+      if (workspaceId && (transitioned || workspaceStatus === "idle") && shouldNotify(notifyPolicy as NotifyPolicy, workspaceStatus, durationSec)) {
+        void this.maybeNotify(workspaceId, workspaceStatus, summary);
       }
 
-      this.logger?.info({ run_id, exit_code, sessionStatus }, "run finished");
+      this.logger?.info({ run_id, exit_code, workspaceStatus }, "run finished");
     };
 
     let execa: typeof import("execa").execa | undefined;

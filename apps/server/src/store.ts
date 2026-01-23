@@ -2,24 +2,26 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { randomUUID } from "node:crypto";
 
-export type SessionStatus = "idle" | "failed" | "needs_input";
-export type NotifyMode = "off" | "needs_input_failed" | "all";
+export type WorkspaceStatus = "idle" | "failed" | "needs_input";
+export type NotifyPolicy = "off" | "needs_input+failed" | "all";
 export type RunStatus = "running" | "done";
 export type RunStream = "stdout" | "stderr";
 
-export interface Session {
+export interface Workspace {
   id: string;
   title: string;
   repo_path: string;
-  status: SessionStatus;
-  notify_mode: NotifyMode;
+  status: WorkspaceStatus;
+  notify_policy: NotifyPolicy;
+  default_thread_id: string | null;
+  test_command_override: string | null;
   created_at: string;
   updated_at: string;
 }
 
 export interface Run {
   id: string;
-  session_id: string;
+  workspace_id: string | null;
   type: string;
   command: string;
   cwd: string;
@@ -38,70 +40,178 @@ export interface RunEvent {
   chunk: string;
 }
 
-export interface ThreadMap {
+export interface ThreadMeta {
   thread_id: string;
-  repo_session_id: string | null;
   title_override: string | null;
   last_seen_at: string;
+  pinned: boolean;
+  archived: boolean;
+}
+
+export interface WorkspaceThread {
+  workspace_id: string;
+  thread_id: string;
+  created_at: string;
 }
 
 export interface Store {
   init: () => void;
-  listSessions: () => Session[];
-  getSession: (id: string) => Session | null;
-  createSession: (input: { title: string; repo_path: string }) => Session;
-  updateSession: (id: string, patch: Partial<Session>) => Session | null;
-  listRunsBySession: (session_id: string, limit?: number) => Run[];
+  listWorkspaces: () => Workspace[];
+  getWorkspace: (id: string) => Workspace | null;
+  createWorkspace: (input: { title: string; repo_path: string }) => Workspace;
+  updateWorkspace: (id: string, patch: Partial<Workspace>) => Workspace | null;
+  deleteWorkspace: (id: string) => boolean;
+  listRunsByWorkspace: (workspace_id: string, limit?: number) => Run[];
   getRun: (id: string) => Run | null;
   createRun: (input: Omit<Run, "created_at" | "updated_at" | "status" | "exit_code" | "last_snippet">) => Run;
   updateRun: (id: string, patch: Partial<Run>) => Run | null;
   appendRunEvent: (event: Omit<RunEvent, "seq">) => RunEvent;
   getRunEvents: (run_id: string, limit: number) => RunEvent[];
-  clearRunsForSession: (session_id: string) => number;
+  clearRunsForWorkspace: (workspace_id: string) => number;
   markStaleRuns: () => number;
-  getThreadMap: (thread_id: string) => ThreadMap | null;
-  upsertThreadMap: (input: {
+  listThreadMeta: () => ThreadMeta[];
+  getThreadMeta: (thread_id: string) => ThreadMeta | null;
+  upsertThreadMeta: (input: {
     thread_id: string;
-    repo_session_id?: string | null;
     title_override?: string | null;
     last_seen_at?: string;
-  }) => ThreadMap;
+    pinned?: boolean;
+    archived?: boolean;
+  }) => ThreadMeta;
+  listWorkspaceThreads: () => WorkspaceThread[];
+  attachThreadToWorkspace: (workspace_id: string, thread_id: string) => WorkspaceThread;
+  detachThreadFromWorkspace: (workspace_id: string, thread_id: string) => boolean;
+  countWorkspaces: () => number;
+  countWorkspaceThreads: () => number;
 }
 
 const now = () => new Date().toISOString();
-const defaultNotifyMode: NotifyMode = "needs_input_failed";
+const defaultNotifyPolicy: NotifyPolicy = "needs_input+failed";
 
-const normalizeSession = (session: Session): Session => {
-  if (!session.notify_mode) {
-    return { ...session, notify_mode: defaultNotifyMode };
-  }
-  return session;
+const normalizeWorkspace = (workspace: Workspace): Workspace => {
+  const notify = workspace.notify_policy || defaultNotifyPolicy;
+  const status = workspace.status || "idle";
+  return {
+    ...workspace,
+    notify_policy: notify,
+    status,
+    default_thread_id: workspace.default_thread_id ?? null,
+    test_command_override: workspace.test_command_override ?? null
+  };
 };
+
+const normalizeThreadMeta = (meta: ThreadMeta): ThreadMeta => ({
+  ...meta,
+  title_override: meta.title_override ?? null,
+  pinned: Boolean(meta.pinned),
+  archived: Boolean(meta.archived)
+});
 
 const defaultDataDir = () => resolve(process.cwd(), "..", "..", ".godex");
 
 interface JsonData {
-  sessions: Session[];
+  workspaces: Workspace[];
   runs: Run[];
   run_events: Record<string, RunEvent[]>;
-  threads_map: ThreadMap[];
+  thread_meta: ThreadMeta[];
+  workspace_threads: WorkspaceThread[];
 }
+
+const emptyJsonData = (): JsonData => ({
+  workspaces: [],
+  runs: [],
+  run_events: {},
+  thread_meta: [],
+  workspace_threads: []
+});
+
+export const migrateJsonData = (raw: any): JsonData => {
+  const workspaces: Workspace[] = Array.isArray(raw?.workspaces)
+    ? raw.workspaces
+    : Array.isArray(raw?.sessions)
+      ? raw.sessions.map((session: any) => {
+        const notifyMode = session?.notify_mode;
+        const notify_policy = notifyMode === "needs_input_failed" ? "needs_input+failed" : notifyMode;
+        return normalizeWorkspace({
+          id: String(session.id),
+          title: String(session.title ?? session.repo_path ?? "workspace"),
+          repo_path: String(session.repo_path ?? ""),
+          status: (session.status as WorkspaceStatus) ?? "idle",
+          notify_policy: (notify_policy as NotifyPolicy) ?? defaultNotifyPolicy,
+          default_thread_id: null,
+          test_command_override: null,
+          created_at: String(session.created_at ?? now()),
+          updated_at: String(session.updated_at ?? now())
+        });
+      })
+      : [];
+
+  const runs: Run[] = Array.isArray(raw?.runs)
+    ? raw.runs.map((run: any) => {
+      const { session_id, ...rest } = run ?? {};
+      return {
+        ...rest,
+        workspace_id: run?.workspace_id ?? session_id ?? null
+      };
+    })
+    : [];
+
+  const run_events = raw?.run_events ?? {};
+
+  const threadMeta: ThreadMeta[] = Array.isArray(raw?.thread_meta)
+    ? raw.thread_meta.map((meta: ThreadMeta) => normalizeThreadMeta(meta))
+    : [];
+
+  const workspaceThreads: WorkspaceThread[] = Array.isArray(raw?.workspace_threads)
+    ? raw.workspace_threads
+    : [];
+
+  if (Array.isArray(raw?.threads_map)) {
+    for (const entry of raw.threads_map) {
+      const existing = threadMeta.find((meta) => meta.thread_id === entry.thread_id);
+      if (!existing) {
+        threadMeta.push(
+          normalizeThreadMeta({
+            thread_id: String(entry.thread_id),
+            title_override: entry.title_override ?? null,
+            last_seen_at: entry.last_seen_at ?? now(),
+            pinned: false,
+            archived: false
+          })
+        );
+      }
+      if (entry.repo_session_id) {
+        const mapped: WorkspaceThread = {
+          workspace_id: String(entry.repo_session_id),
+          thread_id: String(entry.thread_id),
+          created_at: entry.last_seen_at ?? now()
+        };
+        if (!workspaceThreads.find((link) => link.workspace_id === mapped.workspace_id && link.thread_id === mapped.thread_id)) {
+          workspaceThreads.push(mapped);
+        }
+      }
+    }
+  }
+
+  return {
+    workspaces,
+    runs,
+    run_events,
+    thread_meta: threadMeta,
+    workspace_threads: workspaceThreads
+  };
+};
 
 const loadJson = (filePath: string): JsonData => {
   if (!existsSync(filePath)) {
-    return { sessions: [], runs: [], run_events: {}, threads_map: [] };
+    return emptyJsonData();
   }
   const raw = readFileSync(filePath, "utf8");
   try {
-    const data = JSON.parse(raw) as JsonData;
-    return {
-      sessions: data.sessions ?? [],
-      runs: data.runs ?? [],
-      run_events: data.run_events ?? {},
-      threads_map: data.threads_map ?? []
-    };
+    const data = JSON.parse(raw);
+    return migrateJsonData(data);
   } catch {
-    return { sessions: [], runs: [], run_events: {}, threads_map: [] };
+    return emptyJsonData();
   }
 };
 
@@ -117,7 +227,10 @@ const createJsonStore = (dataDir: string): Store => {
       mkdirSync(dataDir, { recursive: true });
     }
     if (!existsSync(filePath)) {
-      saveJson(filePath, { sessions: [], runs: [], run_events: {}, threads_map: [] });
+      saveJson(filePath, emptyJsonData());
+    } else {
+      const migrated = loadJson(filePath);
+      saveJson(filePath, migrated);
     }
   };
 
@@ -130,35 +243,51 @@ const createJsonStore = (dataDir: string): Store => {
 
   return {
     init: ensure,
-    listSessions: () => loadJson(filePath).sessions.map(normalizeSession),
-    getSession: (id) => {
-      const session = loadJson(filePath).sessions.find((s) => s.id === id);
-      return session ? normalizeSession(session) : null;
+    listWorkspaces: () => loadJson(filePath).workspaces.map(normalizeWorkspace),
+    getWorkspace: (id) => {
+      const workspace = loadJson(filePath).workspaces.find((s) => s.id === id);
+      return workspace ? normalizeWorkspace(workspace) : null;
     },
-    createSession: ({ title, repo_path }) =>
+    createWorkspace: ({ title, repo_path }) =>
       withData((data) => {
         const ts = now();
-        const session: Session = {
+        const workspace: Workspace = normalizeWorkspace({
           id: randomUUID(),
           title,
           repo_path,
           status: "idle",
-          notify_mode: defaultNotifyMode,
+          notify_policy: defaultNotifyPolicy,
+          default_thread_id: null,
+          test_command_override: null,
           created_at: ts,
           updated_at: ts
-        };
-        data.sessions.push(session);
-        return session;
+        });
+        data.workspaces.push(workspace);
+        return workspace;
       }),
-    updateSession: (id, patch) =>
+    updateWorkspace: (id, patch) =>
       withData((data) => {
-        const session = data.sessions.find((s) => s.id === id);
-        if (!session) return null;
-        Object.assign(session, patch, { updated_at: now() });
-        return normalizeSession(session);
+        const workspace = data.workspaces.find((s) => s.id === id);
+        if (!workspace) return null;
+        Object.assign(workspace, patch, { updated_at: now() });
+        return normalizeWorkspace(workspace);
       }),
-    listRunsBySession: (session_id, limit = 10) => {
-      const runs = loadJson(filePath).runs.filter((r) => r.session_id === session_id);
+
+    deleteWorkspace: (id) =>
+      withData((data) => {
+        const before = data.workspaces.length;
+        data.workspaces = data.workspaces.filter((workspace) => workspace.id !== id);
+        if (before === data.workspaces.length) return false;
+        const runIds = new Set(data.runs.filter((run) => run.workspace_id === id).map((run) => run.id));
+        data.runs = data.runs.filter((run) => run.workspace_id !== id);
+        for (const runId of runIds) {
+          delete data.run_events[runId];
+        }
+        data.workspace_threads = data.workspace_threads.filter((entry) => entry.workspace_id !== id);
+        return true;
+      }),
+    listRunsByWorkspace: (workspace_id, limit = 10) => {
+      const runs = loadJson(filePath).runs.filter((r) => r.workspace_id === workspace_id);
       runs.sort((a, b) => b.created_at.localeCompare(a.created_at));
       return runs.slice(0, limit);
     },
@@ -198,11 +327,11 @@ const createJsonStore = (dataDir: string): Store => {
       const events = loadJson(filePath).run_events[run_id] ?? [];
       return events.slice(Math.max(0, events.length - limit));
     },
-    clearRunsForSession: (session_id) =>
+    clearRunsForWorkspace: (workspace_id) =>
       withData((data) => {
-        const runIds = new Set(data.runs.filter((r) => r.session_id === session_id).map((r) => r.id));
+        const runIds = new Set(data.runs.filter((r) => r.workspace_id === workspace_id).map((r) => r.id));
         const before = data.runs.length;
-        data.runs = data.runs.filter((r) => r.session_id !== session_id);
+        data.runs = data.runs.filter((r) => r.workspace_id !== workspace_id);
         for (const id of runIds) {
           delete data.run_events[id];
         }
@@ -222,27 +351,51 @@ const createJsonStore = (dataDir: string): Store => {
         }
         return count;
       }),
-    getThreadMap: (thread_id) =>
-      loadJson(filePath).threads_map.find((entry) => entry.thread_id === thread_id) ?? null,
-    upsertThreadMap: (input) =>
+    listThreadMeta: () => loadJson(filePath).thread_meta.map(normalizeThreadMeta),
+    getThreadMeta: (thread_id) => {
+      const meta = loadJson(filePath).thread_meta.find((entry) => entry.thread_id === thread_id) ?? null;
+      return meta ? normalizeThreadMeta(meta) : null;
+    },
+    upsertThreadMeta: (input) =>
       withData((data) => {
-        if (!data.threads_map) {
-          data.threads_map = [];
+        if (!data.thread_meta) {
+          data.thread_meta = [];
         }
-        const existing = data.threads_map.find((entry) => entry.thread_id === input.thread_id) ?? null;
-        const updated: ThreadMap = {
+        const existing = data.thread_meta.find((entry) => entry.thread_id === input.thread_id) ?? null;
+        const updated: ThreadMeta = normalizeThreadMeta({
           thread_id: input.thread_id,
-          repo_session_id: input.repo_session_id ?? existing?.repo_session_id ?? null,
           title_override: input.title_override ?? existing?.title_override ?? null,
-          last_seen_at: input.last_seen_at ?? now()
-        };
+          last_seen_at: input.last_seen_at ?? now(),
+          pinned: input.pinned ?? existing?.pinned ?? false,
+          archived: input.archived ?? existing?.archived ?? false
+        });
         if (existing) {
           Object.assign(existing, updated);
           return existing;
         }
-        data.threads_map.push(updated);
+        data.thread_meta.push(updated);
         return updated;
-      })
+      }),
+    listWorkspaceThreads: () => loadJson(filePath).workspace_threads ?? [],
+    attachThreadToWorkspace: (workspace_id, thread_id) =>
+      withData((data) => {
+        const created_at = now();
+        const existing = data.workspace_threads.find((entry) => entry.workspace_id === workspace_id && entry.thread_id === thread_id);
+        if (existing) return existing;
+        const entry: WorkspaceThread = { workspace_id, thread_id, created_at };
+        data.workspace_threads.push(entry);
+        return entry;
+      }),
+    detachThreadFromWorkspace: (workspace_id, thread_id) =>
+      withData((data) => {
+        const before = data.workspace_threads.length;
+        data.workspace_threads = data.workspace_threads.filter(
+          (entry) => !(entry.workspace_id === workspace_id && entry.thread_id === thread_id)
+        );
+        return before !== data.workspace_threads.length;
+      }),
+    countWorkspaces: () => loadJson(filePath).workspaces.length,
+    countWorkspaceThreads: () => loadJson(filePath).workspace_threads.length
   };
 };
 
@@ -251,23 +404,38 @@ const createSqliteStore = (dataDir: string, dbPath: string): Store => {
   const Database = require("better-sqlite3");
   const db = new Database(dbPath);
 
+  const tableExists = (name: string): boolean => {
+    const row = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name = ?").get(name);
+    return Boolean(row);
+  };
+
+  const columnExists = (table: string, column: string): boolean => {
+    const rows = db.prepare(`PRAGMA table_info(${table})`).all() as Array<{ name: string }>;
+    return rows.some((row) => row.name === column);
+  };
+
   const init = () => {
     if (!existsSync(dataDir)) {
       mkdirSync(dataDir, { recursive: true });
     }
+
+    db.exec("PRAGMA foreign_keys = OFF");
+
     db.exec(`
-      CREATE TABLE IF NOT EXISTS sessions (
+      CREATE TABLE IF NOT EXISTS workspaces (
         id TEXT PRIMARY KEY,
         title TEXT NOT NULL,
         repo_path TEXT NOT NULL,
         status TEXT NOT NULL,
-        notify_mode TEXT DEFAULT 'needs_input_failed',
+        notify_policy TEXT DEFAULT 'needs_input+failed',
+        default_thread_id TEXT,
+        test_command_override TEXT,
         created_at TEXT NOT NULL,
         updated_at TEXT NOT NULL
       );
       CREATE TABLE IF NOT EXISTS runs (
         id TEXT PRIMARY KEY,
-        session_id TEXT NOT NULL,
+        workspace_id TEXT,
         type TEXT NOT NULL,
         command TEXT NOT NULL,
         cwd TEXT NOT NULL,
@@ -276,7 +444,7 @@ const createSqliteStore = (dataDir: string, dbPath: string): Store => {
         created_at TEXT NOT NULL,
         updated_at TEXT NOT NULL,
         last_snippet TEXT,
-        FOREIGN KEY(session_id) REFERENCES sessions(id)
+        FOREIGN KEY(workspace_id) REFERENCES workspaces(id)
       );
       CREATE TABLE IF NOT EXISTS run_events (
         run_id TEXT NOT NULL,
@@ -286,63 +454,138 @@ const createSqliteStore = (dataDir: string, dbPath: string): Store => {
         chunk TEXT NOT NULL,
         PRIMARY KEY(run_id, seq)
       );
-      CREATE TABLE IF NOT EXISTS threads_map (
+      CREATE TABLE IF NOT EXISTS thread_meta (
         thread_id TEXT PRIMARY KEY,
-        repo_session_id TEXT,
         title_override TEXT,
         last_seen_at TEXT NOT NULL,
-        FOREIGN KEY(repo_session_id) REFERENCES sessions(id)
+        pinned INTEGER DEFAULT 0,
+        archived INTEGER DEFAULT 0
+      );
+      CREATE TABLE IF NOT EXISTS workspace_threads (
+        workspace_id TEXT NOT NULL,
+        thread_id TEXT NOT NULL,
+        created_at TEXT NOT NULL,
+        PRIMARY KEY(workspace_id, thread_id),
+        FOREIGN KEY(workspace_id) REFERENCES workspaces(id)
       );
     `);
-    try {
-      db.exec("ALTER TABLE sessions ADD COLUMN notify_mode TEXT DEFAULT 'needs_input_failed'");
-    } catch {
-      // ignore if already exists
+
+    if (tableExists("sessions")) {
+      const hasWorkspaceRows = db.prepare("SELECT COUNT(*) as count FROM workspaces").get() as { count: number };
+      if ((hasWorkspaceRows?.count ?? 0) === 0) {
+        db.prepare(
+          "INSERT INTO workspaces (id, title, repo_path, status, notify_policy, default_thread_id, test_command_override, created_at, updated_at) " +
+            "SELECT id, title, repo_path, status, " +
+            "CASE WHEN notify_mode = 'needs_input_failed' THEN 'needs_input+failed' ELSE COALESCE(notify_mode, 'needs_input+failed') END, " +
+            "NULL, NULL, created_at, updated_at FROM sessions"
+        ).run();
+      }
+      db.exec("DROP TABLE sessions");
     }
+
+    if (tableExists("runs") && columnExists("runs", "session_id")) {
+      db.exec(`
+        CREATE TABLE IF NOT EXISTS runs_new (
+          id TEXT PRIMARY KEY,
+          workspace_id TEXT,
+          type TEXT NOT NULL,
+          command TEXT NOT NULL,
+          cwd TEXT NOT NULL,
+          status TEXT NOT NULL,
+          exit_code INTEGER,
+          created_at TEXT NOT NULL,
+          updated_at TEXT NOT NULL,
+          last_snippet TEXT,
+          FOREIGN KEY(workspace_id) REFERENCES workspaces(id)
+        );
+      `);
+      db.prepare(
+        "INSERT INTO runs_new (id, workspace_id, type, command, cwd, status, exit_code, created_at, updated_at, last_snippet) " +
+          "SELECT id, session_id, type, command, cwd, status, exit_code, created_at, updated_at, last_snippet FROM runs"
+      ).run();
+      db.exec("DROP TABLE runs");
+      db.exec("ALTER TABLE runs_new RENAME TO runs");
+    }
+
+    if (tableExists("threads_map")) {
+      db.prepare(
+        "INSERT INTO thread_meta (thread_id, title_override, last_seen_at, pinned, archived) " +
+          "SELECT thread_id, title_override, last_seen_at, 0, 0 FROM threads_map " +
+          "ON CONFLICT(thread_id) DO UPDATE SET title_override = excluded.title_override, last_seen_at = excluded.last_seen_at"
+      ).run();
+      db.prepare(
+        "INSERT OR IGNORE INTO workspace_threads (workspace_id, thread_id, created_at) " +
+          "SELECT repo_session_id, thread_id, last_seen_at FROM threads_map WHERE repo_session_id IS NOT NULL"
+      ).run();
+      db.exec("DROP TABLE threads_map");
+    }
+
+    db.exec("PRAGMA foreign_keys = ON");
   };
 
   return {
     init,
-    listSessions: () => db.prepare("SELECT * FROM sessions ORDER BY created_at DESC").all().map(normalizeSession),
-    getSession: (id) => {
-      const session = db.prepare("SELECT * FROM sessions WHERE id = ?").get(id) ?? null;
-      return session ? normalizeSession(session) : null;
+    listWorkspaces: () => db.prepare("SELECT * FROM workspaces ORDER BY created_at DESC").all().map(normalizeWorkspace),
+    getWorkspace: (id) => {
+      const workspace = db.prepare("SELECT * FROM workspaces WHERE id = ?").get(id) ?? null;
+      return workspace ? normalizeWorkspace(workspace) : null;
     },
-    createSession: ({ title, repo_path }) => {
+    createWorkspace: ({ title, repo_path }) => {
       const ts = now();
-      const session: Session = {
+      const workspace: Workspace = normalizeWorkspace({
         id: randomUUID(),
         title,
         repo_path,
         status: "idle",
-        notify_mode: defaultNotifyMode,
+        notify_policy: defaultNotifyPolicy,
+        default_thread_id: null,
+        test_command_override: null,
         created_at: ts,
         updated_at: ts
-      };
+      });
       db.prepare(
-        "INSERT INTO sessions (id, title, repo_path, status, notify_mode, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)"
+        "INSERT INTO workspaces (id, title, repo_path, status, notify_policy, default_thread_id, test_command_override, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
       ).run(
-        session.id,
-        session.title,
-        session.repo_path,
-        session.status,
-        session.notify_mode,
-        session.created_at,
-        session.updated_at
+        workspace.id,
+        workspace.title,
+        workspace.repo_path,
+        workspace.status,
+        workspace.notify_policy,
+        workspace.default_thread_id,
+        workspace.test_command_override,
+        workspace.created_at,
+        workspace.updated_at
       );
-      return session;
+      return workspace;
     },
-    updateSession: (id, patch) => {
-      const existing = db.prepare("SELECT * FROM sessions WHERE id = ?").get(id);
+    updateWorkspace: (id, patch) => {
+      const existing = db.prepare("SELECT * FROM workspaces WHERE id = ?").get(id);
       if (!existing) return null;
-      const updated = normalizeSession({ ...existing, ...patch, updated_at: now() } as Session);
+      const updated = normalizeWorkspace({ ...existing, ...patch, updated_at: now() } as Workspace);
       db.prepare(
-        "UPDATE sessions SET title = ?, repo_path = ?, status = ?, notify_mode = ?, updated_at = ? WHERE id = ?"
-      ).run(updated.title, updated.repo_path, updated.status, updated.notify_mode, updated.updated_at, id);
+        "UPDATE workspaces SET title = ?, repo_path = ?, status = ?, notify_policy = ?, default_thread_id = ?, test_command_override = ?, updated_at = ? WHERE id = ?"
+      ).run(
+        updated.title,
+        updated.repo_path,
+        updated.status,
+        updated.notify_policy,
+        updated.default_thread_id,
+        updated.test_command_override,
+        updated.updated_at,
+        id
+      );
       return updated;
     },
-    listRunsBySession: (session_id, limit = 10) =>
-      db.prepare("SELECT * FROM runs WHERE session_id = ? ORDER BY created_at DESC LIMIT ?").all(session_id, limit),
+
+    deleteWorkspace: (id) => {
+      db.prepare("DELETE FROM run_events WHERE run_id IN (SELECT id FROM runs WHERE workspace_id = ?)").run(id);
+      db.prepare("DELETE FROM runs WHERE workspace_id = ?").run(id);
+      db.prepare("DELETE FROM workspace_threads WHERE workspace_id = ?").run(id);
+      const info = db.prepare("DELETE FROM workspaces WHERE id = ?").run(id);
+      return (info.changes ?? 0) > 0;
+    },
+    listRunsByWorkspace: (workspace_id, limit = 10) =>
+      db.prepare("SELECT * FROM runs WHERE workspace_id = ? ORDER BY created_at DESC LIMIT ?").all(workspace_id, limit),
     getRun: (id) => db.prepare("SELECT * FROM runs WHERE id = ?").get(id) ?? null,
     createRun: (input) => {
       const ts = now();
@@ -355,10 +598,10 @@ const createSqliteStore = (dataDir: string, dbPath: string): Store => {
         last_snippet: null
       };
       db.prepare(
-        "INSERT INTO runs (id, session_id, type, command, cwd, status, exit_code, created_at, updated_at, last_snippet) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+        "INSERT INTO runs (id, workspace_id, type, command, cwd, status, exit_code, created_at, updated_at, last_snippet) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
       ).run(
         run.id,
-        run.session_id,
+        run.workspace_id,
         run.type,
         run.command,
         run.cwd,
@@ -388,9 +631,9 @@ const createSqliteStore = (dataDir: string, dbPath: string): Store => {
       );
       return updated;
     },
-    clearRunsForSession: (session_id) => {
-      const info = db.prepare("DELETE FROM run_events WHERE run_id IN (SELECT id FROM runs WHERE session_id = ?)").run(session_id);
-      const infoRuns = db.prepare("DELETE FROM runs WHERE session_id = ?").run(session_id);
+    clearRunsForWorkspace: (workspace_id) => {
+      const info = db.prepare("DELETE FROM run_events WHERE run_id IN (SELECT id FROM runs WHERE workspace_id = ?)").run(workspace_id);
+      const infoRuns = db.prepare("DELETE FROM runs WHERE workspace_id = ?").run(workspace_id);
       return infoRuns.changes ?? info.changes ?? 0;
     },
     markStaleRuns: () => {
@@ -418,20 +661,45 @@ const createSqliteStore = (dataDir: string, dbPath: string): Store => {
         .prepare("SELECT * FROM run_events WHERE run_id = ? ORDER BY seq DESC LIMIT ?")
         .all(run_id, limit)
         .reverse(),
-    getThreadMap: (thread_id) => db.prepare("SELECT * FROM threads_map WHERE thread_id = ?").get(thread_id) ?? null,
-    upsertThreadMap: (input) => {
-      const existing = db.prepare("SELECT * FROM threads_map WHERE thread_id = ?").get(input.thread_id) as ThreadMap | undefined;
-      const updated: ThreadMap = {
+    listThreadMeta: () => db.prepare("SELECT * FROM thread_meta").all().map(normalizeThreadMeta),
+    getThreadMeta: (thread_id) => {
+      const meta = db.prepare("SELECT * FROM thread_meta WHERE thread_id = ?").get(thread_id) ?? null;
+      return meta ? normalizeThreadMeta(meta) : null;
+    },
+    upsertThreadMeta: (input) => {
+      const existing = db.prepare("SELECT * FROM thread_meta WHERE thread_id = ?").get(input.thread_id) as ThreadMeta | undefined;
+      const updated: ThreadMeta = normalizeThreadMeta({
         thread_id: input.thread_id,
-        repo_session_id: input.repo_session_id ?? existing?.repo_session_id ?? null,
         title_override: input.title_override ?? existing?.title_override ?? null,
-        last_seen_at: input.last_seen_at ?? now()
-      };
+        last_seen_at: input.last_seen_at ?? now(),
+        pinned: input.pinned ?? existing?.pinned ?? false,
+        archived: input.archived ?? existing?.archived ?? false
+      });
       db.prepare(
-        "INSERT INTO threads_map (thread_id, repo_session_id, title_override, last_seen_at) VALUES (?, ?, ?, ?) " +
-          "ON CONFLICT(thread_id) DO UPDATE SET repo_session_id = excluded.repo_session_id, title_override = excluded.title_override, last_seen_at = excluded.last_seen_at"
-      ).run(updated.thread_id, updated.repo_session_id, updated.title_override, updated.last_seen_at);
+        "INSERT INTO thread_meta (thread_id, title_override, last_seen_at, pinned, archived) VALUES (?, ?, ?, ?, ?) " +
+          "ON CONFLICT(thread_id) DO UPDATE SET title_override = excluded.title_override, last_seen_at = excluded.last_seen_at, pinned = excluded.pinned, archived = excluded.archived"
+      ).run(updated.thread_id, updated.title_override, updated.last_seen_at, updated.pinned ? 1 : 0, updated.archived ? 1 : 0);
       return updated;
+    },
+    listWorkspaceThreads: () => db.prepare("SELECT * FROM workspace_threads").all() as WorkspaceThread[],
+    attachThreadToWorkspace: (workspace_id, thread_id) => {
+      const created_at = now();
+      db.prepare(
+        "INSERT OR IGNORE INTO workspace_threads (workspace_id, thread_id, created_at) VALUES (?, ?, ?)"
+      ).run(workspace_id, thread_id, created_at);
+      return { workspace_id, thread_id, created_at };
+    },
+    detachThreadFromWorkspace: (workspace_id, thread_id) => {
+      const info = db.prepare("DELETE FROM workspace_threads WHERE workspace_id = ? AND thread_id = ?").run(workspace_id, thread_id);
+      return (info.changes ?? 0) > 0;
+    },
+    countWorkspaces: () => {
+      const row = db.prepare("SELECT COUNT(*) as count FROM workspaces").get() as { count: number };
+      return row?.count ?? 0;
+    },
+    countWorkspaceThreads: () => {
+      const row = db.prepare("SELECT COUNT(*) as count FROM workspace_threads").get() as { count: number };
+      return row?.count ?? 0;
     }
   };
 };

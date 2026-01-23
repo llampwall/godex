@@ -1,10 +1,9 @@
 import { FastifyInstance } from "fastify";
 import { CodexAppServerManager } from "../codex_app_server_manager.js";
 import { RunManager } from "../run_manager.js";
-import { Store } from "../store.js";
+import { Store, ThreadMeta, WorkspaceThread } from "../store.js";
 
 const DEFAULT_LIMIT = 50;
-const FALLBACK_SESSION_ID = "threads";
 
 const extractString = (value: unknown): string | null => {
   if (typeof value === "string") return value;
@@ -17,6 +16,17 @@ const extractThreadId = (message: any): string | null => {
     extractString(message?.params?.thread_id) ||
     extractString(message?.params?.thread?.id) ||
     extractString(message?.params?.thread?.thread_id)
+  );
+};
+
+const extractThreadIdFromResponse = (result: any): string | null => {
+  return (
+    extractString(result?.thread_id) ||
+    extractString(result?.threadId) ||
+    extractString(result?.thread?.id) ||
+    extractString(result?.thread?.thread_id) ||
+    extractString(result?.data?.thread_id) ||
+    extractString(result?.data?.thread?.id)
   );
 };
 
@@ -55,7 +65,6 @@ const extractMessageText = (message: any): string | null => {
   return null;
 };
 
-
 const normalizeTimestamp = (value: unknown): string | null => {
   if (typeof value === "number") {
     const ms = value < 1_000_000_000_000 ? value * 1000 : value;
@@ -87,18 +96,52 @@ const summarizeNotification = (message: any): string => {
   return `[${method}]`;
 };
 
-const normalizeThreadItem = (item: any, store: Store) => {
+export const mergeThreadList = (
+  items: any[],
+  metaList: ThreadMeta[],
+  links: WorkspaceThread[],
+  includeArchived: boolean
+) => {
+  const metaMap = new Map(metaList.map((meta) => [meta.thread_id, meta]));
+  const attachmentMap = buildAttachmentMap(links);
+  const normalized = items
+    .map((item) => {
+      const threadId = item?.id ?? item?.thread_id ?? item?.threadId ?? "";
+      const meta = threadId ? metaMap.get(threadId) ?? null : null;
+      const attached = threadId ? attachmentMap.get(threadId) ?? [] : [];
+      return normalizeThreadItem(item, meta, attached);
+    })
+    .filter((entry) => entry.thread_id);
+
+  return includeArchived ? normalized : normalized.filter((entry) => !entry.archived);
+};
+
+const buildAttachmentMap = (links: WorkspaceThread[]): Map<string, string[]> => {
+  const map = new Map<string, string[]>();
+  for (const link of links) {
+    if (!map.has(link.thread_id)) {
+      map.set(link.thread_id, []);
+    }
+    map.get(link.thread_id)?.push(link.workspace_id);
+  }
+  return map;
+};
+
+const normalizeThreadItem = (item: any, meta: ThreadMeta | null, attached: string[]) => {
   const thread_id = item?.id ?? item?.thread_id ?? item?.threadId ?? "";
   const preview = item?.preview ?? item?.title ?? "";
   const updatedAt = item?.updatedAt ?? item?.updated_at ?? item?.updated ?? item?.modifiedAt;
   const normalizedUpdated = normalizeTimestamp(updatedAt);
-  const mapping = thread_id ? store.getThreadMap(thread_id) : null;
-  const title = mapping?.title_override || preview || "(untitled)";
+  const title = meta?.title_override || preview || "(untitled)";
   return {
     thread_id,
     title,
     updated_at: normalizedUpdated ?? updatedAt ?? null,
-    summary: preview || undefined
+    summary: preview || undefined,
+    attached_workspace_ids: attached,
+    pinned: meta?.pinned ?? false,
+    archived: meta?.archived ?? false,
+    last_seen_at: meta?.last_seen_at ?? null
   };
 };
 
@@ -110,6 +153,31 @@ const build503 = (reply: any, appServer: CodexAppServerManager) => {
     status,
     logs: appServer.getLogLines()
   });
+};
+
+const createThread = async (appServer: CodexAppServerManager, title?: string) => {
+  const payload = title ? { title } : {};
+  const attempts: Array<{ method: string; params: Record<string, unknown> }> = [
+    { method: "thread/create", params: payload },
+    { method: "thread/new", params: payload },
+    { method: "thread/start", params: payload }
+  ];
+
+  let lastError: unknown = null;
+  for (const attempt of attempts) {
+    try {
+      const result = await appServer.request(attempt.method, attempt.params);
+      const threadId = extractThreadIdFromResponse(result) || extractThreadIdFromResponse(result?.data);
+      if (threadId) {
+        return { thread_id: threadId, result };
+      }
+      return { thread_id: null, result };
+    } catch (err) {
+      lastError = err;
+    }
+  }
+
+  throw lastError ?? new Error("thread create failed");
 };
 
 export const registerThreadRoutes = (
@@ -126,11 +194,19 @@ export const registerThreadRoutes = (
       return build503(reply, appServer);
     }
 
-    const query = req.query as { limit?: string; cursor?: string; offset?: string; q?: string } | undefined;
+    const query = req.query as {
+      limit?: string;
+      cursor?: string;
+      offset?: string;
+      q?: string;
+      include_archived?: string;
+      archived?: string;
+    } | undefined;
     const limit = Math.max(1, Math.min(Number(query?.limit ?? DEFAULT_LIMIT), 200));
     const offset = Math.max(0, Number(query?.offset ?? 0));
     const cursor = query?.cursor || undefined;
     const search = query?.q?.trim();
+    const includeArchived = query?.include_archived === "1" || query?.archived === "1";
 
     const fetchList = async (cursorValue?: string, useSearch?: boolean) => {
       const params: Record<string, unknown> = { limit };
@@ -199,8 +275,47 @@ export const registerThreadRoutes = (
       });
     }
 
-    const normalized = data.map((item) => normalizeThreadItem(item, store)).filter((entry) => entry.thread_id);
-    return { data: normalized, next_cursor: nextCursor };
+    const metaList = store.listThreadMeta();
+    const links = store.listWorkspaceThreads();
+    const merged = mergeThreadList(data, metaList, links, includeArchived);
+
+    return { data: merged, next_cursor: nextCursor };
+  });
+
+  app.get("/threads/meta", async () => {
+    return { ok: true, meta: store.listThreadMeta() };
+  });
+
+  app.patch("/threads/:thread_id/meta", async (req, reply) => {
+    const { thread_id } = req.params as { thread_id: string };
+    const body = req.body as { title_override?: string | null; pinned?: boolean; archived?: boolean };
+    if (!thread_id) {
+      return reply.code(400).send({ ok: false, error: "thread_id required" });
+    }
+    const updated = store.upsertThreadMeta({
+      thread_id,
+      title_override: body.title_override ?? undefined,
+      pinned: body.pinned ?? undefined,
+      archived: body.archived ?? undefined,
+      last_seen_at: new Date().toISOString()
+    });
+    return { ok: true, meta: updated };
+  });
+
+  app.post("/threads/create", async (req, reply) => {
+    if (!appServer.isReady()) {
+      return build503(reply, appServer);
+    }
+    const body = req.body as { title?: string } | undefined;
+    try {
+      const created = await createThread(appServer, body?.title);
+      if (created.thread_id) {
+        store.upsertThreadMeta({ thread_id: created.thread_id, last_seen_at: new Date().toISOString() });
+      }
+      return { ok: true, thread_id: created.thread_id, raw: created.result };
+    } catch (err: any) {
+      return reply.code(500).send({ ok: false, error: err?.message ?? "thread create failed" });
+    }
   });
 
   app.get("/threads/:thread_id", async (req, reply) => {
@@ -228,7 +343,7 @@ export const registerThreadRoutes = (
       result = await tryResume();
     }
 
-    store.upsertThreadMap({ thread_id, last_seen_at: new Date().toISOString() });
+    store.upsertThreadMeta({ thread_id, last_seen_at: new Date().toISOString() });
 
     const thread = result?.thread ?? result?.data?.thread ?? (result?.threadId ? result : result?.data ?? result);
     const threadUpdated = thread && typeof thread === "object"
@@ -238,11 +353,16 @@ export const registerThreadRoutes = (
       ? { ...(thread as Record<string, unknown>), updated_at: threadUpdated ?? (thread as any).updated_at ?? null }
       : thread;
 
+    const attachments = buildAttachmentMap(store.listWorkspaceThreads()).get(thread_id) ?? [];
+    const meta = store.getThreadMeta(thread_id);
+
     return {
       thread: threadPayload,
       items: result?.items ?? result?.data?.items,
       turns: result?.turns ?? result?.data?.turns,
-      has_more: result?.has_more ?? result?.data?.has_more
+      has_more: result?.has_more ?? result?.data?.has_more,
+      meta,
+      attached_workspace_ids: attachments
     };
   });
 
@@ -252,31 +372,29 @@ export const registerThreadRoutes = (
     }
 
     const { thread_id } = req.params as { thread_id: string };
-    const body = req.body as { text?: string; repo_session_id?: string };
+    const body = req.body as { text?: string; workspace_id?: string | null };
 
     if (!body?.text || !body.text.trim()) {
       return reply.code(400).send({ ok: false, error: "text required" });
     }
 
-    let sessionId = body.repo_session_id ?? FALLBACK_SESSION_ID;
-    if (body.repo_session_id) {
-      const session = store.getSession(body.repo_session_id);
-      if (!session) {
-        return reply.code(400).send({ ok: false, error: "repo_session_id not found" });
+    const workspaceId = body.workspace_id ?? null;
+    if (workspaceId) {
+      const workspace = store.getWorkspace(workspaceId);
+      if (!workspace) {
+        return reply.code(400).send({ ok: false, error: "workspace_id not found" });
       }
-      sessionId = session.id;
     }
 
     const run_id = runManager.startExternalRun({
       type: "codex_thread",
-      session_id: sessionId,
+      workspace_id: workspaceId,
       command: "codex app-server",
       cwd: process.cwd()
     });
 
-    store.upsertThreadMap({
+    store.upsertThreadMeta({
       thread_id,
-      repo_session_id: body.repo_session_id ?? null,
       last_seen_at: new Date().toISOString()
     });
 

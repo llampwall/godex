@@ -61,17 +61,40 @@ http://central-command:SERVER_PORT/ui?token=YOUR_TOKEN
 
 If UI assets are not built, use the Vite dev server as described above.
 
+## Concepts
+
+- **Workspaces**: repo profiles (not conversations). Fields include `title`, `repo_path`, `notify_policy`, `default_thread_id`, and `test_command_override`.
+- **Threads**: Codex app-server conversations. We store local metadata (title override, pinned, archived) and attachments to workspaces.
+
 ## API requirements
 
 - Auth: `Authorization: Bearer <CODEX_RELAY_TOKEN>` on every request.
 - SSE: `/runs/:id/stream` accepts `?token=<CODEX_RELAY_TOKEN>` (EventSource cannot send headers).
 
+## Workspaces API
+
+- `GET /workspaces`
+- `POST /workspaces` `{ repo_path, title? }`
+- `GET /workspaces/:id`
+- `PATCH /workspaces/:id` `{ title?, notify_policy?, default_thread_id?, test_command_override? }`
+- `DELETE /workspaces/:id`
+- `POST /workspaces/:id/threads` `{ thread_id }`
+- `DELETE /workspaces/:id/threads/:thread_id`
+- `POST /workspaces/:id/git/status`
+- `POST /workspaces/:id/git/diff`
+- `POST /workspaces/:id/test`
+- `POST /workspaces/:id/runs/clear`
+- `POST /workspaces/:id/open-folder`
+- `POST /workspaces/:id/open-code`
+
 ## Threads (Codex app-server)
 
-The Threads tab connects to the local `codex app-server` process to list and continue existing Codex threads.
-
-- Sessions: repo-backed runs (codex exec / git / tests).
-- Threads: existing Codex threads exposed by `codex app-server`.
+- `GET /threads` (merged list: remote threads + local meta + attached workspace ids)
+- `GET /threads/:thread_id`
+- `POST /threads/:thread_id/message` `{ text, workspace_id? }`
+- `POST /threads/create` (best-effort thread/create)
+- `GET /threads/meta`
+- `PATCH /threads/:thread_id/meta` `{ title_override?, pinned?, archived? }`
 
 Notes:
 - The server spawns `codex app-server` automatically (requires `codex` on PATH).
@@ -81,6 +104,7 @@ Notes:
 
 Diagnostics:
 - `GET /diag/codex` shows the spawn config and `codex --version` output.
+- `GET /health` includes workspace/thread counts and app-server state.
 - `pnpm smoke` calls `/diag/codex` and fails if codex cannot execute.
 
 ## Optional notifications
