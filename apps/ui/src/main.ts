@@ -218,6 +218,54 @@ const buildModal = (title: string, body: string) => `
   </div>
 `;
 
+const openRenameModal = (currentTitle: string, onSave: (value: string) => Promise<void>) => {
+  const modalHost = document.querySelector<HTMLDivElement>("#modal-host");
+  if (!modalHost) return;
+
+  modalHost.innerHTML = buildModal(
+    "rename thread",
+    `
+      <form id="rename-form">
+        <label>title</label>
+        <input name="title" id="rename-title" value="${currentTitle.replace(/"/g, "&quot;")}" />
+        <div class="actions below">
+          <button type="button" id="rename-cancel" class="ghost">cancel</button>
+          <button type="submit" class="send">ok</button>
+        </div>
+      </form>
+    `
+  );
+
+  const close = () => {
+    modalHost.innerHTML = "";
+  };
+
+  modalHost.querySelector("#modal-close")?.addEventListener("click", close);
+  modalHost.querySelector("#rename-cancel")?.addEventListener("click", close);
+  modalHost.querySelector("#modal-backdrop")?.addEventListener("click", (event) => {
+    if ((event.target as HTMLElement).id === "modal-backdrop") close();
+  });
+
+  const form = modalHost.querySelector<HTMLFormElement>("#rename-form");
+  const input = modalHost.querySelector<HTMLInputElement>("#rename-title");
+  input?.focus();
+  input?.select();
+
+  input?.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      event.preventDefault();
+      close();
+    }
+  });
+
+  form?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const next = String(input?.value ?? "").trim();
+    await onSave(next);
+    close();
+  });
+};
+
 const getSpeechRecognition = () => {
   const w = window as any;
   return w.SpeechRecognition || w.webkitSpeechRecognition || null;
@@ -240,6 +288,7 @@ const attachDictation = (targets: DictationTargets) => {
 
   let listening = false;
   let recognition: any = null;
+  let lastAppended = "";
 
   const updateStatus = (text: string, interim = false) => {
     if (!status) return;
@@ -266,31 +315,23 @@ const attachDictation = (targets: DictationTargets) => {
   const start = () => {
     if (listening) return;
     recognition = new SpeechRecognition();
-    recognition.continuous = true;
-    recognition.interimResults = true;
+    recognition.continuous = false;
+    recognition.interimResults = false;
     recognition.lang = navigator.language || "en-US";
+    lastAppended = "";
 
     recognition.onresult = (event: any) => {
-      let interim = "";
-      let finalText = "";
-      for (let i = event.resultIndex; i < event.results.length; i += 1) {
-        const result = event.results[i];
-        const transcript = result[0]?.transcript ?? "";
-        if (result.isFinal) {
-          finalText += transcript;
-        } else {
-          interim += transcript;
+      const result = event.results[event.resultIndex];
+      const transcript = result?.[0]?.transcript ?? "";
+      if (result?.isFinal) {
+        const cleaned = transcript.trim();
+        if (cleaned && cleaned.toLowerCase() !== lastAppended.toLowerCase()) {
+          appendText(cleaned);
+          lastAppended = cleaned;
         }
-      }
-      if (finalText.trim()) {
-        appendText(finalText);
       }
       if (listening) {
-        if (interim.trim()) {
-          updateStatus(`Listening... ${interim.trim()}`, true);
-        } else {
-          updateStatus("Listening...");
-        }
+        updateStatus("Listening...");
       }
     };
 
@@ -1035,6 +1076,7 @@ const renderThreadsList = async () => {
       <div id="threads-banner" class="banner hidden"></div>
       <div id="thread-list" class="list">loading...</div>
     </div>
+    <div id="modal-host"></div>
   `);
 
   const list = document.querySelector<HTMLDivElement>("#thread-list");
@@ -1042,6 +1084,7 @@ const renderThreadsList = async () => {
   const archivedToggle = document.querySelector<HTMLInputElement>("#show-archived");
 
   let menuListenerAttached = false;
+  let threadsSnapshot: any[] = [];
 
   const bindThreadActions = () => {
     const cards = document.querySelectorAll<HTMLDivElement>(".thread-card");
@@ -1077,6 +1120,19 @@ const renderThreadsList = async () => {
         const action = item.dataset.action;
         const threadId = item.dataset.thread;
         if (!action || !threadId) return;
+
+        if (action === "rename") {
+          const thread = threadsSnapshot.find((item: any) => item.thread_id === threadId);
+          const currentTitle = getThreadTitle(thread ?? { title: threadId });
+          openRenameModal(currentTitle, async (value) => {
+            await apiFetch(`/threads/${threadId}/meta`, {
+              method: "PATCH",
+              body: JSON.stringify({ title_override: value || undefined })
+            });
+            await loadThreads();
+          });
+          return;
+        }
 
         if (action === "attach") {
           await openWorkspacePicker("attach to workspace", async (workspace, setDefaultFlag) => {
@@ -1136,6 +1192,9 @@ const renderThreadsList = async () => {
       }
       const workspaces = await apiFetch("/workspaces");
       const workspaceMap = new Map<string, string>((workspaces.workspaces ?? []).map((ws: any) => [ws.id, ws.title]));
+      const metaRes = await apiFetch("/threads/meta");
+      const metaEntries = Array.isArray(metaRes.meta) ? metaRes.meta : [];
+      const metaMap = new Map<string, any>(metaEntries.map((entry: any) => [entry.thread_id, entry]));
       const archived = archivedToggle?.checked ? "&include_archived=1" : "";
       const data = await apiFetch(`/threads?limit=50${archived}`);
       if (!list) return;
@@ -1148,12 +1207,14 @@ const renderThreadsList = async () => {
         const bTime = new Date(b.updated_at ?? 0).getTime();
         return bTime - aTime;
       });
+      threadsSnapshot = sorted;
       list.innerHTML = sorted
         .map((thread: any) => {
           const badges = (thread.attached_workspace_ids ?? [])
             .map((id: string) => buildThreadBadge(workspaceMap.get(id) || id))
             .join(" ");
-          const title = getThreadTitle(thread);
+          const override = metaMap.get(thread.thread_id)?.title_override;
+          const title = override ? override.trim() : getThreadTitle(thread);
           const snippet = getThreadSnippet(thread);
           const archived = thread.archived ? "true" : "false";
           return `
@@ -1163,6 +1224,7 @@ const renderThreadsList = async () => {
                 <div class="thread-menu-wrap">
                   <button class="menu-button" data-menu="${thread.thread_id}" aria-label="thread menu">☰</button>
                   <div class="thread-menu" data-menu-for="${thread.thread_id}">
+                    <button class="menu-item" data-action="rename" data-thread="${thread.thread_id}">rename</button>
                     <button class="menu-item" data-action="attach" data-thread="${thread.thread_id}">attach to</button>
                     <button class="menu-item" data-action="default" data-thread="${thread.thread_id}">set as default for</button>
                     <button class="menu-item" data-action="archive" data-thread="${thread.thread_id}">${thread.archived ? "unarchive locally" : "archive locally"}</button>
@@ -1268,7 +1330,7 @@ const renderThreadDetail = async (threadId: string) => {
       const data = await apiFetch(`/threads/${threadId}`);
       threadMeta = data.meta;
       if (meta) {
-        const title = data.thread?.title ?? data.thread?.preview ?? data.thread?.id ?? threadId;
+        const title = threadMeta?.title_override || data.thread?.title || data.thread?.preview || data.thread?.id || threadId;
         meta.innerHTML = `<div class="title-row"><strong>${title}</strong><span>${formatTimestamp(data.thread?.updatedAt ?? data.thread?.updated_at)}</span></div><div class="meta">id: ${threadId}</div>`;
       }
       if (badges) {
