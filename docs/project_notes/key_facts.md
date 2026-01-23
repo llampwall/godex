@@ -13,11 +13,15 @@
 - Default hosts: `SERVER_HOST=0.0.0.0`, `UI_HOST=0.0.0.0`
 - Ports: server `SERVER_PORT` (default 6969), UI dev server `UI_PORT` (default 5174)
 - Auth: API requires `Authorization: Bearer <CODEX_RELAY_TOKEN>`; SSE uses `?token=<CODEX_RELAY_TOKEN>`
+- Runs SSE stream: `/runs/:id/stream` accepts `replay=0` to skip replaying recent events
 - Common paths: `apps/server`, `apps/ui`, `packages`
 
 ## Notifications
 - Session notify modes: `off`, `needs_input_failed`, `all` (default `needs_input_failed`)
 - Update notify mode: `PATCH /sessions/:id` with JSON `{ "notify_mode": "<mode>" }`
+
+## Data storage
+- Local store files live in `.godex/`: `data.json` and `godex.sqlite`
 
 ## Deployment
 - Build: `pnpm build`
