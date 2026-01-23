@@ -1,0 +1,25 @@
+# OS / IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# node / pnpm
+node_modules/
+.pnpm-store/
+.pnpm/
+
+# python
+.venv/
+
+# env
+.env
+.env.*
+*.log
+
+# build artifacts (common)
+dist/
+build/
+coverage/
+
+.codex/sessions/
