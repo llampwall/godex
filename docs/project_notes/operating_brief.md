@@ -10,6 +10,7 @@
 ## Current state
 - Working: pnpm workspace with `apps/server` and `apps/ui`, plus root scripts for dev/build/start.
 - Working: server serves built UI at `/ui`; dev uses Vite UI on `UI_PORT` when assets are not built.
+- Working: sessions persist `notify_mode`; server can send ntfy notifications and UI exposes per-session controls.
 
 ## Repo map
 - `apps/server`: backend server for API + SSE, and optional static UI serving.

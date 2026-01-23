@@ -15,6 +15,10 @@
 - Auth: API requires `Authorization: Bearer <CODEX_RELAY_TOKEN>`; SSE uses `?token=<CODEX_RELAY_TOKEN>`
 - Common paths: `apps/server`, `apps/ui`, `packages`
 
+## Notifications
+- Session notify modes: `off`, `needs_input_failed`, `all` (default `needs_input_failed`)
+- Update notify mode: `PATCH /sessions/:id` with JSON `{ "notify_mode": "<mode>" }`
+
 ## Deployment
 - Build: `pnpm build`
 - Start: `pnpm start` (builds then starts `apps/server`)
