@@ -51,10 +51,15 @@ export const buildServer = () => {
 
   const uiDist = resolve(process.cwd(), "..", "ui", "dist");
   const uiIndexPath = resolve(uiDist, "index.html");
+  const uiLogoPath = resolve(uiDist, "godex.png");
   let uiIndexHtml: string | null = null;
+  let uiLogo: Buffer | null = null;
 
   if (existsSync(uiIndexPath)) {
     uiIndexHtml = readFileSync(uiIndexPath, "utf8");
+  }
+  if (existsSync(uiLogoPath)) {
+    uiLogo = readFileSync(uiLogoPath);
   }
 
   if (existsSync(resolve(uiDist, "assets"))) {
@@ -63,6 +68,13 @@ export const buildServer = () => {
       prefix: "/ui/assets/"
     });
   }
+
+  app.get("/ui/godex.png", async (_req, reply) => {
+    if (!uiLogo) {
+      return reply.code(404).send({ ok: false, error: "logo not found" });
+    }
+    reply.type("image/png").send(uiLogo);
+  });
 
   const serveUi = async (_req: unknown, reply: any) => {
     if (!uiIndexHtml) {

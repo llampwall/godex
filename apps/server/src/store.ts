@@ -3,6 +3,7 @@ import { resolve } from "node:path";
 import { randomUUID } from "node:crypto";
 
 export type SessionStatus = "idle" | "failed" | "needs_input";
+export type NotifyMode = "off" | "needs_input_failed" | "all";
 export type RunStatus = "running" | "done";
 export type RunStream = "stdout" | "stderr";
 
@@ -11,6 +12,7 @@ export interface Session {
   title: string;
   repo_path: string;
   status: SessionStatus;
+  notify_mode: NotifyMode;
   created_at: string;
   updated_at: string;
 }
@@ -47,12 +49,20 @@ export interface Store {
   createRun: (input: Omit<Run, "created_at" | "updated_at" | "status" | "exit_code" | "last_snippet">) => Run;
   updateRun: (id: string, patch: Partial<Run>) => Run | null;
   appendRunEvent: (event: Omit<RunEvent, "seq">) => RunEvent;
+  getRunEvents: (run_id: string, limit: number) => RunEvent[];
   clearRunsForSession: (session_id: string) => number;
   markStaleRuns: () => number;
-  getRunEvents: (run_id: string, limit: number) => RunEvent[];
 }
 
 const now = () => new Date().toISOString();
+const defaultNotifyMode: NotifyMode = "needs_input_failed";
+
+const normalizeSession = (session: Session): Session => {
+  if (!session.notify_mode) {
+    return { ...session, notify_mode: defaultNotifyMode };
+  }
+  return session;
+};
 
 const defaultDataDir = () => resolve(process.cwd(), "..", "..", ".godex");
 
@@ -104,8 +114,11 @@ const createJsonStore = (dataDir: string): Store => {
 
   return {
     init: ensure,
-    listSessions: () => loadJson(filePath).sessions,
-    getSession: (id) => loadJson(filePath).sessions.find((s) => s.id === id) ?? null,
+    listSessions: () => loadJson(filePath).sessions.map(normalizeSession),
+    getSession: (id) => {
+      const session = loadJson(filePath).sessions.find((s) => s.id === id);
+      return session ? normalizeSession(session) : null;
+    },
     createSession: ({ title, repo_path }) =>
       withData((data) => {
         const ts = now();
@@ -114,6 +127,7 @@ const createJsonStore = (dataDir: string): Store => {
           title,
           repo_path,
           status: "idle",
+          notify_mode: defaultNotifyMode,
           created_at: ts,
           updated_at: ts
         };
@@ -125,7 +139,7 @@ const createJsonStore = (dataDir: string): Store => {
         const session = data.sessions.find((s) => s.id === id);
         if (!session) return null;
         Object.assign(session, patch, { updated_at: now() });
-        return session;
+        return normalizeSession(session);
       }),
     listRunsBySession: (session_id, limit = 10) => {
       const runs = loadJson(filePath).runs.filter((r) => r.session_id === session_id);
@@ -210,6 +224,7 @@ const createSqliteStore = (dataDir: string, dbPath: string): Store => {
         title TEXT NOT NULL,
         repo_path TEXT NOT NULL,
         status TEXT NOT NULL,
+        notify_mode TEXT DEFAULT 'needs_input_failed',
         created_at TEXT NOT NULL,
         updated_at TEXT NOT NULL
       );
@@ -235,12 +250,20 @@ const createSqliteStore = (dataDir: string, dbPath: string): Store => {
         PRIMARY KEY(run_id, seq)
       );
     `);
+    try {
+      db.exec("ALTER TABLE sessions ADD COLUMN notify_mode TEXT DEFAULT 'needs_input_failed'");
+    } catch {
+      // ignore if already exists
+    }
   };
 
   return {
     init,
-    listSessions: () => db.prepare("SELECT * FROM sessions ORDER BY created_at DESC").all(),
-    getSession: (id) => db.prepare("SELECT * FROM sessions WHERE id = ?").get(id) ?? null,
+    listSessions: () => db.prepare("SELECT * FROM sessions ORDER BY created_at DESC").all().map(normalizeSession),
+    getSession: (id) => {
+      const session = db.prepare("SELECT * FROM sessions WHERE id = ?").get(id) ?? null;
+      return session ? normalizeSession(session) : null;
+    },
     createSession: ({ title, repo_path }) => {
       const ts = now();
       const session: Session = {
@@ -248,21 +271,30 @@ const createSqliteStore = (dataDir: string, dbPath: string): Store => {
         title,
         repo_path,
         status: "idle",
+        notify_mode: defaultNotifyMode,
         created_at: ts,
         updated_at: ts
       };
       db.prepare(
-        "INSERT INTO sessions (id, title, repo_path, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)"
-      ).run(session.id, session.title, session.repo_path, session.status, session.created_at, session.updated_at);
+        "INSERT INTO sessions (id, title, repo_path, status, notify_mode, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)"
+      ).run(
+        session.id,
+        session.title,
+        session.repo_path,
+        session.status,
+        session.notify_mode,
+        session.created_at,
+        session.updated_at
+      );
       return session;
     },
     updateSession: (id, patch) => {
       const existing = db.prepare("SELECT * FROM sessions WHERE id = ?").get(id);
       if (!existing) return null;
-      const updated = { ...existing, ...patch, updated_at: now() } as Session;
+      const updated = normalizeSession({ ...existing, ...patch, updated_at: now() } as Session);
       db.prepare(
-        "UPDATE sessions SET title = ?, repo_path = ?, status = ?, updated_at = ? WHERE id = ?"
-      ).run(updated.title, updated.repo_path, updated.status, updated.updated_at, id);
+        "UPDATE sessions SET title = ?, repo_path = ?, status = ?, notify_mode = ?, updated_at = ? WHERE id = ?"
+      ).run(updated.title, updated.repo_path, updated.status, updated.notify_mode, updated.updated_at, id);
       return updated;
     },
     listRunsBySession: (session_id, limit = 10) =>
@@ -313,13 +345,17 @@ const createSqliteStore = (dataDir: string, dbPath: string): Store => {
       return updated;
     },
     clearRunsForSession: (session_id) => {
-      const runIds = db.prepare("SELECT id FROM runs WHERE session_id = ?").all(session_id) as { id: string }[];
-      db.prepare("DELETE FROM run_events WHERE run_id IN (SELECT id FROM runs WHERE session_id = ?)").run(session_id);
-      const info = db.prepare("DELETE FROM runs WHERE session_id = ?").run(session_id);
-      return info.changes ?? 0;
+      const info = db.prepare("DELETE FROM run_events WHERE run_id IN (SELECT id FROM runs WHERE session_id = ?)").run(session_id);
+      const infoRuns = db.prepare("DELETE FROM runs WHERE session_id = ?").run(session_id);
+      return infoRuns.changes ?? info.changes ?? 0;
     },
     markStaleRuns: () => {
-      const info = db.prepare("UPDATE runs SET status = ?, exit_code = ?, updated_at = ? WHERE status = ?").run("done", -1, now(), "running");
+      const info = db.prepare("UPDATE runs SET status = ?, exit_code = ?, updated_at = ? WHERE status = ?").run(
+        "done",
+        -1,
+        now(),
+        "running"
+      );
       return info.changes ?? 0;
     },
     appendRunEvent: (event) => {

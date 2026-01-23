@@ -1,29 +1,18 @@
 import { randomUUID } from "node:crypto";
-import { Store, RunStream, SessionStatus } from "./store.js";
+import { Store, RunStream, SessionStatus, NotifyMode } from "./store.js";
+
+const dynamicImport = (specifier: string) => {
+  if (process.env.VITEST) {
+    return import(specifier);
+  }
+  const importer = new Function("specifier", "return import(specifier)");
+  return importer(specifier) as Promise<any>;
+};
 
 const loadExeca = async () => {
-  const mod = await (new Function("return import('execa')")()) as { execa: typeof import("execa").execa };
+  const mod = (await dynamicImport("execa")) as { execa: typeof import("execa").execa };
   return mod.execa;
 };
-
-const loadStripAnsi = async (logger?: Logger) => {
-  try {
-    const mod = await (new Function("return import('strip-ansi')")()) as { default: (input: string) => string };
-    return mod.default;
-  } catch (err) {
-    logger?.error({ error: err }, "strip-ansi failed, using fallback");
-    return fallbackStrip;
-  }
-};
-
-
-interface Logger {
-  info: (obj: unknown, msg?: string) => void;
-  error: (obj: unknown, msg?: string) => void;
-  debug?: (obj: unknown, msg?: string) => void;
-}
-
-
 
 const fallbackStrip = (input: string) => {
   return input
@@ -31,6 +20,22 @@ const fallbackStrip = (input: string) => {
     .replace(/\x1b\[[0-9;]*m/g, "")
     .replace(/\\u001b\[[0-9;]*m/g, "")
     .replace(/\\x1b\[[0-9;]*m/g, "");
+};
+
+interface Logger {
+  info: (obj: unknown, msg?: string) => void;
+  error: (obj: unknown, msg?: string) => void;
+  debug?: (obj: unknown, msg?: string) => void;
+}
+
+const loadStripAnsi = async (logger?: Logger) => {
+  try {
+    const mod = (await dynamicImport("strip-ansi")) as { default: (input: string) => string };
+    return mod.default;
+  } catch (err) {
+    logger?.error({ error: err }, "strip-ansi failed, using fallback");
+    return fallbackStrip;
+  }
 };
 
 export interface RunStartInput {
@@ -88,6 +93,63 @@ const filterMessageNoise = (text: string): string => {
   return filtered.join("\n");
 };
 
+const detectNeedsInput = (text: string) => {
+  const lines = text.split(/\r?\n/);
+  let mode: "user" | "assistant" = "assistant";
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed) continue;
+    const lower = trimmed.toLowerCase();
+    if (lower === "user") {
+      mode = "user";
+      continue;
+    }
+    if (lower === "thinking" || lower === "assistant" || lower === "codex") {
+      mode = "assistant";
+      continue;
+    }
+    if (mode === "user") continue;
+    if (needsInputPatterns.some((pattern) => lower.includes(pattern))) {
+      return true;
+    }
+  }
+  return false;
+};
+
+const collapseWhitespace = (input: string) => input.replace(/\s+/g, " ").trim();
+
+const buildSummary = (
+  events: { chunk: string }[],
+  status: SessionStatus,
+  stripAnsi: (input: string) => string
+) => {
+  const lines = events
+    .flatMap((event) => event.chunk.split(/\r?\n/))
+    .map((line) => collapseWhitespace(stripAnsi(line)))
+    .filter((line) => line.length > 0);
+
+  if (!lines.length) return "";
+
+  if (status === "failed") {
+    const errorLine = [...lines].reverse().find((line) => /(error|failed|exception)/i.test(line));
+    if (errorLine) return errorLine;
+  }
+
+  return lines[lines.length - 1];
+};
+
+const truncateSummary = (input: string, max = 160) => {
+  if (input.length <= max) return input;
+  return input.slice(0, max - 3) + "...";
+};
+
+const shouldNotify = (mode: NotifyMode, status: SessionStatus, durationSec: number) => {
+  if (mode === "off") return false;
+  if (status === "failed" || status === "needs_input") return true;
+  if (status === "idle") return mode === "all" && durationSec >= 30;
+  return false;
+};
+
 export class RunManager {
   private store: Store;
   private logger?: Logger;
@@ -121,18 +183,26 @@ export class RunManager {
     }
   }
 
-  private async maybeNotify(session_id: string, status: SessionStatus) {
+  private async maybeNotify(session_id: string, status: SessionStatus, summary: string) {
     const url = process.env.NTFY_URL;
     const topic = process.env.NTFY_TOPIC;
     if (!url || !topic) return;
-    if (status !== "failed" && status !== "needs_input") return;
     const session = this.store.getSession(session_id);
     if (!session) return;
-    const message = `godex: ${session.title} -> ${status}`;
+
+    const base = url.replace(/\/$/, "");
+    const link = `${base}/ui/s/${session.id}`;
+    const title = `${session.title} · ${status}`;
+    const body = `session: ${session.title}\nstatus: ${status}\nsummary: ${summary || "(none)"}\n${link}`;
+
     try {
-      await fetch(`${url.replace(/\/$/, "")}/${topic}`, {
+      await fetch(`${base}/${topic}`, {
         method: "POST",
-        body: message
+        headers: {
+          Title: title,
+          "Content-Type": "text/plain"
+        },
+        body
       });
     } catch {
       // ignore notification errors
@@ -159,6 +229,8 @@ export class RunManager {
     let lastSnippet: string | null = null;
     let finished = false;
 
+    const startMs = Date.now();
+
     const finalize = (exit_code: number | null, errorMessage?: string) => {
       if (finished) return;
       finished = true;
@@ -171,8 +243,11 @@ export class RunManager {
       } else if (needsInput) {
         sessionStatus = "needs_input";
       }
+
+      const prevSession = this.store.getSession(input.session_id);
+      const prevStatus = prevSession?.status ?? "idle";
+      const notifyMode = prevSession?.notify_mode ?? "needs_input_failed";
       this.store.updateSession(input.session_id, { status: sessionStatus });
-      void this.maybeNotify(input.session_id, sessionStatus);
 
       if (errorMessage) {
         const ts = now();
@@ -192,11 +267,21 @@ export class RunManager {
       };
       this.broadcast({ type: "final", data: finalEvent });
 
+      const durationSec = Math.round((Date.now() - startMs) / 1000);
+      const events = this.store.getRunEvents(run_id, 200);
+      const stripSummary = stripAnsi ?? fallbackStrip;
+      const summary = truncateSummary(buildSummary(events, sessionStatus, stripSummary));
+
+      const transitioned = prevStatus !== sessionStatus;
+      if ((transitioned || sessionStatus === "idle") && shouldNotify(notifyMode as NotifyMode, sessionStatus, durationSec)) {
+        void this.maybeNotify(input.session_id, sessionStatus, summary);
+      }
+
       this.logger?.info({ run_id, exit_code, sessionStatus }, "run finished");
     };
 
-    let execa;
-    let stripAnsi;
+    let execa: typeof import("execa").execa | undefined;
+    let stripAnsi: ((input: string) => string) | undefined;
 
     try {
       [execa, stripAnsi] = await Promise.all([loadExeca(), loadStripAnsi(this.logger)]);
@@ -225,8 +310,8 @@ export class RunManager {
     const handleChunk = (stream: RunStream, chunk: Buffer) => {
       let text = chunk.toString();
       if (!text) return;
-      text = stripAnsi(text);
-      text = fallbackStrip(text);
+      const clean = stripAnsi ? stripAnsi(text) : fallbackStrip(text);
+      text = fallbackStrip(clean);
       if (input.type === "message") {
         text = filterMessageNoise(text);
       }
@@ -241,8 +326,9 @@ export class RunManager {
       });
       lastSnippet = text.slice(-200);
       if (!needsInput) {
-        const lower = text.toLowerCase();
-        needsInput = needsInputPatterns.some((pattern) => lower.includes(pattern));
+        needsInput = input.type === "message"
+          ? detectNeedsInput(text)
+          : needsInputPatterns.some((pattern) => text.toLowerCase().includes(pattern));
       }
       this.store.updateRun(run_id, { last_snippet: lastSnippet });
       this.broadcast({ type: "chunk", data: { ...event } });

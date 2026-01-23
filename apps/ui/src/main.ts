@@ -39,36 +39,24 @@ const updateHealth = async () => {
     const port = window.location.port || "?";
     const uptime = Math.round(Number(data.uptime ?? 0));
     const active = data.active_runs ?? 0;
-    el.textContent = `Server ok | port ${port} | pid ${data.pid ?? "?"} | uptime ${uptime}s | active ${active}`;
+    el.textContent = `server ok | port ${port} | pid ${data.pid ?? "?"} | uptime ${uptime}s | active ${active}`;
   } catch (err) {
-    el.textContent = `Server status unavailable`;
+    el.textContent = "server status unavailable";
   }
 };
 
 const renderLayout = (title: string, content: string) => {
   root.innerHTML = `
     <main class="page">
-      <header class="topbar">
-        <div>
-          <div class="brand">godex</div>
-          <div class="sub">${title}</div>
-          <div class="status" id="server-status">Server status...</div>
-        </div>
-        <div class="token">Token ${getToken() ? "loaded" : "missing"}</div>
+      <div class="ticker" id="server-status">server status...</div>
+      <header class="topbar header-wrap">
+        <img class="brand-image" src="/ui/godex.png" alt="godex" />
       </header>
       <section class="content">
         ${content}
       </section>
-      <footer class="footer">
-        <div class="status" id="server-status-footer"></div>
-      </footer>
     </main>
   `;
-
-  const footer = document.querySelector<HTMLDivElement>("#server-status-footer");
-  if (footer) {
-    footer.textContent = "Server status...";
-  }
 
   void updateHealth();
   if (healthInterval) {
@@ -76,29 +64,25 @@ const renderLayout = (title: string, content: string) => {
   }
   healthInterval = window.setInterval(async () => {
     await updateHealth();
-    const header = document.querySelector<HTMLDivElement>("#server-status");
-    if (header && footer) {
-      footer.textContent = header.textContent;
-    }
   }, 10000);
 };
 
 const renderSessionsList = async () => {
-  renderLayout("Sessions", `
+  renderLayout("sessions", `
     <div class="grid">
       <div class="card">
-        <h2>Add session</h2>
+        <h2>add session</h2>
         <form id="session-form">
-          <label>Repo path (Windows)</label>
+          <label>repo path (windows)</label>
           <input name="repo" placeholder="P:\\software\\godex" required />
-          <label>Title (optional)</label>
+          <label>title (optional)</label>
           <input name="title" placeholder="godex" />
-          <button type="submit">Create</button>
+          <button type="submit">create</button>
         </form>
       </div>
       <div class="card">
-        <h2>Sessions</h2>
-        <div id="session-list" class="list">Loading...</div>
+        <h2>sessions</h2>
+        <div id="session-list" class="list">loading...</div>
       </div>
     </div>
   `);
@@ -127,7 +111,7 @@ const renderSessionsList = async () => {
     const data = await apiFetch("/sessions");
     if (!list) return;
     if (!data.sessions.length) {
-      list.textContent = "No sessions yet.";
+      list.textContent = "no sessions yet.";
       return;
     }
     list.innerHTML = data.sessions
@@ -146,12 +130,26 @@ const renderSessionsList = async () => {
   }
 };
 
+const appendChunk = (container: HTMLElement, chunk: string) => {
+  const lines = chunk.split(/\n/);
+  lines.forEach((line, index) => {
+    const span = document.createElement("span");
+    const trimmed = line.trimStart().toLowerCase();
+    if (trimmed.startsWith("user ")) {
+      span.className = "user-line";
+    }
+    span.textContent = line;
+    container.appendChild(span);
+    if (index < lines.length - 1) {
+      container.appendChild(document.createTextNode("\n"));
+    }
+  });
+};
+
 const renderRunOutput = (container: HTMLElement, events: any[]) => {
   container.textContent = "";
   for (const event of events) {
-    const span = document.createElement("span");
-    span.textContent = event.chunk;
-    container.appendChild(span);
+    appendChunk(container, event.chunk);
   }
   container.scrollTop = container.scrollHeight;
 };
@@ -159,17 +157,15 @@ const renderRunOutput = (container: HTMLElement, events: any[]) => {
 const attachStream = (runId: string, output: HTMLElement) => {
   const token = getToken();
   if (!token) {
-    output.textContent = "Missing token. Append ?token=... to URL.";
+    output.textContent = "missing token. append ?token=... to url.";
     return;
   }
-  const streamUrl = `${apiBase()}/runs/${runId}/stream?token=${encodeURIComponent(token)}`;
+  const streamUrl = `${apiBase()}/runs/${runId}/stream?token=${encodeURIComponent(token)}&replay=0`;
   const es = new EventSource(streamUrl);
 
   es.addEventListener("chunk", (event) => {
     const data = JSON.parse((event as MessageEvent).data);
-    const span = document.createElement("span");
-    span.textContent = data.chunk;
-    output.appendChild(span);
+    appendChunk(output, data.chunk);
     output.scrollTop = output.scrollHeight;
   });
 
@@ -184,34 +180,38 @@ const loadRun = async (runId: string, output: HTMLElement) => {
 };
 
 const renderSessionDetail = async (sessionId: string) => {
-  renderLayout("Session", `
+  renderLayout("", `
     <div class="toolbar">
-      <a href="/ui" class="link">Back</a>
-      <div class="actions">
-        <button id="git-status">Git Status</button>
-        <button id="git-diff">Git Diff</button>
-        <button id="run-tests">Run Tests</button>
+      <div id="session-location" class="location">loading...</div>
+      <a href="/ui" class="link outline">cd</a>
+    </div>
+    <div class="card">
+      <div id="session-meta" class="meta-block">loading...</div>
+      <div class="notify-row">
+        <label for="notify-mode">notify</label>
+        <select id="notify-mode">
+          <option value="needs_input_failed">needs_input_failed</option>
+          <option value="all">all</option>
+          <option value="off">off</option>
+        </select>
+      </div>
+      <pre id="output" class="output"></pre>
+      <div class="input-row single">
+        <textarea id="message" rows="1" placeholder="send prompt to codex..."></textarea>
+        <button id="send" class="send">send</button>
+      </div>
+      <div class="actions below thirds">
+        <button id="git-status">git status</button>
+        <button id="git-diff">git diff</button>
+        <button id="run-tests">run tests</button>
       </div>
     </div>
     <div class="card">
-      <div id="session-meta" class="meta-block">Loading...</div>
-      <div class="input-row">
-        <textarea id="message" rows="3" placeholder="Send prompt to codex..."></textarea>
-        <button id="send">Send</button>
+      <div class="runs-header">
+        <h3>runs</h3>
+        <button id="clear-runs" class="ghost">clear</button>
       </div>
-    </div>
-    <div class="grid">
-      <div class="card">
-        <div class="runs-header">
-          <h3>Runs</h3>
-          <button id="clear-runs" class="ghost">Clear</button>
-        </div>
-        <div id="run-list" class="list">Loading...</div>
-      </div>
-      <div class="card">
-        <h3>Output</h3>
-        <pre id="output" class="output"></pre>
-      </div>
+      <div id="run-list" class="list">loading...</div>
     </div>
   `);
 
@@ -224,19 +224,26 @@ const renderSessionDetail = async (sessionId: string) => {
   const gitDiff = document.querySelector<HTMLButtonElement>("#git-diff");
   const runTests = document.querySelector<HTMLButtonElement>("#run-tests");
   const clearRuns = document.querySelector<HTMLButtonElement>("#clear-runs");
+  const notifySelect = document.querySelector<HTMLSelectElement>("#notify-mode");
 
   const refreshRuns = async () => {
     const data = await apiFetch(`/sessions/${sessionId}`);
+    const location = document.querySelector<HTMLDivElement>("#session-location");
+    if (location) {
+      const parts = data.session.repo_path.split(/[/\\\\]/).filter(Boolean);
+      location.textContent = parts.length ? `/${parts[parts.length - 1]}` : `/${data.session.repo_path}`;
+    }
     if (meta) {
       meta.innerHTML = `
-        <div><strong>${data.session.title}</strong></div>
-        <div>${data.session.repo_path}</div>
-        <div>Status: ${data.session.status}</div>
+        <div class="title-row"><strong>[${data.session.title}]</strong><span>status: ${data.session.status}</span></div>
       `;
+    }
+    if (notifySelect) {
+      notifySelect.value = data.session.notify_mode || "needs_input_failed";
     }
     if (runList) {
       if (!data.runs.length) {
-        runList.textContent = "No runs yet.";
+        runList.textContent = "no runs yet.";
       } else {
         runList.innerHTML = data.runs
           .map((run: any) => {
@@ -287,8 +294,17 @@ const renderSessionDetail = async (sessionId: string) => {
     await startAction(`/sessions/${sessionId}/test`);
   });
 
+  notifySelect?.addEventListener("change", async () => {
+    const value = notifySelect.value;
+    await apiFetch(`/sessions/${sessionId}`, {
+      method: "PATCH",
+      body: JSON.stringify({ notify_mode: value })
+    });
+    await refreshRuns();
+  });
+
   clearRuns?.addEventListener("click", async () => {
-    if (!confirm("Clear all runs for this session?")) return;
+    if (!confirm("clear all runs for this session?")) return;
     await apiFetch(`/sessions/${sessionId}/runs/clear`, { method: "POST" });
     if (output) output.textContent = "";
     await refreshRuns();
@@ -328,38 +344,45 @@ const route = () => {
 const style = document.createElement("style");
 style.textContent = `
   :root { color-scheme: light; }
-  body { margin: 0; font-family: "Space Grotesk", "Segoe UI", sans-serif; background: #f2f0ea; color: #1e1a16; }
-  .page { max-width: 1100px; margin: 0 auto; padding: 32px 24px 60px; }
-  .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; gap: 16px; }
-  .brand { font-size: 28px; font-weight: 700; letter-spacing: -0.02em; }
-  .sub { color: #6a6056; font-size: 14px; }
-  .token { font-size: 12px; padding: 6px 10px; border: 1px solid #c9c2b8; border-radius: 999px; align-self: flex-start; }
-  .status { font-size: 12px; color: #6a6056; margin-top: 6px; }
-  .content { display: flex; flex-direction: column; gap: 20px; }
+  body { margin: 0; font-family: "Space Grotesk", "Segoe UI", sans-serif; background: #f2f0ea; color: #1e1a16; text-transform: lowercase; }
+  .page { max-width: none; margin: 0; padding: 0; }
+  .topbar { display: flex; justify-content: flex-end; align-items: center; padding: 6px 12px; }
+  .header-wrap { background: #000; }
+  .brand-image { width: 100%; height: auto; display: block; }
+  .ticker { background: #000; text-align: center; font-size: 12px; color: #e4a05b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 6px 12px; border-bottom: 1px solid #d6d0c6; }
+  .content { display: flex; flex-direction: column; padding: 0; }
   .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
-  .card { background: #fffdf9; border-radius: 16px; padding: 20px; box-shadow: 0 10px 30px rgba(78, 63, 48, 0.12); }
+  .card { background: #000; border-radius: 3px; padding: 12px; box-shadow: none; border: 1px solid #e0d9ce; margin: 0; }
   h2, h3 { margin: 0 0 12px; }
-  label { display: block; font-size: 12px; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.08em; }
-  input, textarea { width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid #d6d0c6; font-size: 14px; margin-bottom: 12px; background: #fff; }
-  button { padding: 10px 14px; border-radius: 10px; border: none; background: #2a2420; color: #fff; font-weight: 600; cursor: pointer; }
+  label { display: block; font-size: 12px; margin-bottom: 6px; text-transform: lowercase; letter-spacing: 0.08em; }
+  input, textarea, select { width: 100%; padding: 8px 10px; border-radius: 3px; border: 1px solid #d6d0c6; font-size: 14px; margin-bottom: 0; background: #0f0d0b; color: #f5efe6; box-sizing: border-box; }
+  button { padding: 10px 14px; border-radius: 3px; border: none; background: #2a2420; color: #fff; font-weight: 600; cursor: pointer; }
+  .send { background: #6f6a62; }
   button:hover { background: #3c342e; }
-  .ghost { background: transparent; color: #2a2420; border: 1px solid #d6d0c6; }
+  .ghost { background: transparent; color: #f5efe6; border: 1px solid #d6d0c6; }
   .ghost:hover { background: #efe9de; }
   .list { display: flex; flex-direction: column; gap: 10px; }
-  .list-item { display: block; padding: 12px; border-radius: 12px; border: 1px solid #e0d9ce; text-decoration: none; color: inherit; }
+  .list-item { display: block; padding: 12px; border-radius: 3px; border: 1px solid #e0d9ce; text-decoration: none; color: inherit; }
   .list-item .title { font-weight: 600; }
   .list-item .meta { font-size: 12px; color: #6a6056; }
-  .list-item .status { font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; }
-  .toolbar { display: flex; justify-content: space-between; align-items: center; }
-  .actions { display: flex; gap: 10px; flex-wrap: wrap; }
+  .list-item .status { font-size: 12px; text-transform: lowercase; letter-spacing: 0.08em; }
+  .toolbar { background: #000; display: flex; justify-content: space-between; align-items: center; padding: 0 12px; }
+  .actions { display: flex; gap: 8px; flex-wrap: nowrap; }
+  .actions.below { margin-top: 10px; }
+  .actions.thirds button { flex: 1; }
   .link { text-decoration: none; color: #2a2420; font-weight: 600; }
-  .input-row { display: grid; grid-template-columns: 1fr auto; gap: 12px; }
-  .meta-block { color: #4c4036; }
-  .output { background: #0f0d0b; color: #f5efe6; min-height: 320px; max-height: 420px; overflow: auto; padding: 12px; border-radius: 12px; }
-  .run-item { text-align: left; padding: 10px; border-radius: 10px; border: 1px solid #e0d9ce; background: #f8f4ee; }
+  .link.outline { color: #e4a05b; padding: 6px 10px; border-radius: 3px; text-transform: lowercase; }
+  .input-row { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; }
+  .input-row.single textarea { height: 34px; resize: none; overflow: hidden; }
+  .meta-block { color: #4c4036; margin-bottom: 8px; }
+  .notify-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; color: #f5efe6; }
+  .notify-row label { margin: 0; font-size: 12px; letter-spacing: 0.08em; }
+  .title-row { color: #f5efe6; display: flex; justify-content: space-between; align-items: baseline; }
+  .location { font-size: 16px; color: #e4a05b; font-weight: 600; }
+  .output { text-wrap: auto; background: #0f0d0b; color: #f5efe6; min-height: 220px; max-height: 320px; overflow: auto; padding: 12px; border-radius: 3px; margin-bottom: 8px; }
+  .run-item { text-align: left; padding: 10px; border-radius: 3px; border: 1px solid #e0d9ce; background: #000; }
   .run-item .meta { font-size: 11px; color: #6a6056; }
-  .runs-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
-  .footer { margin-top: 24px; }
+  .runs-header { color: #f5efe6; display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
   @media (max-width: 720px) { .input-row { grid-template-columns: 1fr; } }
 `;
 

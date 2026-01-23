@@ -76,6 +76,21 @@ export const registerSessionRoutes = (app: FastifyInstance, store: Store, runMan
     return { ok: true, session, runs };
   });
 
+  app.patch("/sessions/:id", async (req, reply) => {
+    const { id } = req.params as { id: string };
+    const body = req.body as { notify_mode?: string };
+    const session = store.getSession(id);
+    if (!session) {
+      return reply.code(404).send({ ok: false, error: "session not found" });
+    }
+    const mode = body?.notify_mode;
+    if (!mode || !["off", "needs_input_failed", "all"].includes(mode)) {
+      return reply.code(400).send({ ok: false, error: "invalid notify_mode" });
+    }
+    const updated = store.updateSession(id, { notify_mode: mode as any });
+    return { ok: true, session: updated };
+  });
+
   app.post("/sessions/:id/runs/clear", async (req, reply) => {
     const { id } = req.params as { id: string };
     const session = store.getSession(id);
