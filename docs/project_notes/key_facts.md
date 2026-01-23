@@ -56,6 +56,8 @@
 - `pnpm typecheck`
 - `pnpm test:server`
 - `pnpm test:ui`
+- `start-godex.cmd` (builds then starts the server)
+- `start-caddy.cmd` (runs Caddy with `P:\software\caddy\Caddyfile`)
 
 ## Repo map
 - `.`: pnpm workspace root.

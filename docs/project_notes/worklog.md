@@ -1,5 +1,10 @@
 # Worklog
 
+### 2026-01-23 - Thread rename flow + startup helpers
+- **Outcome:** Threads can be renamed via a modal with title overrides shown in list/detail, Android dictation avoids repeated transcripts, and `start-godex.cmd`/`start-caddy.cmd` helpers exist.
+- **Why:** Make thread lists easier to scan, reduce duplicate dictation input on Android, and simplify local startup.
+- **Links:** commit `4d4d36f2242cd574a223622729a6b097a47959be`
+
 ### 2026-01-23 - PWA install, share drafts, and dictation
 - **Outcome:** UI is installable as a PWA with offline banner/toasts, supports share-to-godex drafts at `/ui/share`, and adds mic-driven dictation on message inputs.
 - **Why:** Enable installable offline-capable UI on Android and faster prompt entry via share + voice.
