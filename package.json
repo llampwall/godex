@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "pnpm -r --parallel dev",
     "build": "pnpm -r build",
+    "start": "pnpm -s build && pnpm --filter ./apps/server start",
     "typecheck": "pnpm -r typecheck",
     "test:server": "pnpm --filter ./apps/server test",
     "test:ui": "pnpm --filter ./apps/ui build",
