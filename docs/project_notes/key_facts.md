@@ -27,6 +27,14 @@
 - Build: `pnpm build`
 - Start: `pnpm start` (builds then starts `apps/server`)
 
+## PWA + share + dictation
+- PWA install: open `/ui` in Chrome (Android) and use the "Install app" browser menu.
+- Offline behavior: UI shell loads from cache and shows an offline/server-unreachable banner if the server is down.
+- Share sheet route: `/ui/share` ingests shared text/URLs and stores drafts in localStorage until sent/cleared.
+- Dictation: mic button on message inputs (Chrome only; requires mic permission).
+- HTTPS dev helper: `caddy run --config P:\software\caddy\Caddyfile`
+- Token requirement: PWA/share flows still need `CODEX_RELAY_TOKEN` in localStorage (open UI once with `?token=...`).
+
 ## Threads + diagnostics
 - Threads UI uses `codex app-server` (spawned by the server); requires `codex` on PATH or `CODEX_BIN` set.
 - Thread detail route: `/ui/t/:thread_id`

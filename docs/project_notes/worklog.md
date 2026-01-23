@@ -1,5 +1,10 @@
 # Worklog
 
+### 2026-01-23 - PWA install, share drafts, and dictation
+- **Outcome:** UI is installable as a PWA with offline banner/toasts, supports share-to-godex drafts at `/ui/share`, and adds mic-driven dictation on message inputs.
+- **Why:** Enable installable offline-capable UI on Android and faster prompt entry via share + voice.
+- **Links:** commit `0eee4a68f49c9d05466f05c26c2d254a7771fe2b`
+
 ### 2026-01-23 - Workspaces model + thread attachments
 - **Outcome:** Server stores workspace profiles, exposes workspace routes/actions, and threads carry local metadata plus workspace attachments in the UI.
 - **Why:** Separate repo profiles from conversations, allow per-workspace defaults, and support thread attachments in the interface.

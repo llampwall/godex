@@ -14,6 +14,9 @@
 - Working: sessions persist `notify_mode`; server can send ntfy notifications and UI exposes per-session controls.
 - Working: Threads UI bridges to `codex app-server` so existing Codex threads can be listed and resumed.
 - Working: Workspaces are stored server-side as repo profiles; threads can be attached with local metadata (pinned/archived/title override).
+- Working: UI is installable as a PWA, shows an offline/server-unreachable banner, and serves PWA root assets from the server build output.
+- Working: Share drafts flow at `/ui/share` saves incoming share text/URLs to localStorage before sending.
+- Working: Dictation is available via mic controls on workspace/thread inputs (Chrome + mic permission).
 
 ## Repo map
 - `apps/server`: backend server for API + SSE, and optional static UI serving.
@@ -39,6 +42,7 @@
 - `CODEX_RELAY_TOKEN` is required for API requests and SSE streams; missing/incorrect tokens break UI and API access.
 - Setting `CODEX_FULL_ACCESS=1` allows full-access Codex runs; use only when explicitly needed.
 - Threads require `codex` on PATH (or `CODEX_BIN` set) so the server can spawn `codex app-server`.
+- PWA/share flows still require a valid token in localStorage (open UI once with `?token=...` to set it).
 
 ## How to get oriented fast
 - Start here: `README.md`
