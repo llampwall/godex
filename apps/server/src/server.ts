@@ -7,8 +7,11 @@ import fastifyStatic from "@fastify/static";
 import { authGuard } from "./auth.js";
 import { createStore } from "./store.js";
 import { RunManager } from "./run_manager.js";
+import { CodexAppServerManager } from "./codex_app_server_manager.js";
 import { registerRunRoutes } from "./routes/runs.js";
 import { registerSessionRoutes } from "./routes/sessions.js";
+import { registerThreadRoutes } from "./routes/threads.js";
+import { registerDiagRoutes } from "./routes/diag.js";
 
 dotenv.config({ path: resolve(process.cwd(), "..", "..", ".env") });
 
@@ -17,6 +20,9 @@ export const buildServer = () => {
 
   const { store, backend } = createStore();
   const runManager = new RunManager(store, app.log);
+  const appServer = new CodexAppServerManager(app.log);
+  appServer.start();
+
   const staleCount = store.markStaleRuns();
   if (staleCount > 0) {
     app.log.info({ staleCount }, "marked stale runs as done");
@@ -43,11 +49,14 @@ export const buildServer = () => {
     backend,
     pid: process.pid,
     uptime: process.uptime(),
-    active_runs: runManager.getActiveRunsCount()
+    active_runs: runManager.getActiveRunsCount(),
+    app_server: appServer.getStatus()
   }));
 
   registerSessionRoutes(app, store, runManager);
   registerRunRoutes(app, store, runManager);
+  registerThreadRoutes(app, store, runManager, appServer);
+  registerDiagRoutes(app, appServer);
 
   const uiDist = resolve(process.cwd(), "..", "ui", "dist");
   const uiIndexPath = resolve(uiDist, "index.html");

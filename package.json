@@ -10,6 +10,7 @@
     "typecheck": "pnpm -r typecheck",
     "test:server": "pnpm --filter ./apps/server test",
     "test:ui": "pnpm --filter ./apps/ui build",
-    "test": "pnpm -s test:server && pnpm -s test:ui"
+    "test": "pnpm -s test:server && pnpm -s test:ui",
+    "smoke": "node scripts/smoke-codex.mjs"
   }
 }

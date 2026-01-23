@@ -38,6 +38,13 @@ export interface RunEvent {
   chunk: string;
 }
 
+export interface ThreadMap {
+  thread_id: string;
+  repo_session_id: string | null;
+  title_override: string | null;
+  last_seen_at: string;
+}
+
 export interface Store {
   init: () => void;
   listSessions: () => Session[];
@@ -52,6 +59,13 @@ export interface Store {
   getRunEvents: (run_id: string, limit: number) => RunEvent[];
   clearRunsForSession: (session_id: string) => number;
   markStaleRuns: () => number;
+  getThreadMap: (thread_id: string) => ThreadMap | null;
+  upsertThreadMap: (input: {
+    thread_id: string;
+    repo_session_id?: string | null;
+    title_override?: string | null;
+    last_seen_at?: string;
+  }) => ThreadMap;
 }
 
 const now = () => new Date().toISOString();
@@ -70,11 +84,12 @@ interface JsonData {
   sessions: Session[];
   runs: Run[];
   run_events: Record<string, RunEvent[]>;
+  threads_map: ThreadMap[];
 }
 
 const loadJson = (filePath: string): JsonData => {
   if (!existsSync(filePath)) {
-    return { sessions: [], runs: [], run_events: {} };
+    return { sessions: [], runs: [], run_events: {}, threads_map: [] };
   }
   const raw = readFileSync(filePath, "utf8");
   try {
@@ -82,10 +97,11 @@ const loadJson = (filePath: string): JsonData => {
     return {
       sessions: data.sessions ?? [],
       runs: data.runs ?? [],
-      run_events: data.run_events ?? {}
+      run_events: data.run_events ?? {},
+      threads_map: data.threads_map ?? []
     };
   } catch {
-    return { sessions: [], runs: [], run_events: {} };
+    return { sessions: [], runs: [], run_events: {}, threads_map: [] };
   }
 };
 
@@ -101,7 +117,7 @@ const createJsonStore = (dataDir: string): Store => {
       mkdirSync(dataDir, { recursive: true });
     }
     if (!existsSync(filePath)) {
-      saveJson(filePath, { sessions: [], runs: [], run_events: {} });
+      saveJson(filePath, { sessions: [], runs: [], run_events: {}, threads_map: [] });
     }
   };
 
@@ -205,6 +221,27 @@ const createJsonStore = (dataDir: string): Store => {
           }
         }
         return count;
+      }),
+    getThreadMap: (thread_id) =>
+      loadJson(filePath).threads_map.find((entry) => entry.thread_id === thread_id) ?? null,
+    upsertThreadMap: (input) =>
+      withData((data) => {
+        if (!data.threads_map) {
+          data.threads_map = [];
+        }
+        const existing = data.threads_map.find((entry) => entry.thread_id === input.thread_id) ?? null;
+        const updated: ThreadMap = {
+          thread_id: input.thread_id,
+          repo_session_id: input.repo_session_id ?? existing?.repo_session_id ?? null,
+          title_override: input.title_override ?? existing?.title_override ?? null,
+          last_seen_at: input.last_seen_at ?? now()
+        };
+        if (existing) {
+          Object.assign(existing, updated);
+          return existing;
+        }
+        data.threads_map.push(updated);
+        return updated;
       })
   };
 };
@@ -248,6 +285,13 @@ const createSqliteStore = (dataDir: string, dbPath: string): Store => {
         stream TEXT NOT NULL,
         chunk TEXT NOT NULL,
         PRIMARY KEY(run_id, seq)
+      );
+      CREATE TABLE IF NOT EXISTS threads_map (
+        thread_id TEXT PRIMARY KEY,
+        repo_session_id TEXT,
+        title_override TEXT,
+        last_seen_at TEXT NOT NULL,
+        FOREIGN KEY(repo_session_id) REFERENCES sessions(id)
       );
     `);
     try {
@@ -373,7 +417,22 @@ const createSqliteStore = (dataDir: string, dbPath: string): Store => {
       db
         .prepare("SELECT * FROM run_events WHERE run_id = ? ORDER BY seq DESC LIMIT ?")
         .all(run_id, limit)
-        .reverse()
+        .reverse(),
+    getThreadMap: (thread_id) => db.prepare("SELECT * FROM threads_map WHERE thread_id = ?").get(thread_id) ?? null,
+    upsertThreadMap: (input) => {
+      const existing = db.prepare("SELECT * FROM threads_map WHERE thread_id = ?").get(input.thread_id) as ThreadMap | undefined;
+      const updated: ThreadMap = {
+        thread_id: input.thread_id,
+        repo_session_id: input.repo_session_id ?? existing?.repo_session_id ?? null,
+        title_override: input.title_override ?? existing?.title_override ?? null,
+        last_seen_at: input.last_seen_at ?? now()
+      };
+      db.prepare(
+        "INSERT INTO threads_map (thread_id, repo_session_id, title_override, last_seen_at) VALUES (?, ?, ?, ?) " +
+          "ON CONFLICT(thread_id) DO UPDATE SET repo_session_id = excluded.repo_session_id, title_override = excluded.title_override, last_seen_at = excluded.last_seen_at"
+      ).run(updated.thread_id, updated.repo_session_id, updated.title_override, updated.last_seen_at);
+      return updated;
+    }
   };
 };
 

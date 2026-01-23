@@ -46,6 +46,13 @@ export interface RunStartInput {
   cwd: string;
 }
 
+export interface ExternalRunStartInput {
+  type: string;
+  session_id: string;
+  command: string;
+  cwd: string;
+}
+
 export interface RunEventPayload {
   run_id: string;
   ts: string;
@@ -181,6 +188,60 @@ export class RunManager {
     for (const handler of subs) {
       handler(event);
     }
+  }
+
+  startExternalRun(input: ExternalRunStartInput): string {
+    const run_id = randomUUID();
+    this.store.createRun({
+      id: run_id,
+      session_id: input.session_id,
+      type: input.type,
+      command: input.command,
+      cwd: input.cwd
+    });
+    this.activeRuns.add(run_id);
+    this.logger?.info({ run_id, type: input.type, cwd: input.cwd, command: input.command }, "external run started");
+    return run_id;
+  }
+
+  appendExternalEvent(run_id: string, stream: RunStream, chunk: string) {
+    if (!chunk) return;
+    const ts = now();
+    const event = this.store.appendRunEvent({
+      run_id,
+      ts,
+      stream,
+      chunk
+    });
+    const lastSnippet = chunk.slice(-200);
+    this.store.updateRun(run_id, { last_snippet: lastSnippet });
+    this.broadcast({ type: "chunk", data: { ...event } });
+  }
+
+  finalizeExternalRun(run_id: string, exit_code: number | null, errorMessage?: string) {
+    const run = this.store.getRun(run_id);
+    if (!run) return;
+    this.store.updateRun(run_id, { status: "done", exit_code });
+    this.activeRuns.delete(run_id);
+
+    if (errorMessage) {
+      const ts = now();
+      const event = this.store.appendRunEvent({
+        run_id,
+        ts,
+        stream: "stderr",
+        chunk: errorMessage
+      });
+      this.broadcast({ type: "chunk", data: { ...event } });
+    }
+
+    const finalEvent: FinalEventPayload = {
+      run_id,
+      ts: now(),
+      exit_code
+    };
+    this.broadcast({ type: "final", data: finalEvent });
+    this.logger?.info({ run_id, exit_code }, "external run finished");
   }
 
   private async maybeNotify(session_id: string, status: SessionStatus, summary: string) {

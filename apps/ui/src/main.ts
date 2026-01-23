@@ -14,6 +14,13 @@ if (tokenParam) {
 const getToken = () => localStorage.getItem("godex_token") ?? "";
 const apiBase = () => window.location.origin;
 
+const withToken = (path: string) => {
+  const token = getToken();
+  if (!token) return path;
+  const joiner = path.includes("?") ? "&" : "?";
+  return `${path}${joiner}token=${encodeURIComponent(token)}`;
+};
+
 const apiFetch = async (path: string, init?: RequestInit) => {
   const token = getToken();
   const headers = new Headers(init?.headers ?? {});
@@ -45,13 +52,17 @@ const updateHealth = async () => {
   }
 };
 
-const renderLayout = (title: string, content: string) => {
+const renderLayout = (activeTab: "sessions" | "threads", content: string) => {
   root.innerHTML = `
     <main class="page">
       <div class="ticker" id="server-status">server status...</div>
       <header class="topbar header-wrap">
         <img class="brand-image" src="/ui/godex.png" alt="godex" />
       </header>
+      <nav class="tabs">
+        <a class="tab ${activeTab === "sessions" ? "active" : ""}" href="${withToken("/ui")}">sessions</a>
+        <a class="tab ${activeTab === "threads" ? "active" : ""}" href="${withToken("/ui/threads")}">threads</a>
+      </nav>
       <section class="content">
         ${content}
       </section>
@@ -65,6 +76,28 @@ const renderLayout = (title: string, content: string) => {
   healthInterval = window.setInterval(async () => {
     await updateHealth();
   }, 10000);
+};
+
+const formatTimestamp = (value?: string | number | null) => {
+  if (value === null || value === undefined) return "";
+  if (typeof value === "number") {
+    const ms = value < 1_000_000_000_000 ? value * 1000 : value;
+    const date = new Date(ms);
+    if (Number.isNaN(date.getTime())) return String(value);
+    return date.toLocaleString();
+  }
+  const trimmed = value.trim();
+  if (!trimmed) return "";
+  if (/^\d+$/.test(trimmed)) {
+    const numeric = Number(trimmed);
+    const ms = numeric < 1_000_000_000_000 ? numeric * 1000 : numeric;
+    const date = new Date(ms);
+    if (Number.isNaN(date.getTime())) return trimmed;
+    return date.toLocaleString();
+  }
+  const date = new Date(trimmed);
+  if (Number.isNaN(date.getTime())) return trimmed;
+  return date.toLocaleString();
 };
 
 const renderSessionsList = async () => {
@@ -117,7 +150,7 @@ const renderSessionsList = async () => {
     list.innerHTML = data.sessions
       .map((session: any) => {
         return `
-          <a class="list-item" href="/ui/s/${session.id}${getToken() ? `?token=${encodeURIComponent(getToken())}` : ""}">
+          <a class="list-item" href="${withToken(`/ui/s/${session.id}`)}">
             <div class="title">${session.title}</div>
             <div class="meta">${session.repo_path}</div>
             <div class="status">${session.status}</div>
@@ -135,7 +168,7 @@ const appendChunk = (container: HTMLElement, chunk: string) => {
   lines.forEach((line, index) => {
     const span = document.createElement("span");
     const trimmed = line.trimStart().toLowerCase();
-    if (trimmed.startsWith("user ")) {
+    if (trimmed.startsWith("user ") || trimmed.startsWith("user:")) {
       span.className = "user-line";
     }
     span.textContent = line;
@@ -180,10 +213,10 @@ const loadRun = async (runId: string, output: HTMLElement) => {
 };
 
 const renderSessionDetail = async (sessionId: string) => {
-  renderLayout("", `
+  renderLayout("sessions", `
     <div class="toolbar">
       <div id="session-location" class="location">loading...</div>
-      <a href="/ui" class="link outline">cd</a>
+      <a href="${withToken("/ui")}" class="link outline">cd</a>
     </div>
     <div class="card">
       <div id="session-meta" class="meta-block">loading...</div>
@@ -230,7 +263,7 @@ const renderSessionDetail = async (sessionId: string) => {
     const data = await apiFetch(`/sessions/${sessionId}`);
     const location = document.querySelector<HTMLDivElement>("#session-location");
     if (location) {
-      const parts = data.session.repo_path.split(/[/\\\\]/).filter(Boolean);
+      const parts = data.session.repo_path.split(/[/\\]/).filter(Boolean);
       location.textContent = parts.length ? `/${parts[parts.length - 1]}` : `/${data.session.repo_path}`;
     }
     if (meta) {
@@ -322,10 +355,185 @@ const renderSessionDetail = async (sessionId: string) => {
   await refreshRuns();
 };
 
+const extractItemText = (item: any): string => {
+  if (!item) return "";
+  if (typeof item.text === "string") return item.text;
+  if (typeof item.content === "string") return item.content;
+  if (Array.isArray(item.content)) {
+    return item.content
+      .map((entry: any) => {
+        if (typeof entry?.text === "string") return entry.text;
+        if (typeof entry?.content === "string") return entry.content;
+        return "";
+      })
+      .join("");
+  }
+  return "";
+};
+
+const renderThreadTranscript = (output: HTMLElement, payload: { items?: any[]; turns?: any[] }) => {
+  output.textContent = "";
+  const lines: string[] = [];
+
+  if (Array.isArray(payload.items)) {
+    for (const item of payload.items) {
+      const role = item?.role ?? item?.author ?? item?.type ?? "item";
+      const text = extractItemText(item);
+      if (text) {
+        lines.push(`${role}: ${text}`);
+      }
+    }
+  } else if (Array.isArray(payload.turns)) {
+    for (const turn of payload.turns) {
+      const role = turn?.role ?? turn?.author ?? "turn";
+      const text = extractItemText(turn) || extractItemText(turn?.message);
+      if (text) {
+        lines.push(`${role}: ${text}`);
+      }
+    }
+  }
+
+  if (!lines.length) {
+    output.textContent = "no transcript available.";
+    return;
+  }
+
+  lines.forEach((line) => appendChunk(output, line));
+  output.scrollTop = output.scrollHeight;
+};
+
+const renderThreadsList = async () => {
+  renderLayout("threads", `
+    <div class="card">
+      <div class="threads-header">
+        <h2>threads</h2>
+        <button id="refresh-threads" class="ghost">refresh</button>
+      </div>
+      <div id="thread-list" class="list">loading...</div>
+    </div>
+  `);
+
+  const list = document.querySelector<HTMLDivElement>("#thread-list");
+  const refresh = document.querySelector<HTMLButtonElement>("#refresh-threads");
+
+  const loadThreads = async () => {
+    if (list) list.textContent = "loading...";
+    try {
+      const data = await apiFetch("/threads?limit=50");
+      if (!list) return;
+      if (!data.data?.length) {
+        list.textContent = "no threads yet.";
+        return;
+      }
+      list.innerHTML = data.data
+        .map((thread: any) => {
+          return `
+            <a class="list-item" href="${withToken(`/ui/t/${thread.thread_id}`)}">
+              <div class="title">${thread.title}</div>
+              <div class="meta">${formatTimestamp(thread.updated_at)}</div>
+              <div class="snippet">${thread.summary ?? ""}</div>
+            </a>
+          `;
+        })
+        .join("");
+    } catch (err) {
+      if (list) list.textContent = String(err);
+    }
+  };
+
+  refresh?.addEventListener("click", async () => {
+    await loadThreads();
+  });
+
+  await loadThreads();
+};
+
+const renderThreadDetail = async (threadId: string) => {
+  renderLayout("threads", `
+    <div class="toolbar">
+      <div class="location">/thread</div>
+      <a href="${withToken("/ui/threads")}" class="link outline">back</a>
+    </div>
+    <div class="card">
+      <div class="thread-meta" id="thread-meta">loading...</div>
+      <pre id="thread-output" class="output"></pre>
+      <div class="input-row">
+        <textarea id="thread-message" rows="2" placeholder="send message..."></textarea>
+        <button id="thread-send" class="send">send</button>
+      </div>
+      <div class="input-row">
+        <select id="thread-link">
+          <option value="">link to session (optional)</option>
+        </select>
+      </div>
+    </div>
+  `);
+
+  const meta = document.querySelector<HTMLDivElement>("#thread-meta");
+  const output = document.querySelector<HTMLPreElement>("#thread-output");
+  const sendBtn = document.querySelector<HTMLButtonElement>("#thread-send");
+  const input = document.querySelector<HTMLTextAreaElement>("#thread-message");
+  const linkSelect = document.querySelector<HTMLSelectElement>("#thread-link");
+
+  const loadSessions = async () => {
+    if (!linkSelect) return;
+    try {
+      const data = await apiFetch("/sessions");
+      if (!data.sessions?.length) return;
+      for (const session of data.sessions) {
+        const option = document.createElement("option");
+        option.value = session.id;
+        option.textContent = session.title;
+        linkSelect.appendChild(option);
+      }
+    } catch {
+      // ignore
+    }
+  };
+
+  const loadThread = async () => {
+    if (!output) return;
+    try {
+      const data = await apiFetch(`/threads/${threadId}`);
+      if (meta) {
+        const title = data.thread?.title ?? data.thread?.preview ?? data.thread?.id ?? threadId;
+        meta.innerHTML = `<div class="title-row"><strong>${title}</strong><span>${formatTimestamp(data.thread?.updatedAt ?? data.thread?.updated_at)}</span></div>`;
+      }
+      renderThreadTranscript(output, { items: data.items, turns: data.turns });
+    } catch (err) {
+      output.textContent = String(err);
+    }
+  };
+
+  sendBtn?.addEventListener("click", async () => {
+    if (!output || !input) return;
+    const text = input.value.trim();
+    if (!text) return;
+    input.value = "";
+    try {
+      const repo_session_id = linkSelect?.value || undefined;
+      const res = await apiFetch(`/threads/${threadId}/message`, {
+        method: "POST",
+        body: JSON.stringify({ text, repo_session_id: repo_session_id || undefined })
+      });
+      attachStream(res.run_id, output);
+    } catch (err) {
+      appendChunk(output, String(err));
+    }
+  });
+
+  await loadSessions();
+  await loadThread();
+};
+
 const route = () => {
   const path = window.location.pathname.replace(/\/+$/, "");
   if (path === "" || path === "/" || path === "/ui") {
     void renderSessionsList();
+    return;
+  }
+  if (path === "/ui/threads" || path === "/ui/t") {
+    void renderThreadsList();
     return;
   }
   if (path.startsWith("/ui/s/")) {
@@ -333,9 +541,19 @@ const route = () => {
     if (sessionId) void renderSessionDetail(sessionId);
     return;
   }
+  if (path.startsWith("/ui/t/")) {
+    const threadId = path.split("/").pop();
+    if (threadId) void renderThreadDetail(threadId);
+    return;
+  }
   if (path.startsWith("/s/")) {
     const sessionId = path.split("/").pop();
     if (sessionId) void renderSessionDetail(sessionId);
+    return;
+  }
+  if (path.startsWith("/t/")) {
+    const threadId = path.split("/").pop();
+    if (threadId) void renderThreadDetail(threadId);
     return;
   }
   void renderSessionsList();
@@ -350,6 +568,10 @@ style.textContent = `
   .header-wrap { background: #000; }
   .brand-image { width: 100%; height: auto; display: block; }
   .ticker { background: #000; text-align: center; font-size: 12px; color: #e4a05b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 6px 12px; border-bottom: 1px solid #d6d0c6; }
+  .tabs { display: flex; gap: 10px; padding: 8px 12px; background: #f2f0ea; border-bottom: 1px solid #d6d0c6; }
+  .tab { text-decoration: none; font-weight: 600; color: #2a2420; padding: 6px 10px; border-radius: 999px; border: 1px solid transparent; }
+  .tab.active { background: #000; color: #e4a05b; border-color: #000; }
+  .tab:hover { border-color: #2a2420; }
   .content { display: flex; flex-direction: column; padding: 0; }
   .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
   .card { background: #000; border-radius: 3px; padding: 12px; box-shadow: none; border: 1px solid #e0d9ce; margin: 0; }
@@ -362,10 +584,11 @@ style.textContent = `
   .ghost { background: transparent; color: #f5efe6; border: 1px solid #d6d0c6; }
   .ghost:hover { background: #efe9de; }
   .list { display: flex; flex-direction: column; gap: 10px; }
-  .list-item { display: block; padding: 12px; border-radius: 3px; border: 1px solid #e0d9ce; text-decoration: none; color: inherit; }
-  .list-item .title { font-weight: 600; }
+  .list-item { display: block; padding: 12px; border-radius: 3px; border: 1px solid #e0d9ce; text-decoration: none; color: inherit; background: #000; }
+  .list-item .title { font-weight: 600; color: #f5efe6; }
   .list-item .meta { font-size: 12px; color: #6a6056; }
   .list-item .status { font-size: 12px; text-transform: lowercase; letter-spacing: 0.08em; }
+  .list-item .snippet { font-size: 12px; color: #8a7f74; margin-top: 4px; }
   .toolbar { background: #000; display: flex; justify-content: space-between; align-items: center; padding: 0 12px; }
   .actions { display: flex; gap: 8px; flex-wrap: nowrap; }
   .actions.below { margin-top: 10px; }
@@ -380,9 +603,10 @@ style.textContent = `
   .title-row { color: #f5efe6; display: flex; justify-content: space-between; align-items: baseline; }
   .location { font-size: 16px; color: #e4a05b; font-weight: 600; }
   .output { text-wrap: auto; background: #0f0d0b; color: #f5efe6; min-height: 220px; max-height: 320px; overflow: auto; padding: 12px; border-radius: 3px; margin-bottom: 8px; }
-  .run-item { text-align: left; padding: 10px; border-radius: 3px; border: 1px solid #e0d9ce; background: #000; }
+  .run-item { text-align: left; padding: 10px; border-radius: 3px; border: 1px solid #e0d9ce; background: #000; color: #f5efe6; }
   .run-item .meta { font-size: 11px; color: #6a6056; }
-  .runs-header { color: #f5efe6; display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+  .runs-header, .threads-header { color: #f5efe6; display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+  .thread-meta { color: #f5efe6; margin-bottom: 8px; }
   @media (max-width: 720px) { .input-row { grid-template-columns: 1fr; } }
 `;
 
