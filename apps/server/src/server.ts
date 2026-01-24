@@ -10,6 +10,7 @@ import { RunManager } from "./run_manager.js";
 import { CodexAppServerManager } from "./codex_app_server_manager.js";
 import { registerRunRoutes } from "./routes/runs.js";
 import { registerWorkspaceRoutes } from "./routes/workspaces.js";
+import { resolveDefaultRepoRoot } from "./bootstrap.js";
 import { registerThreadRoutes } from "./routes/threads.js";
 import { registerDiagRoutes } from "./routes/diag.js";
 
@@ -52,10 +53,11 @@ export const buildServer = () => {
     active_runs: runManager.getActiveRunsCount(),
     workspace_count: store.countWorkspaces(),
     linked_threads_count: store.countWorkspaceThreads(),
-    app_server_state: appServer.getStatus()
+    app_server_state: appServer.getStatus(),
+    default_repo_root: resolveDefaultRepoRoot()
   }));
 
-  registerWorkspaceRoutes(app, store, runManager);
+  registerWorkspaceRoutes(app, store, runManager, appServer);
   registerRunRoutes(app, store, runManager);
   registerThreadRoutes(app, store, runManager, appServer);
   registerDiagRoutes(app, appServer);

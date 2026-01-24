@@ -28,6 +28,16 @@ const withToken = (path: string) => {
   return `${path}${joiner}token=${encodeURIComponent(token)}`;
 };
 
+const apiFetchRaw = async (path: string, init?: RequestInit) => {
+  const token = getToken();
+  const headers = new Headers(init?.headers ?? {});
+  if (token) {
+    headers.set("Authorization", `Bearer ${token}`);
+  }
+  headers.set("Content-Type", "application/json");
+  return fetch(`${apiBase()}${path}`, { ...init, headers });
+};
+
 const apiFetch = async (path: string, init?: RequestInit) => {
   const token = getToken();
   const headers = new Headers(init?.headers ?? {});
@@ -44,6 +54,7 @@ const apiFetch = async (path: string, init?: RequestInit) => {
 };
 
 let healthInterval: number | null = null;
+let defaultRepoRoot: string | null = null;
 let tickerInstance: any = null;
 let tickerRoot: HTMLDivElement | null = null;
 let tickerIterHandler: ((event: Event) => void) | null = null;
@@ -164,6 +175,7 @@ const updateHealth = async () => {
     const data = await apiFetch("/health");
     const port = window.location.port || "?";
     const uptime = Math.round(Number(data.uptime ?? 0));
+    defaultRepoRoot = typeof data.default_repo_root === "string" ? data.default_repo_root : null;
     const active = data.active_runs ?? 0;
     const workspaces = data.workspace_count ?? 0;
     const linked = data.linked_threads_count ?? 0;
@@ -272,13 +284,13 @@ const renderRunOutput = (container: HTMLElement, events: any[]) => {
   container.scrollTop = container.scrollHeight;
 };
 
-const attachStream = (runId: string, output: HTMLElement) => {
+const attachStream = (runId: string, output: HTMLElement, onFinal?: () => void, replay = 0) => {
   const token = getToken();
   if (!token) {
     output.textContent = "missing token. append ?token=... to url.";
     return;
   }
-  const streamUrl = `${apiBase()}/runs/${runId}/stream?token=${encodeURIComponent(token)}&replay=0`;
+  const streamUrl = `${apiBase()}/runs/${runId}/stream?token=${encodeURIComponent(token)}&replay=${replay}`;
   const es = new EventSource(streamUrl);
 
   es.addEventListener("chunk", (event) => {
@@ -289,6 +301,7 @@ const attachStream = (runId: string, output: HTMLElement) => {
 
   es.addEventListener("final", () => {
     es.close();
+    onFinal?.();
   });
 };
 
@@ -755,7 +768,10 @@ const renderWorkspacesList = async () => {
     <div class="card">
       <div class="section-header">
         <h2 style="color: cornflowerblue;">workspaces</h2>
-        <button id="open-workspace-modal" class="ghost">${iconLabel("plus","add")}</button>
+        <div class="actions">
+          <button id="open-bootstrap-modal" class="ghost">${iconLabel("plus","new repo")}</button>
+          <button id="open-workspace-modal" class="ghost">${iconLabel("plus","add")}</button>
+        </div>
       </div>
       <div id="workspace-list" class="list">loading...</div>
     </div>
@@ -764,6 +780,7 @@ const renderWorkspacesList = async () => {
 
   const list = document.querySelector<HTMLDivElement>("#workspace-list");
   const openModal = document.querySelector<HTMLButtonElement>("#open-workspace-modal");
+  const openBootstrap = document.querySelector<HTMLButtonElement>("#open-bootstrap-modal");
 
   const openCreateWorkspace = () => {
     const modalHost = document.querySelector<HTMLDivElement>("#modal-host");
@@ -815,7 +832,227 @@ const renderWorkspacesList = async () => {
     });
   };
 
+  const openBootstrapModal = () => {
+    const modalHost = document.querySelector<HTMLDivElement>("#modal-host");
+    if (!modalHost) return;
+
+    const defaultPath = defaultRepoRoot ?? "";
+
+    modalHost.innerHTML = buildModal(
+      "new repo",
+      `
+        <form id="bootstrap-form">
+          <label>name</label>
+          <input name="name" placeholder="my-new-repo" required />
+          <label>path (optional)</label>
+          <input name="path" placeholder="${defaultPath}" />
+          <label>template</label>
+          <div class="radio-group" id="bootstrap-templates">
+            <label><input type="radio" name="template" value="mono" /> mono</label>
+            <label><input type="radio" name="template" value="service" /> node-ts-service</label>
+            <label><input type="radio" name="template" value="web" /> node-ts-web</label>
+            <label><input type="radio" name="template" value="python" /> python</label>
+            <label><input type="radio" name="template" value="blank" /> blank repo</label>
+            <label><input type="radio" name="template" value="auto" checked /> describe it</label>
+          </div>
+          <div id="bootstrap-description-wrap">
+            <label>description</label>
+            <textarea name="description" rows="3" placeholder="pwa with api + admin"></textarea>
+          </div>
+          <label class="toggle"><input type="checkbox" name="start" /> start after create</label>
+          <div class="helper" id="bootstrap-error"></div>
+          <div id="bootstrap-busy" class="bootstrap-status hidden">
+            <span class="spinner" aria-hidden="true"></span>
+            <span>working...</span>
+          </div>
+          <div id="bootstrap-suggestions" class="actions below hidden"></div>
+          <div class="actions below">
+            <button type="button" id="bootstrap-cancel" class="ghost">${iconLabel("trash", "cancel")}</button>
+            <button type="submit" class="send">${iconLabel("send", "create")}</button>
+          </div>
+        </form>
+        <pre id="bootstrap-output" class="output hidden"></pre>
+      `
+    );
+
+    const close = () => { modalHost.innerHTML = ""; };
+    modalHost.querySelector("#modal-close")?.addEventListener("click", close);
+    modalHost.querySelector("#bootstrap-cancel")?.addEventListener("click", close);
+    modalHost.querySelector("#modal-backdrop")?.addEventListener("click", (event) => {
+      if ((event.target as HTMLElement).id === "modal-backdrop") close();
+    });
+
+    const form = modalHost.querySelector<HTMLFormElement>("#bootstrap-form");
+    const error = modalHost.querySelector<HTMLDivElement>("#bootstrap-error");
+    const descriptionWrap = modalHost.querySelector<HTMLDivElement>("#bootstrap-description-wrap");
+    const templates = modalHost.querySelector<HTMLDivElement>("#bootstrap-templates");
+    const suggestions = modalHost.querySelector<HTMLDivElement>("#bootstrap-suggestions");
+    const busy = modalHost.querySelector<HTMLDivElement>("#bootstrap-busy");
+    const output = modalHost.querySelector<HTMLPreElement>("#bootstrap-output");
+
+    const setError = (message: string) => {
+      if (!error) return;
+      error.textContent = message;
+    };
+
+    const setBusy = (value: boolean) => {
+      if (busy) {
+        busy.classList.toggle("hidden", !value);
+      }
+      if (!form) return;
+      const fields = form.querySelectorAll<HTMLInputElement | HTMLTextAreaElement | HTMLButtonElement>("input, textarea, button");
+      fields.forEach((field) => {
+        field.disabled = value;
+      });
+    };
+
+    const templateLabel = (value: string) => {
+      if (value === "service") return "node-ts-service";
+      if (value === "web") return "node-ts-web";
+      if (value === "blank") return "blank repo";
+      return value;
+    };
+
+    const suggestionIcon = (value: string) => (value === "blank" ? "plus" : "star");
+
+    const showSuggestions = (items: string[], onPick: (value: string) => void) => {
+      if (!suggestions) return;
+      suggestions.innerHTML = items.map((item) => `
+        <button type="button" class="ghost" data-template="${item}">${iconLabel(suggestionIcon(item), templateLabel(item))}</button>
+      `).join("");
+      suggestions.classList.remove("hidden");
+      suggestions.addEventListener("click", (event) => {
+        const target = event.target as HTMLElement;
+        const btn = target.closest<HTMLButtonElement>("button[data-template]");
+        const value = btn?.dataset.template;
+        if (!value) return;
+        onPick(value);
+      }, { once: true });
+    };
+
+    const normalizeSuggestions = (items: string[]) => {
+      const next = Array.from(new Set(items.filter(Boolean)));
+      if (!next.includes("blank")) next.push("blank");
+      return next;
+    };
+
+    const selectTemplate = (value: string) => {
+      const input = templates?.querySelector<HTMLInputElement>(`input[value="${value}"]`);
+      if (input) {
+        input.checked = true;
+        toggleDescription();
+      }
+    };
+
+    const toggleDescription = () => {
+      if (!descriptionWrap || !templates) return;
+      const selected = templates.querySelector<HTMLInputElement>('input[name="template"]:checked')?.value;
+      if (selected === "auto") {
+        descriptionWrap.classList.remove("hidden");
+      } else {
+        descriptionWrap.classList.add("hidden");
+      }
+    };
+
+    templates?.addEventListener("change", toggleDescription);
+    toggleDescription();
+
+    form?.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      if (!form) return;
+      setError("");
+      suggestions?.classList.add("hidden");
+      const formData = new FormData(form);
+      const name = String(formData.get("name") || "").trim();
+      const path = String(formData.get("path") || "").trim();
+      const template = String(formData.get("template") || "auto");
+      const description = String(formData.get("description") || "").trim();
+      const start = Boolean(formData.get("start"));
+
+      if (!name) {
+        setError("name is required");
+        return;
+      }
+
+      if (template === "auto" && !description) {
+        setError("description is required for auto");
+        return;
+      }
+
+      try {
+        setBusy(true);
+        const res = await apiFetchRaw("/workspaces/bootstrap", {
+          method: "POST",
+          body: JSON.stringify({ name, path: path || undefined, template, description: description || undefined, start })
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          if (res.status === 409 && data?.error === "template_suggestion") {
+            setError(data.reasoning || "template suggestion available");
+            const items = normalizeSuggestions([data.suggested, ...(data.suggestions || [])]);
+            showSuggestions(items, (value) => {
+              selectTemplate(value);
+            });
+            setBusy(false);
+            return;
+          }
+          if (res.status === 409 && data?.error === "ambiguous_template") {
+            setError(data.message || "template is ambiguous");
+            showSuggestions(normalizeSuggestions(data.suggestions || []), (value) => {
+              selectTemplate(value);
+            });
+            setBusy(false);
+            return;
+          }
+          if (res.status === 409 && data?.error === "repo_exists") {
+            setError(`repo already exists: ${data.repo_path}`);
+            showSuggestions(["create workspace for existing folder"], async () => {
+              await apiFetch("/workspaces", {
+                method: "POST",
+                body: JSON.stringify({ repo_path: data.repo_path, title: name })
+              });
+              window.location.href = withToken("/ui");
+            });
+            setBusy(false);
+            return;
+          }
+          setError(data?.error || "bootstrap failed");
+          setBusy(false);
+          return;
+        }
+
+        if (output) {
+          output.classList.remove("hidden");
+          output.textContent = "";
+        }
+
+        const runId = data.run_id;
+        if (runId && output) {
+          attachStream(runId, output, async () => {
+            try {
+              const runData = await apiFetch(`/runs/${runId}`);
+              const meta = runData?.run?.meta;
+              if (meta?.workspace_id) {
+                window.location.href = withToken(`/ui/w/${meta.workspace_id}`);
+              } else {
+                setError("bootstrap finished without workspace metadata");
+                setBusy(false);
+              }
+            } catch (err) {
+              setError(String(err));
+              setBusy(false);
+            }
+          }, 1);
+        }
+      } catch (err) {
+        setError(String(err));
+        setBusy(false);
+      }
+    });
+  };
+
   openModal?.addEventListener("click", openCreateWorkspace);
+  openBootstrap?.addEventListener("click", openBootstrapModal);
 
   try {
     const data = await apiFetch("/workspaces");
@@ -1775,7 +2012,7 @@ const route = () => {
 
 const style = document.createElement("style");
 style.textContent = `
-  :root { color-scheme: light; }
+  :root { color-scheme: light; background: #000; }
   body { margin: 0; font-family: "Space Grotesk", "Segoe UI", sans-serif; background: #f2f0ea; color: #1e1a16; text-transform: lowercase; }
   .page { max-width: none; margin: 0; padding: 0; }
   .topbar { display: flex; justify-content: flex-end; align-items: center; padding: 6px 12px; }
@@ -1794,14 +2031,18 @@ style.textContent = `
   .banner { background: #efe9de; color: #2a2420; padding: 10px 12px; border-bottom: 1px solid #d6d0c6; font-size: 12px; }
   .banner.hidden { display: none; }
   .banner.offline { background: #2a2420; color: #f5efe6; }
+  .hidden { display: none; }
   .toast { position: fixed; right: 16px; bottom: 16px; background: #efe9de; color: #2a2420; border: 1px solid #d6d0c6; padding: 8px 10px; border-radius: 6px; font-size: 12px; z-index: 60; box-shadow: 0 6px 20px rgba(0,0,0,0.2); }
   .toast.hidden { display: none; }
   .content { display: flex; flex-direction: column; padding: 0; }
   .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)) }
   .card { color: cornflowerblue; background: #000; border-radius: 3px; padding: 12px; box-shadow: none; border: 1px solid #e0d9ce; margin: 0; }
   h2, h3 { margin: 0 0 12px; }
-  label { display: block; font-size: 12px; margin-bottom: 6px; text-transform: lowercase; letter-spacing: 0.08em; }
-  input, textarea, select { padding: 8px 10px; border-radius: 3px; border: 1px solid #d6d0c6; font-size: 14px; margin-bottom: .5rem; background: #0f0d0b; color: #f5efe6; box-sizing: border-box; }
+  label { display: block; font-size: 12px; margin-bottom: 6px; text-transform: lowercase; letter-spacing: 0.08em; color: #cfc6bb; }
+  .radio-group { display: flex; flex-wrap: wrap; gap: 10px 16px; margin-bottom: 10px; }
+  .radio-group label { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; margin-bottom: 0; color: #f5efe6; }
+  input, textarea, select { padding: 10px 12px; border-radius: 6px; border: 1px solid #6a6056; font-size: 14px; margin-bottom: .5rem; background: #111; color: #f5efe6; box-sizing: border-box; }
+  input::placeholder, textarea::placeholder { color: #6a6056; }
   input { width: 100%; }
   #show-archived { width: unset; }
   button { padding: 8px 10px; border-radius: 3px; border: none; background: #2a2420; color: #fff; font-weight: 600; cursor: pointer; }
@@ -1817,7 +2058,7 @@ style.textContent = `
   .list-item .snippet { font-size: 12px; color: #8a7f74; margin-top: 4px; }
   .meta-row { display: flex; gap: 6px; align-items: center; font-size: 12px; color: #6a6056; }
   .toolbar { background: #000; display: flex; justify-content: space-between; align-items: center; padding: 0 12px; }
-  .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .actions { display: flex; gap: 10px; flex-wrap: wrap; }
   .actions.below { margin-top: 10px; }
   .actions.thirds button { flex: 1; }
   .link { text-decoration: none; color: #2a2420; font-weight: 600; }
@@ -1859,11 +2100,16 @@ style.textContent = `
   .badges { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
   .badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 999px; font-size: 11px; border: 1px solid #6a6056; color: #e4a05b; }
   .helper { margin: 8px 0; color: #f5efe6; }
-  .helper-text { font-size: 12px; color: #cfc6bb; }
-  .toggle { margin-bottom: 0; margin-right: 1rem; font-size: .8rem; color: #f5efe6; display: flex; align-items: center; gap: 6px; }
+  .helper-text { font-size: 12px; color: #e0d9ce; }
+  .toggle { margin-bottom: 0; margin-right: 1rem; font-size: .85rem; color: #f5efe6; display: inline-flex; align-items: center; gap: 8px; }
+  .bootstrap-status { display: flex; align-items: center; gap: 8px; color: #f5efe6; font-size: 12px; margin-top: 8px; }
+  .bootstrap-status.hidden { display: none; }
+  .spinner { width: 14px; height: 14px; border: 2px solid #6a6056; border-top-color: #e4a05b; border-radius: 999px; animation: spin 0.9s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
   .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 50; }
-  .modal { background: #000; border: 1px solid #e0d9ce; border-radius: 6px; padding: 16px; width: min(520px, 100%); max-height: 80vh; overflow: auto; }
-  .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; color: #f5efe6; }
+  .modal { background: #0b0b0b; border: 1px solid #e0d9ce; border-radius: 10px; padding: 18px; width: min(560px, 100%); max-height: 84vh; overflow: auto; box-shadow: 0 18px 60px rgba(0,0,0,0.6); }
+  .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; color: #f5efe6; }
+  .modal h3 { font-size: 20px; letter-spacing: 0.04em; }
   .modal-controls { margin-bottom: 12px; color: #f5efe6; }
   @media (max-width: 720px) { .input-row { grid-template-columns: 1fr; } }
 `;

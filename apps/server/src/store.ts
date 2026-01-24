@@ -30,6 +30,7 @@ export interface Run {
   created_at: string;
   updated_at: string;
   last_snippet: string | null;
+  meta?: Record<string, unknown> | null;
 }
 
 export interface RunEvent {
@@ -105,6 +106,25 @@ const normalizeThreadMeta = (meta: ThreadMeta): ThreadMeta => ({
   title_override: meta.title_override ?? null,
   pinned: Boolean(meta.pinned),
   archived: Boolean(meta.archived)
+});
+
+const parseRunMeta = (value: unknown): Record<string, unknown> | null => {
+  if (!value) return null;
+  if (typeof value === "object") return value as Record<string, unknown>;
+  if (typeof value === "string") {
+    try {
+      const parsed = JSON.parse(value);
+      if (parsed && typeof parsed === "object") return parsed as Record<string, unknown>;
+    } catch {
+      return null;
+    }
+  }
+  return null;
+};
+
+const normalizeRun = (run: Run): Run => ({
+  ...run,
+  meta: parseRunMeta(run.meta)
 });
 
 const defaultDataDir = () => resolve(process.cwd(), "..", "..", ".godex");
@@ -287,11 +307,14 @@ const createJsonStore = (dataDir: string): Store => {
         return true;
       }),
     listRunsByWorkspace: (workspace_id, limit = 10) => {
-      const runs = loadJson(filePath).runs.filter((r) => r.workspace_id === workspace_id);
+      const runs = loadJson(filePath).runs.filter((r) => r.workspace_id === workspace_id).map(normalizeRun);
       runs.sort((a, b) => b.created_at.localeCompare(a.created_at));
       return runs.slice(0, limit);
     },
-    getRun: (id) => loadJson(filePath).runs.find((r) => r.id === id) ?? null,
+    getRun: (id) => {
+      const run = loadJson(filePath).runs.find((r) => r.id === id) ?? null;
+      return run ? normalizeRun(run) : null;
+    },
     createRun: (input) =>
       withData((data) => {
         const ts = now();
@@ -301,17 +324,18 @@ const createJsonStore = (dataDir: string): Store => {
           exit_code: null,
           created_at: ts,
           updated_at: ts,
-          last_snippet: null
+          last_snippet: null,
+          meta: input.meta ?? null
         };
         data.runs.push(run);
-        return run;
+        return normalizeRun(run);
       }),
     updateRun: (id, patch) =>
       withData((data) => {
         const run = data.runs.find((r) => r.id === id);
         if (!run) return null;
         Object.assign(run, patch, { updated_at: now() });
-        return run;
+        return normalizeRun(run);
       }),
     appendRunEvent: (event) =>
       withData((data) => {
@@ -444,6 +468,7 @@ const createSqliteStore = (dataDir: string, dbPath: string): Store => {
         created_at TEXT NOT NULL,
         updated_at TEXT NOT NULL,
         last_snippet TEXT,
+        meta TEXT,
         FOREIGN KEY(workspace_id) REFERENCES workspaces(id)
       );
       CREATE TABLE IF NOT EXISTS run_events (
@@ -483,6 +508,10 @@ const createSqliteStore = (dataDir: string, dbPath: string): Store => {
       db.exec("DROP TABLE sessions");
     }
 
+    if (tableExists("runs") && !columnExists("runs", "meta")) {
+      db.exec("ALTER TABLE runs ADD COLUMN meta TEXT");
+    }
+
     if (tableExists("runs") && columnExists("runs", "session_id")) {
       db.exec(`
         CREATE TABLE IF NOT EXISTS runs_new (
@@ -496,12 +525,14 @@ const createSqliteStore = (dataDir: string, dbPath: string): Store => {
           created_at TEXT NOT NULL,
           updated_at TEXT NOT NULL,
           last_snippet TEXT,
+          meta TEXT,
+        meta TEXT,
           FOREIGN KEY(workspace_id) REFERENCES workspaces(id)
         );
       `);
       db.prepare(
-        "INSERT INTO runs_new (id, workspace_id, type, command, cwd, status, exit_code, created_at, updated_at, last_snippet) " +
-          "SELECT id, session_id, type, command, cwd, status, exit_code, created_at, updated_at, last_snippet FROM runs"
+        "INSERT INTO runs_new (id, workspace_id, type, command, cwd, status, exit_code, created_at, updated_at, last_snippet, meta) " +
+          "SELECT id, session_id, type, command, cwd, status, exit_code, created_at, updated_at, last_snippet, NULL FROM runs"
       ).run();
       db.exec("DROP TABLE runs");
       db.exec("ALTER TABLE runs_new RENAME TO runs");
@@ -585,8 +616,11 @@ const createSqliteStore = (dataDir: string, dbPath: string): Store => {
       return (info.changes ?? 0) > 0;
     },
     listRunsByWorkspace: (workspace_id, limit = 10) =>
-      db.prepare("SELECT * FROM runs WHERE workspace_id = ? ORDER BY created_at DESC LIMIT ?").all(workspace_id, limit),
-    getRun: (id) => db.prepare("SELECT * FROM runs WHERE id = ?").get(id) ?? null,
+      db.prepare("SELECT * FROM runs WHERE workspace_id = ? ORDER BY created_at DESC LIMIT ?").all(workspace_id, limit).map(normalizeRun),
+    getRun: (id) => {
+      const run = db.prepare("SELECT * FROM runs WHERE id = ?").get(id) ?? null;
+      return run ? normalizeRun(run as Run) : null;
+    },
     createRun: (input) => {
       const ts = now();
       const run: Run = {
@@ -595,10 +629,11 @@ const createSqliteStore = (dataDir: string, dbPath: string): Store => {
         exit_code: null,
         created_at: ts,
         updated_at: ts,
-        last_snippet: null
+        last_snippet: null,
+        meta: input.meta ?? null
       };
       db.prepare(
-        "INSERT INTO runs (id, workspace_id, type, command, cwd, status, exit_code, created_at, updated_at, last_snippet) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+        "INSERT INTO runs (id, workspace_id, type, command, cwd, status, exit_code, created_at, updated_at, last_snippet, meta) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
       ).run(
         run.id,
         run.workspace_id,
@@ -609,16 +644,17 @@ const createSqliteStore = (dataDir: string, dbPath: string): Store => {
         run.exit_code,
         run.created_at,
         run.updated_at,
-        run.last_snippet
+        run.last_snippet,
+        run.meta ? JSON.stringify(run.meta) : null
       );
-      return run;
+      return normalizeRun(run);
     },
     updateRun: (id, patch) => {
       const existing = db.prepare("SELECT * FROM runs WHERE id = ?").get(id);
       if (!existing) return null;
-      const updated = { ...existing, ...patch, updated_at: now() } as Run;
+      const updated = normalizeRun({ ...existing, ...patch, updated_at: now() } as Run);
       db.prepare(
-        "UPDATE runs SET type = ?, command = ?, cwd = ?, status = ?, exit_code = ?, updated_at = ?, last_snippet = ? WHERE id = ?"
+        "UPDATE runs SET type = ?, command = ?, cwd = ?, status = ?, exit_code = ?, updated_at = ?, last_snippet = ?, meta = ? WHERE id = ?"
       ).run(
         updated.type,
         updated.command,
@@ -627,6 +663,7 @@ const createSqliteStore = (dataDir: string, dbPath: string): Store => {
         updated.exit_code,
         updated.updated_at,
         updated.last_snippet,
+        updated.meta ? JSON.stringify(updated.meta) : null,
         id
       );
       return updated;

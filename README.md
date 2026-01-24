@@ -120,6 +120,37 @@ http://central-command {
 - `POST /workspaces/:id/open-folder`
 - `POST /workspaces/:id/open-code`
 
+## New Repo bootstrap
+
+- Requires `strap` on PATH.
+- Optional env: `GODEX_DEFAULT_REPO_ROOT` sets the default repo root used by the bootstrap endpoint.
+- When `template` is `auto`, the server asks Codex (strap-bootstrapper skill) to suggest a template.
+- If suggestions are ambiguous, you can choose `blank` to create an empty repo (folder + git init).
+
+Endpoint:
+
+```
+POST /workspaces/bootstrap
+```
+
+Body:
+
+```
+{
+  "name": "my-new-repo",
+  "path": "P:\software",
+  "template": "mono" | "service" | "web" | "python" | "blank" | "auto",
+  "description": "optional description used for auto",
+  "start": false
+}
+```
+
+Example:
+
+```
+curl -X POST http://central-command:7777/workspaces/bootstrap   -H "Authorization: Bearer YOUR_TOKEN"   -H "Content-Type: application/json"   -d '{"name":"demo","template":"mono","path":"P:\software"}'
+```
+
 ## Threads (Codex app-server)
 
 - `GET /threads` (merged list: remote threads + local meta + attached workspace ids)
