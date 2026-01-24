@@ -1,5 +1,10 @@
 # Worklog
 
+### 2026-01-24 - Repo bootstrap flow
+- **Outcome:** UI exposes a bootstrap modal and the server provides `/workspaces/bootstrap` to scaffold new repos (template/auto) and return workspace metadata.
+- **Why:** Create new repos from the phone UI and register them as workspaces without manual setup.
+- **Links:** commit `70736853291269942c060b3c578b27f4dd8580a3`
+
 ### 2026-01-23 - UI icons + ticker marquee
 - **Outcome:** UI uses consistent inline SVG icons and the status ticker scrolls with vanilla-marquee plus controlled pause.
 - **Why:** Improve readability with consistent iconography and make the top ticker behave like a real marquee.

@@ -14,6 +14,7 @@
 - Working: sessions persist `notify_mode`; server can send ntfy notifications and UI exposes per-session controls.
 - Working: Threads UI bridges to `codex app-server` so existing Codex threads can be listed and resumed.
 - Working: Workspaces are stored server-side as repo profiles; threads can be attached with local metadata (pinned/archived/title override).
+- Working: New repo bootstrap flow in the UI plus `/workspaces/bootstrap` endpoint can scaffold repos (strap + optional auto template).
 - Working: UI is installable as a PWA, shows an offline/server-unreachable banner, and serves PWA root assets from the server build output.
 - Working: Share drafts flow at `/ui/share` saves incoming share text/URLs to localStorage before sending.
 - Working: Dictation is available via mic controls on workspace/thread inputs (Chrome + mic permission).
