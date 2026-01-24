@@ -1,4 +1,5 @@
 import { registerSW } from "virtual:pwa-register";
+import marquee from "vanilla-marquee";
 
 const root = document.querySelector<HTMLDivElement>("#app");
 
@@ -43,6 +44,88 @@ const apiFetch = async (path: string, init?: RequestInit) => {
 };
 
 let healthInterval: number | null = null;
+let tickerInstance: any = null;
+let tickerRoot: HTMLDivElement | null = null;
+let tickerIterHandler: ((event: Event) => void) | null = null;
+let tickerPauseTimer: number | null = null;
+
+const ensureTicker = (content: string) => {
+  const el = document.querySelector<HTMLDivElement>("#server-status");
+  if (!el) return;
+
+  if (!tickerRoot) {
+    tickerRoot = document.createElement("div");
+    tickerRoot.className = "ticker-marquee";
+    tickerRoot.innerHTML = content;
+    el.innerHTML = "";
+    el.appendChild(tickerRoot);
+    tickerInstance = new marquee(tickerRoot, {
+      duplicated: true,
+      gap: 32,
+      speed: 35,
+      delayBeforeStart: 0,
+      startVisible: true
+    });
+    const wrap = (tickerInstance as any)?._marqWrap as HTMLElement | undefined;
+    if (wrap) {
+      const hardReset = () => {
+        wrap.style.animationPlayState = "paused";
+        wrap.style.transform = "translateX(0px)";
+        if (tickerPauseTimer) window.clearTimeout(tickerPauseTimer);
+        tickerPauseTimer = window.setTimeout(() => {
+          wrap.style.animationPlayState = "running";
+        }, 5000);
+      };
+      hardReset();
+      tickerIterHandler = () => {
+        hardReset();
+      };
+      wrap.addEventListener("animationiteration", tickerIterHandler);
+    }
+    return;
+  }
+
+  const marquees = tickerRoot.querySelectorAll<HTMLElement>(".js-marquee");
+  if (marquees.length) {
+    marquees.forEach((node) => {
+      node.innerHTML = content;
+    });
+    tickerInstance?.refresh();
+    return;
+  }
+
+  tickerRoot.innerHTML = content;
+  tickerInstance?.destroy();
+  tickerInstance = new marquee(tickerRoot, {
+    duplicated: true,
+    gap: 32,
+    speed: 35,
+    delayBeforeStart: 0,
+    startVisible: true
+  });
+  const wrap = (tickerInstance as any)?._marqWrap as HTMLElement | undefined;
+  if (wrap) {
+    wrap.style.animationPlayState = "paused";
+    wrap.style.transform = "translateX(0px)";
+    if (tickerPauseTimer) window.clearTimeout(tickerPauseTimer);
+    tickerPauseTimer = window.setTimeout(() => {
+      wrap.style.animationPlayState = "running";
+    }, 5000);
+    if (tickerIterHandler) {
+      wrap.removeEventListener("animationiteration", tickerIterHandler);
+    }
+    tickerIterHandler = () => {
+      wrap.style.animationPlayState = "paused";
+      wrap.style.transform = "translateX(0px)";
+      if (tickerPauseTimer) window.clearTimeout(tickerPauseTimer);
+      tickerPauseTimer = window.setTimeout(() => {
+        wrap.style.animationPlayState = "running";
+      }, 5000);
+    };
+    wrap.addEventListener("animationiteration", tickerIterHandler);
+  }
+};
+
 let offlineListenerAttached = false;
 
 const setOfflineBanner = (isOffline: boolean, message = "Offline / Server unreachable") => {
@@ -84,10 +167,20 @@ const updateHealth = async () => {
     const active = data.active_runs ?? 0;
     const workspaces = data.workspace_count ?? 0;
     const linked = data.linked_threads_count ?? 0;
-    el.textContent = `server ok | port ${port} | pid ${data.pid ?? "?"} | uptime ${uptime}s | active ${active} | workspaces ${workspaces} | links ${linked}`;
+    const pid = data.pid ?? "?";
+    const tickerText = `
+      <span class="label">server ok</span>
+      | <span class="label">port</span> <span class="value">${port}</span>
+      | <span class="label">pid</span> <span class="value">${pid}</span>
+      | <span class="label">uptime</span> <span class="value">${uptime}s</span>
+      | <span class="label">active</span> <span class="value">${active}</span>
+      | <span class="label">workspaces</span> <span class="value">${workspaces}</span>
+      | <span class="label">links</span> <span class="value">${linked}</span>
+    `;
+    ensureTicker(tickerText);
     setOfflineBanner(false);
   } catch (err) {
-    el.textContent = "server status unavailable";
+    ensureTicker(`<span class="label">server status unavailable</span>`);
     setOfflineBanner(true);
   }
 };
@@ -206,6 +299,110 @@ const loadRun = async (runId: string, output: HTMLElement) => {
 
 const buildThreadBadge = (label: string) => `<span class="badge">${label}</span>`;
 
+const iconMap: Record<string, string> = {
+  mic: `
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M12 2a3 3 0 0 1 3 3v6a3 3 0 1 1-6 0V5a3 3 0 0 1 3-3z" />
+      <path d="M5 11a7 7 0 0 0 14 0" />
+      <path d="M12 18v4" />
+      <path d="M8 22h8" />
+    </svg>
+  `,
+  send: `
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M22 2 11 13" />
+      <path d="M22 2 15 22 11 13 2 9 22 2" />
+    </svg>
+  `,
+  refresh: `
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M21 12a9 9 0 1 1-2.64-6.36" />
+      <path d="M21 3v6h-6" />
+    </svg>
+  `,
+  plus: `
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M12 5v14" />
+      <path d="M5 12h14" />
+    </svg>
+  `,
+  link: `
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M10 13a5 5 0 0 1 0-7l1.5-1.5a5 5 0 0 1 7 7L17 12" />
+      <path d="M14 11a5 5 0 0 1 0 7L12.5 19.5a5 5 0 1 1-7-7L7 11" />
+    </svg>
+  `,
+  star: `
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="m12 2 3 7h7l-5.5 4.5L18 21l-6-3.5L6 21l1.5-7.5L2 9h7z" />
+    </svg>
+  `,
+  archive: `
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M21 8v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8" />
+      <path d="M22 4H2v4h20z" />
+      <path d="M10 12h4" />
+    </svg>
+  `,
+  folder: `
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M3 7h5l2 2h11v10a2 2 0 0 1-2 2H3z" />
+      <path d="M3 7V5a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v2" />
+    </svg>
+  `,
+  code: `
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M16 18 22 12 16 6" />
+      <path d="M8 6 2 12l6 6" />
+    </svg>
+  `,
+  play: `
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M8 5v14l11-7z" />
+    </svg>
+  `,
+  diff: `
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M3 12h8" />
+      <path d="M7 8v8" />
+      <path d="M17 8v8" />
+      <path d="M13 12h8" />
+    </svg>
+  `,
+  git: `
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M16 18a2 2 0 1 0 2 2 2 2 0 0 0-2-2z" />
+      <path d="M8 6a2 2 0 1 0-2-2 2 2 0 0 0 2 2z" />
+      <path d="M6 4v12a4 4 0 0 0 4 4h6" />
+      <path d="M16 20V8" />
+    </svg>
+  `,
+  trash: `
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M3 6h18" />
+      <path d="M8 6V4h8v2" />
+      <path d="M6 6l1 14h10l1-14" />
+    </svg>
+  `,
+  edit: `
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M12 20h9" />
+      <path d="M16.5 3.5 20.5 7.5" />
+      <path d="M4 13.5 14.5 3l4.5 4.5L8.5 18H4z" />
+    </svg>
+  `,
+  more: `
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M5 12h.01" />
+      <path d="M12 12h.01" />
+      <path d="M19 12h.01" />
+    </svg>
+  `
+};
+
+const icon = (name: string) => iconMap[name] ?? "";
+const iconLabel = (name: string, text: string) => `<span class="btn-icon"><span class="icon">${icon(name)}</span><span>${text}</span></span>`;
+
 const buildModal = (title: string, body: string) => `
   <div class="modal-backdrop" id="modal-backdrop">
     <div class="modal">
@@ -230,7 +427,7 @@ const openRenameModal = (currentTitle: string, onSave: (value: string) => Promis
         <input name="title" id="rename-title" value="${currentTitle.replace(/"/g, "&quot;")}" />
         <div class="actions below">
           <button type="button" id="rename-cancel" class="ghost">cancel</button>
-          <button type="submit" class="send">ok</button>
+          <button type="submit" class="send">${iconLabel("send","ok")}</button>
         </div>
       </form>
     `
@@ -558,7 +755,7 @@ const renderWorkspacesList = async () => {
     <div class="card">
       <div class="section-header">
         <h2 style="color: cornflowerblue;">workspaces</h2>
-        <button id="open-workspace-modal" class="ghost">+</button>
+        <button id="open-workspace-modal" class="ghost">${iconLabel("plus","add")}</button>
       </div>
       <div id="workspace-list" class="list">loading...</div>
     </div>
@@ -663,9 +860,9 @@ const renderWorkspaceDetail = async (workspaceId: string) => {
     <div class="card">
       <div id="workspace-meta" class="meta-block">loading...</div>
       <div class="actions below thirds">
-        <button id="open-folder">open folder</button>
-        <button id="open-code">open in VS code</button>
-        <button id="open-thread">open default thread</button>
+        <button id="open-folder">${iconLabel("folder","open folder")}</button>
+        <button id="open-code">${iconLabel("code","open in VS code")}</button>
+        <button id="open-thread">${iconLabel("link","open default thread")}</button>
       </div>
       <div class="notify-row">
         <label for="notify-policy">notify</label>
@@ -677,33 +874,33 @@ const renderWorkspaceDetail = async (workspaceId: string) => {
       </div>
       <div class="input-row single with-mic">
         <textarea id="message" rows="1" placeholder="send prompt to default thread..."></textarea>
-        <button id="workspace-mic" class="mic" aria-label="dictation">mic</button>
-        <button id="send" class="send">send</button>
+        <button id="workspace-mic" class="mic" aria-label="dictation" title="dictation"><span class="icon">${icon("mic")}</span></button>
+        <button id="send" class="send">${iconLabel("send","send")}</button>
       </div>
       <div class="dictation-status" id="workspace-dictation"></div>
       <div class="helper" id="thread-helper"></div>
       <div class="actions below thirds">
-        <button id="git-status">git status</button>
-        <button id="git-diff">git diff</button>
-        <button id="run-tests">run tests</button>
+        <button id="git-status">${iconLabel("git","git status")}</button>
+        <button id="git-diff">${iconLabel("diff","git diff")}</button>
+        <button id="run-tests">${iconLabel("play","run tests")}</button>
       </div>
       <pre id="output" class="output"></pre>
     </div>
     <div class="card">
       <div class="section-header">
         <h3>linked threads</h3>
-        <button id="attach-thread" class="ghost">attach thread</button>
+        <button id="attach-thread" class="ghost">${iconLabel("link","attach thread")}</button>
       </div>
       <div id="linked-threads" class="list">loading...</div>
       <div class="input-row" style="margin-top: 12px;">
         <select id="default-thread"></select>
-        <button id="save-default" class="ghost">set default</button>
+        <button id="save-default" class="ghost">${iconLabel("star","set default")}</button>
       </div>
     </div>
     <div class="card">
       <div class="runs-header">
         <h3>runs</h3>
-        <button id="clear-runs" class="ghost">clear</button>
+        <button id="clear-runs" class="ghost">${iconLabel("trash","clear")}</button>
       </div>
       <div id="run-list" class="list">loading...</div>
     </div>
@@ -1070,7 +1267,7 @@ const renderThreadsList = async () => {
         <h2 style="color: #e4a05b;">threads</h2>
         <div class="actions">
           <label class="toggle"><input type="checkbox" id="show-archived" /><span style="margin-bottom: 6px;">show archived</span></label>
-          <button id="refresh-threads" class="ghost">refresh</button>
+          <button id="refresh-threads" class="ghost"><span class="icon">${icon("refresh")}</span></button>
         </div>
       </div>
       <div id="threads-banner" class="banner hidden"></div>
@@ -1224,10 +1421,10 @@ const renderThreadsList = async () => {
                 <div class="thread-menu-wrap">
                   <button class="menu-button" data-menu="${thread.thread_id}" aria-label="thread menu">☰</button>
                   <div class="thread-menu" data-menu-for="${thread.thread_id}">
-                    <button class="menu-item" data-action="rename" data-thread="${thread.thread_id}">rename</button>
-                    <button class="menu-item" data-action="attach" data-thread="${thread.thread_id}">attach to</button>
-                    <button class="menu-item" data-action="default" data-thread="${thread.thread_id}">set as default for</button>
-                    <button class="menu-item" data-action="archive" data-thread="${thread.thread_id}">${thread.archived ? "unarchive locally" : "archive locally"}</button>
+                    <button class="menu-item" data-action="rename" data-thread="${thread.thread_id}">${iconLabel("edit","rename")}</button>
+                    <button class="menu-item" data-action="attach" data-thread="${thread.thread_id}">${iconLabel("link","attach to")}</button>
+                    <button class="menu-item" data-action="default" data-thread="${thread.thread_id}">${iconLabel("star","set as default for")}</button>
+                    <button class="menu-item" data-action="archive" data-thread="${thread.thread_id}">${iconLabel("archive", thread.archived ? "unarchive locally" : "archive locally")}</button>
                   </div>
                 </div>
               </div>
@@ -1272,15 +1469,15 @@ const renderThreadDetail = async (threadId: string) => {
       <div class="thread-meta" id="thread-meta">loading...</div>
       <div class="badges" id="thread-badges"></div>
       <div class="actions below">
-        <button id="attach-workspace" class="ghost">attach to workspace</button>
-        <button id="set-default" class="ghost">set as default for workspace</button>
-        <button id="archive-thread" class="ghost">archive locally</button>
+        <button id="attach-workspace" class="ghost">${iconLabel("link","attach to workspace")}</button>
+        <button id="set-default" class="ghost">${iconLabel("star","set as default for workspace")}</button>
+        <button id="archive-thread" class="ghost">${iconLabel("archive","archive locally")}</button>
       </div>
       <pre id="thread-output" class="output"></pre>
       <div class="input-row with-mic">
         <textarea id="thread-message" rows="2" placeholder="send message..."></textarea>
-        <button id="thread-mic" class="mic" aria-label="dictation">mic</button>
-        <button id="thread-send" class="send">send</button>
+        <button id="thread-mic" class="mic" aria-label="dictation" title="dictation"><span class="icon">${icon("mic")}</span></button>
+        <button id="thread-send" class="send">${iconLabel("send","send")}</button>
       </div>
       <div class="dictation-status" id="thread-dictation"></div>
       <div class="input-row">
@@ -1434,8 +1631,8 @@ const renderShare = async () => {
         </select>
         <div class="helper" id="share-helper"></div>
         <div class="actions below">
-          <button id="share-send" class="send">send</button>
-          <button id="share-clear" class="ghost">clear draft</button>
+          <button id="share-send" class="send">${iconLabel("send","send")}</button>
+          <button id="share-clear" class="ghost">${iconLabel("trash","clear draft")}</button>
         </div>
       ` : `
         <div class="helper-text">no shared content yet. use android share to send text or a url to godex.</div>
@@ -1584,7 +1781,12 @@ style.textContent = `
   .topbar { display: flex; justify-content: flex-end; align-items: center; padding: 6px 12px; }
   .header-wrap { background: #000; }
   .brand-image { width: 100%; height: auto; display: block; }
-  .ticker { background: #000; text-align: center; font-size: 12px; color: #e4a05b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 6px 12px; border-bottom: 1px solid #d6d0c6; }
+  .ticker { background: #000; font-size: 12px; color: #e4a05b; white-space: nowrap; overflow: hidden; padding: 6px 12px; border-bottom: 1px solid #d6d0c6; }
+  .ticker .label { color: #e4a05b; }
+  .ticker .value { color: #f5efe6; }
+  .ticker-marquee { display: inline-block; }
+  .ticker .js-marquee-wrapper { display: inline-flex; }
+  .ticker .js-marquee { display: inline-flex; align-items: center; gap: 6px; padding-right: 32px; }
   .tabs { display: flex; gap: 10px; padding: 8px 12px; background: #000; border-bottom: 1px solid #d6d0c6; }
   .tab { text-decoration: none; font-weight: 600; color: #2a2420; padding: 6px 10px 10px; border-radius: 5px; border: 1px solid transparent; }
   .tab.active { background: #000; color: #e4a05b; border-color: #000; }
@@ -1623,8 +1825,13 @@ style.textContent = `
   .input-row { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; }
   .input-row.with-mic { grid-template-columns: 1fr auto auto; }
   .input-row.single textarea { height: 34px; resize: none; overflow: hidden; }
-  .mic { background: #0f0d0b; border: 1px solid #6a6056; color: #e4a05b; padding: 8px 10px; }
+  .mic { background: #0f0d0b; border: 1px solid #6a6056; color: #e4a05b; padding: 8px 10px; display: inline-flex; align-items: center; justify-content: center; }
   .mic.active { background: #e4a05b; color: #000; }
+  .icon { display: inline-flex; align-items: center; justify-content: center; }
+  .icon svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .btn-icon { display: inline-flex; align-items: center; gap: 6px; }
+  .menu-button .icon svg { width: 14px; height: 14px; }
+  .menu-item .btn-icon .icon svg { width: 14px; height: 14px; }
   .dictation-status { font-size: 12px; color: #b7a48a; min-height: 16px; margin-top: 6px; }
   .dictation-status.interim { color: #8a7f74; }
   .meta-block { color: #4c4036; margin-bottom: 8px; }

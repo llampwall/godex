@@ -71,8 +71,28 @@ If UI assets are not built, use the Vite dev server as described above.
 Notes:
 - Start the backend before using the UI: run `pnpm start`.
 - If using HTTPS via Caddy, run `caddy run --config P:\software\caddy\Caddyfile` in a separate terminal.
+- For SSE stability, add no-buffer headers in Caddy (example below).
 - The app still needs a valid token in localStorage. If you have not set one, open the UI once with `?token=...` first.
 - Share drafts are stored locally and survive refresh until sent or cleared.
+
+Caddy SSE headers example:
+```
+central-command:443 {
+  tls internal
+
+  @sse path /runs/*/stream
+  header @sse {
+    Cache-Control "no-cache"
+    X-Accel-Buffering "no"
+  }
+
+  reverse_proxy 127.0.0.1:7777
+}
+
+http://central-command {
+  redir https://{host}{uri}
+}
+```
 
 ## Concepts
 
