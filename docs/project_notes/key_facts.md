@@ -33,6 +33,7 @@
 - Share sheet route: `/ui/share` ingests shared text/URLs and stores drafts in localStorage until sent/cleared.
 - Dictation: mic button on message inputs (Chrome only; requires mic permission).
 - HTTPS dev helper: `caddy run --config P:\software\caddy\Caddyfile`
+- Caddy SSE headers: add no-buffer headers for `/runs/*/stream` (`Cache-Control: no-cache`, `X-Accel-Buffering: no`).
 - Token requirement: PWA/share flows still need `CODEX_RELAY_TOKEN` in localStorage (open UI once with `?token=...`).
 
 ## Threads + diagnostics

@@ -1,5 +1,10 @@
 # Worklog
 
+### 2026-01-23 - UI icons + ticker marquee
+- **Outcome:** UI uses consistent inline SVG icons and the status ticker scrolls with vanilla-marquee plus controlled pause.
+- **Why:** Improve readability with consistent iconography and make the top ticker behave like a real marquee.
+- **Links:** commit `a29eaa4795ffbb53e2e3f256feeab78a65b913fe`
+
 ### 2026-01-23 - Thread rename flow + startup helpers
 - **Outcome:** Threads can be renamed via a modal with title overrides shown in list/detail, Android dictation avoids repeated transcripts, and `start-godex.cmd`/`start-caddy.cmd` helpers exist.
 - **Why:** Make thread lists easier to scan, reduce duplicate dictation input on Android, and simplify local startup.
