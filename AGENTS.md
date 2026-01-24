@@ -5,6 +5,7 @@ Repo: godex
 ## Guardrails
 - Keep changes small and reviewable.
 - Put automation in `scripts/` or `tools/`.
+- On Windows, spawning `.cmd`/`.bat` like `strap.cmd` must use `shell: true` (or `cmd.exe /c`) to avoid `spawn EINVAL`.
 
 ## Project Memory System
 

@@ -70,6 +70,18 @@ const ensureBlankSuggestion = (items: string[] | undefined) => {
   return base.includes("blank") ? base : [...base, "blank"];
 };
 
+const resolveStrapCommand = (): string => {
+  const env = process.env.STRAP_BIN;
+  if (env && env.trim()) return env.trim();
+  return "strap";
+};
+
+const shouldUseShellForCommand = (command: string): boolean => {
+  if (process.platform !== "win32") return false;
+  const lower = command.trim().toLowerCase();
+  return lower.endsWith(".cmd") || lower.endsWith(".bat");
+};
+
 const sendBootstrapNotify = async (input: {
   name: string;
   status: "success" | "failed";
@@ -312,7 +324,8 @@ export const registerWorkspaceRoutes = (
     }
 
     const args = buildStrapArgs(name, templateUsed, root, body?.start);
-    const commandLabel = `strap ${args.join(" ")}`;
+    const strapCommand = resolveStrapCommand();
+    const commandLabel = `${strapCommand} ${args.join(" ")}`;
 
     const run_id = runManager.startExternalRun({
       type: "bootstrap",
@@ -321,7 +334,11 @@ export const registerWorkspaceRoutes = (
       cwd: root
     });
 
-    const child = spawn("strap", args, { cwd: root, windowsHide: true });
+    const child = spawn(strapCommand, args, {
+      cwd: root,
+      windowsHide: true,
+      shell: shouldUseShellForCommand(strapCommand)
+    });
 
     child.stdout?.on("data", (chunk: Buffer) => {
       runManager.appendExternalEvent(run_id, "stdout", chunk.toString());
