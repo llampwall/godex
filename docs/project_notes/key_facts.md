@@ -9,7 +9,7 @@
 ## Local development
 - Runtime: Node.js (pnpm workspace)
 - Package manager: pnpm@9.12.3
-- Env var names: `SERVER_HOST`, `SERVER_PORT`, `UI_HOST`, `UI_PORT`, `CODEX_RELAY_TOKEN`, `CODEX_FULL_ACCESS`, `CODEX_BIN`, `GODEX_APP_SERVER_CWD`, `GODEX_DEFAULT_REPO_ROOT`, `NTFY_URL`, `NTFY_TOPIC`
+- Env var names: `SERVER_HOST`, `SERVER_PORT`, `UI_HOST`, `UI_PORT`, `CODEX_RELAY_TOKEN`, `CODEX_FULL_ACCESS`, `CODEX_BIN`, `GODEX_APP_SERVER_CWD`, `GODEX_DEFAULT_REPO_ROOT`, `STRAP_BIN`, `NTFY_URL`, `NTFY_TOPIC`
 - Default hosts: `SERVER_HOST=0.0.0.0`, `UI_HOST=0.0.0.0`
 - Ports: server `SERVER_PORT` (default 6969), UI dev server `UI_PORT` (default 5174)
 - Auth: API requires `Authorization: Bearer <CODEX_RELAY_TOKEN>`; SSE uses `?token=<CODEX_RELAY_TOKEN>`
@@ -50,6 +50,7 @@
 ## Repo bootstrap
 - Requires `strap` on PATH.
 - Default repo root env: `GODEX_DEFAULT_REPO_ROOT`.
+- Override strap command: `STRAP_BIN` (supports full path or `.cmd`/`.bat` on Windows).
 - Endpoint: `POST /workspaces/bootstrap`.
 - Templates: `mono`, `service`, `web`, `python`, `blank`, `auto` (auto can use a description to request suggestions).
 

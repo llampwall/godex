@@ -1,5 +1,10 @@
 # Worklog
 
+### 2026-01-24 - Bootstrap command reliability
+- **Outcome:** Bootstrap now supports `STRAP_BIN` overrides and spawns `.cmd`/`.bat` with Windows shell when needed.
+- **Why:** Make repo bootstrap work reliably when strap is installed via a Windows shim.
+- **Links:** commit `60d96b8f33e83ef02093d8b940c570625a0f163c`, bug entry `docs/project_notes/bugs.md`
+
 ### 2026-01-24 - Repo bootstrap flow
 - **Outcome:** UI exposes a bootstrap modal and the server provides `/workspaces/bootstrap` to scaffold new repos (template/auto) and return workspace metadata.
 - **Why:** Create new repos from the phone UI and register them as workspaces without manual setup.
