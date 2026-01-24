@@ -213,7 +213,7 @@ const renderLayout = (activeTab: "workspaces" | "threads", content: string, bann
   }
   healthInterval = window.setInterval(async () => {
     await updateHealth();
-  }, 10000);
+  }, 30000);
 };
 
 const formatTimestamp = (value?: string | number | null) => {
