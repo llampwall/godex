@@ -1,11 +1,14 @@
 import dotenv from "dotenv";
 import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import tailwindcss from "@tailwindcss/vite";
 import { VitePWA } from "vite-plugin-pwa";
+import path from "path";
 
 dotenv.config({ path: "../../.env" });
 
-const uiHost = process.env.UI_HOST && process.env.UI_HOST.trim() ? process.env.UI_HOST : "0.0.0.0";
-const uiPort = Number(process.env.UI_PORT ?? 7777);
+const uiHost = process.env.UI_HOST?.trim() || "0.0.0.0";
+const uiPort = Number(process.env.UI_PORT ?? 5174);
 
 const manifest = {
   name: "godex",
@@ -34,6 +37,8 @@ const manifest = {
 export default defineConfig({
   base: "/ui/",
   plugins: [
+    react(),
+    tailwindcss(),
     VitePWA({
       registerType: "autoUpdate",
       manifest,
@@ -46,6 +51,11 @@ export default defineConfig({
       }
     })
   ],
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src")
+    }
+  },
   server: {
     host: uiHost,
     port: uiPort,
