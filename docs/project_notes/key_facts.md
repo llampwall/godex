@@ -13,6 +13,7 @@
 - Default hosts: `SERVER_HOST=0.0.0.0`, `UI_HOST=0.0.0.0`
 - Ports: server `SERVER_PORT` (default 6969), UI dev server `UI_PORT` (default 5174)
 - Auth: API requires `Authorization: Bearer <CODEX_RELAY_TOKEN>`; SSE uses `?token=<CODEX_RELAY_TOKEN>`
+- UI token storage: `?token=` is stored in localStorage as `godex_token` and removed from the URL.
 - Runs SSE stream: `/runs/:id/stream` accepts `replay=0` to skip replaying recent events
 - Common paths: `apps/server`, `apps/ui`, `packages`
 

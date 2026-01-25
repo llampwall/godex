@@ -1,5 +1,10 @@
 # Worklog
 
+### 2026-01-25 - UI auth context
+- **Outcome:** UI now has an auth context that captures `?token=` into localStorage and exposes authenticated state to consumers.
+- **Why:** Centralize token handling and make auth state available to UI components.
+- **Links:** commit `c0192310863a61469ce4880e328f59fbb1943be6`
+
 ### 2026-01-25 - Core shadcn/ui components
 - **Outcome:** UI now has baseline shadcn/ui components (button, dialog, dropdown menu, input, scroll area).
 - **Why:** Establish reusable UI primitives for upcoming interface work.
