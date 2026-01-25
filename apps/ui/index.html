@@ -1,15 +1,16 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="en" class="dark">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>godex</title>
-    <link rel="manifest" href="/ui/manifest.webmanifest" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <meta name="theme-color" content="#000000" />
-    <link rel="icon" href="/ui/pwa-192.png" />
+    <link rel="icon" type="image/png" href="/ui/godex.png" />
+    <link rel="apple-touch-icon" href="/ui/pwa-192.png" />
+    <link rel="manifest" href="/ui/manifest.webmanifest" />
+    <title>godex</title>
   </head>
   <body>
-    <div id="app"></div>
-    <script type="module" src="/src/main.ts"></script>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
