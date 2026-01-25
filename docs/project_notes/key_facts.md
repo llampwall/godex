@@ -40,6 +40,7 @@
 - Threads UI uses `codex app-server` (spawned by the server); requires `codex` on PATH or `CODEX_BIN` set.
 - Thread detail route: `/ui/t/:thread_id`
 - Diagnostics: `GET /diag/codex` returns spawn config + `codex --version`
+- Diagnostics: `POST /diag/restart` runs build + server restart and logs to `.godex/restart.log`
 - Smoke check: `pnpm smoke` (calls `/diag/codex`)
 
 ## Workspaces
@@ -66,6 +67,8 @@
 - `pnpm test:ui`
 - `start-godex.cmd` (builds then starts the server)
 - `start-caddy.cmd` (runs Caddy with `P:\software\caddy\Caddyfile`)
+- `scripts/godex-pm2-start.ps1` (PM2 start helper for Windows)
+- `scripts/godex-pm2-start.cmd` (PM2 start helper for Windows)
 
 ## Repo map
 - `.`: pnpm workspace root.

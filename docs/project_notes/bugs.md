@@ -1,5 +1,12 @@
 # Bug Playbook
 
+### 2026-01-25 - PM2 restart fails on Windows
+- **Symptom:** Restart button fails under PM2 on Windows; server restart doesn't trigger reliably.
+- **Root cause:** PM2 restart path invoked via pnpm/.cmd without Windows shell or resolved paths, causing spawn failures.
+- **Fix:** Add `/diag/restart` to resolve pnpm/pm2 paths and run build+restart with shell, logging output to `.godex/restart.log`.
+- **Prevention:** Use the Windows PM2 start helpers and keep restart logic shell-aware for `.cmd`/`.bat`.
+- **References:** commit `84183cba90f72ed6aef8f1099fd97cfefe1193b0`
+
 ### 2026-01-24 - Windows strap spawn fails for .cmd/.bat
 - **Symptom:** `POST /workspaces/bootstrap` fails when the strap command is a `.cmd`/`.bat` on Windows (spawn error).
 - **Root cause:** `child_process.spawn` was invoked without `shell: true` for `.cmd`/`.bat`, which Windows requires.

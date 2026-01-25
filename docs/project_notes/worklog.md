@@ -1,5 +1,10 @@
 # Worklog
 
+### 2026-01-25 - Reliable PM2 restart flow
+- **Outcome:** Server restart uses `/diag/restart` with resolved pnpm/pm2 paths, shell execution, and logs to `.godex/restart.log`; Windows PM2 start helpers added.
+- **Why:** Make the restart button reliable under PM2 on Windows for local ops.
+- **Links:** commit `84183cba90f72ed6aef8f1099fd97cfefe1193b0`, bug entry `docs/project_notes/bugs.md`
+
 ### 2026-01-24 - Bootstrap command reliability
 - **Outcome:** Bootstrap now supports `STRAP_BIN` overrides and spawns `.cmd`/`.bat` with Windows shell when needed.
 - **Why:** Make repo bootstrap work reliably when strap is installed via a Windows shim.
