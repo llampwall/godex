@@ -1,5 +1,10 @@
 # Worklog
 
+### 2026-01-25 - Core shadcn/ui components
+- **Outcome:** UI now has baseline shadcn/ui components (button, dialog, dropdown menu, input, scroll area).
+- **Why:** Establish reusable UI primitives for upcoming interface work.
+- **Links:** commit `f49189ccc6a6b2000ebba410664c1abb8e22b32c`
+
 ### 2026-01-25 - React entry point wiring
 - **Outcome:** UI entry point now uses a React `main.tsx` entry with updated `index.html` wiring.
 - **Why:** Align the UI bootstrapping with React conventions for upcoming component work.
