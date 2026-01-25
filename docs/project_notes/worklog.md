@@ -1,5 +1,10 @@
 # Worklog
 
+### 2026-01-25 - UI React + shadcn dependencies
+- **Outcome:** `apps/ui` now includes React/ReactDOM plus shadcn stack dependencies (Radix UI, CVA, Tailwind utilities).
+- **Why:** Establish the UI component stack for upcoming shadcn-based work.
+- **Links:** commit `22e9fa5ef2b73189c2f4462f7c2f30dce8670ea1`
+
 ### 2026-01-25 - Thread working state indicator
 - **Outcome:** Thread view shows a working spinner/status during streaming replies.
 - **Why:** Provide clear feedback while replies stream.
