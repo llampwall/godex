@@ -1,5 +1,10 @@
 # Worklog
 
+### 2026-01-25 - React entry point wiring
+- **Outcome:** UI entry point now uses a React `main.tsx` entry with updated `index.html` wiring.
+- **Why:** Align the UI bootstrapping with React conventions for upcoming component work.
+- **Links:** commit `c49f33cbab533a5cbd968b23e9519325a8be498a`
+
 ### 2026-01-25 - UI React + shadcn dependencies
 - **Outcome:** `apps/ui` now includes React/ReactDOM plus shadcn stack dependencies (Radix UI, CVA, Tailwind utilities).
 - **Why:** Establish the UI component stack for upcoming shadcn-based work.
