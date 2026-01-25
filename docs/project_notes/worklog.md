@@ -1,5 +1,10 @@
 # Worklog
 
+### 2026-01-25 - Workspace API response shape handling
+- **Outcome:** UI workspace context now supports the `/workspaces` response wrapper `{ ok, workspaces: [...] }` instead of assuming a bare array.
+- **Why:** Keep workspace list and detail views aligned with the server response format.
+- **Links:** commit `3fd070dfc259b50ee6c7ec6e5996e304bd0b9bfc`
+
 ### 2026-01-25 - App shell header components
 - **Outcome:** UI now includes app shell header components for the main layout (header, actions menu, workspace switcher).
 - **Why:** Establish the top-level navigation and controls for upcoming layout and workflow work.
