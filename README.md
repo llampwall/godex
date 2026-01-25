@@ -61,6 +61,41 @@ http://central-command:SERVER_PORT/ui?token=YOUR_TOKEN
 
 If UI assets are not built, use the Vite dev server as described above.
 
+## Run with PM2 (recommended for reliable restarts)
+
+Run the server under PM2 so the UI restart button can rebuild and restart it.
+
+Initial start (after a build):
+
+```
+pnpm build
+pm2 start "P:\software\godex\apps\server\dist\index.js" --name godex --cwd "P:\software\godex\apps\server"
+pm2 save
+```
+
+Stop / start / restart:
+
+```
+pm2 stop godex
+pm2 start godex
+pm2 restart godex
+```
+
+Restart via API (the UI button uses this):
+
+```
+POST /diag/restart
+```
+
+Notes:
+- The restart endpoint runs `pnpm build` then `pm2 restart godex`.
+- Logs go to `.godex/restart.log`.
+- The API requires `Authorization: Bearer <CODEX_RELAY_TOKEN>`.
+
+## Caddy (HTTPS + reverse proxy)
+
+`start-caddy.cmd` must be running in a separate terminal during normal use.
+
 ## PWA + dictation + share
 
 - Install: open the UI in Chrome (Android) and use the browser menu "Install app".

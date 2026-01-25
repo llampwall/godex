@@ -359,6 +359,84 @@ const attachStream = (runId: string, output: HTMLElement, onFinal?: () => void, 
   });
 };
 
+const isEventTag = (line: string) => /^\[[a-z0-9_\/\-]+\]$/i.test(line.trim());
+
+const isDeltaTag = (line: string) =>
+  /\[codex\/event\/(agent|assistant)_message(_content)?_delta\]/i.test(line.trim());
+
+const appendDeltaText = (buffer: string, next: string) => {
+  if (!buffer) return next;
+  if (!next) return buffer;
+  const needsSpace = !/\s$/.test(buffer) && !/^\s/.test(next);
+  return `${buffer}${needsSpace ? " " : ""}${next}`;
+};
+
+const attachThreadStream = (
+  runId: string,
+  output: HTMLElement,
+  onFinal?: () => void,
+  replay = 0
+) => {
+  const token = getToken();
+  if (!token) {
+    output.textContent = "missing token. append ?token=... to url.";
+    return;
+  }
+  const streamUrl = `${apiBase()}/runs/${runId}/stream?token=${encodeURIComponent(token)}&replay=${replay}`;
+  const es = new EventSource(streamUrl);
+
+  let buffer = "";
+  let awaitingDelta = false;
+  let liveEl: HTMLDivElement | null = null;
+
+  const ensureLiveMessage = () => {
+    if (liveEl) return liveEl;
+    const container = document.createElement("div");
+    container.className = "thread-message assistant live";
+    const text = document.createElement("div");
+    text.className = "thread-text";
+    container.appendChild(text);
+    output.appendChild(container);
+    liveEl = text;
+    return liveEl;
+  };
+
+  es.addEventListener("chunk", (event) => {
+    const data = JSON.parse((event as MessageEvent).data);
+    const chunk = String(data.chunk ?? "");
+    const lines = chunk.split(/\r?\n/);
+    for (const rawLine of lines) {
+      const line = rawLine.trim();
+      if (!line) continue;
+      if (isDeltaTag(line)) {
+        awaitingDelta = true;
+        continue;
+      }
+      if (isEventTag(line)) {
+        awaitingDelta = false;
+        continue;
+      }
+      if (awaitingDelta) {
+        buffer = appendDeltaText(buffer, rawLine);
+        const textEl = ensureLiveMessage();
+        textEl.textContent = buffer;
+        output.scrollTop = output.scrollHeight;
+      } else {
+        // non-delta content (rare); append as its own line
+        buffer = appendDeltaText(buffer, rawLine);
+        const textEl = ensureLiveMessage();
+        textEl.textContent = buffer;
+        output.scrollTop = output.scrollHeight;
+      }
+    }
+  });
+
+  es.addEventListener("final", () => {
+    es.close();
+    onFinal?.();
+  });
+};
+
 const loadRun = async (runId: string, output: HTMLElement) => {
   const data = await apiFetch(`/runs/${runId}`);
   renderRunOutput(output, data.events);
@@ -1867,7 +1945,10 @@ const renderThreadDetail = async (threadId: string) => {
   renderLayout("threads", `
     <div class="toolbar">
       <div class="location">/thread</div>
-      <a href="${withToken("/ui/threads")}" class="link outline">back</a>
+      <div class="toolbar-actions">
+        <button id="refresh-thread" class="ghost" title="refresh thread">${icon("refresh")}</button>
+        <a href="${withToken("/ui/threads")}" class="link outline">back</a>
+      </div>
     </div>
     <div class="card">
       <div class="thread-meta" id="thread-meta">loading...</div>
@@ -1904,8 +1985,11 @@ const renderThreadDetail = async (threadId: string) => {
   const attachWorkspace = document.querySelector<HTMLButtonElement>("#attach-workspace");
   const setDefault = document.querySelector<HTMLButtonElement>("#set-default");
   const archiveBtn = document.querySelector<HTMLButtonElement>("#archive-thread");
+  const refreshBtn = document.querySelector<HTMLButtonElement>("#refresh-thread");
 
   let threadMeta: any = null;
+  let isStreaming = false;
+  let refreshTimer: number | null = null;
 
   attachDictation({ button: dictationBtn, textarea: input, status: dictationStatus });
 
@@ -1925,10 +2009,11 @@ const renderThreadDetail = async (threadId: string) => {
     }
   };
 
-  const loadThread = async () => {
+  const loadThread = async (force = false) => {
     if (!output) return;
+    if (isStreaming && !force) return;
     try {
-      const data = await apiFetch(`/threads/${threadId}`);
+      const data = await apiFetch(`/threads/${threadId}`, { cache: "no-store" });
       threadMeta = data.meta;
       if (meta) {
         const title = threadMeta?.title_override || data.thread?.title || data.thread?.preview || data.thread?.id || threadId;
@@ -1962,7 +2047,11 @@ const renderThreadDetail = async (threadId: string) => {
         method: "POST",
         body: JSON.stringify({ text, workspace_id: workspace_id || undefined })
       });
-      attachStream(res.run_id, output);
+      isStreaming = true;
+      attachThreadStream(res.run_id, output, async () => {
+        isStreaming = false;
+        await loadThread(true);
+      });
     } catch (err) {
       appendChunk(output, String(err));
     }
@@ -2003,8 +2092,20 @@ const renderThreadDetail = async (threadId: string) => {
     await loadThread();
   });
 
+  refreshBtn?.addEventListener("click", async () => {
+    await loadThread(true);
+  });
+
   await loadWorkspaces();
   await loadThread();
+  if (refreshTimer) {
+    window.clearInterval(refreshTimer);
+  }
+  refreshTimer = window.setInterval(async () => {
+    if (!isStreaming) {
+      await loadThread();
+    }
+  }, 15000);
 };
 
 const renderShare = async () => {
@@ -2230,6 +2331,7 @@ style.textContent = `
   .list-item .snippet { font-size: 12px; color: #8a7f74; margin-top: 4px; }
   .meta-row { display: flex; gap: 6px; align-items: center; font-size: 12px; color: #6a6056; }
   .toolbar { background: #000; display: flex; justify-content: space-between; align-items: center; padding: 0 12px; }
+  .toolbar-actions { display: flex; gap: 8px; align-items: center; }
   .actions { display: flex; gap: 10px; flex-wrap: wrap; }
   .actions.below { margin-top: 10px; }
   .actions.thirds button { flex: 1; }
@@ -2258,6 +2360,7 @@ style.textContent = `
   .thread-message { display: flex; flex-direction: column; gap: 6px; padding: 6px 2px; }
   .thread-message.user .thread-text { color: #7bd4ff; }
   .thread-message.assistant .thread-text { color: #f5efe6; }
+  .thread-message.live .thread-text { color: #d5f5ff; }
   .thread-text { white-space: pre-wrap; line-height: 1.5; }
   .run-item { text-align: left; padding: 10px; border-radius: 3px; border: 1px solid #e0d9ce; background: #000; color: #f5efe6; }
   .run-item .meta { font-size: 11px; color: #6a6056; }
