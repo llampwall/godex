@@ -1,5 +1,10 @@
 # Worklog
 
+### 2026-01-25 - Thread working state indicator
+- **Outcome:** Thread view shows a working spinner/status during streaming replies.
+- **Why:** Provide clear feedback while replies stream.
+- **Links:** commit `f7cd88b5f89d6abeebd748383c85e69305fd00c8`
+
 ### 2026-01-25 - Thread streaming cleanup + refresh controls
 - **Outcome:** Thread view aggregates SSE deltas to hide raw event tags, adds manual/auto refresh with no-store fetch, and README now documents PM2 stop/start/restart plus `/diag/restart`; unused `.godex/restart-run.cmd` removed.
 - **Why:** Keep live thread output readable and make restart workflows clearer.
