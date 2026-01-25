@@ -16,10 +16,10 @@
 - Working: Workspaces are stored server-side as repo profiles; threads can be attached with local metadata (pinned/archived/title override).
 - Working: New repo bootstrap flow in the UI plus `/workspaces/bootstrap` endpoint can scaffold repos (strap + optional auto template).
 - Working: UI is installable as a PWA, shows an offline/server-unreachable banner, and serves PWA root assets from the server build output.
-- Working: Threads transcripts render clearer role/action context, plus UI restart controls and service-worker update toasts.
+- Working: Threads streaming aggregates deltas to hide raw SSE tags, adds manual/auto refresh on thread detail, plus UI restart controls and service-worker update toasts.
 - Working: Share drafts flow at `/ui/share` saves incoming share text/URLs to localStorage before sending.
 - Working: Dictation is available via mic controls on workspace/thread inputs (Chrome + mic permission).
-- Working: Windows restart tooling includes `.godex` restart-run scripts and a PM2 ecosystem config for `godex`.
+- Working: Windows restart tooling includes a PM2 ecosystem config for `godex`.
 
 ## Repo map
 - `apps/server`: backend server for API + SSE, and optional static UI serving.

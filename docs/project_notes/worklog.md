@@ -1,7 +1,12 @@
 # Worklog
 
+### 2026-01-25 - Thread streaming cleanup + refresh controls
+- **Outcome:** Thread view aggregates SSE deltas to hide raw event tags, adds manual/auto refresh with no-store fetch, and README now documents PM2 stop/start/restart plus `/diag/restart`; unused `.godex/restart-run.cmd` removed.
+- **Why:** Keep live thread output readable and make restart workflows clearer.
+- **Links:** commit `e26f717e85c00bdee60bbc1cc8a4aab4bb3d7906`
+
 ### 2026-01-25 - Threads UI restart controls + PM2 config
-- **Outcome:** Threads transcripts render more clearly, UI exposes restart controls with update toasts, and a PM2 ecosystem config plus restart-run scripts were added for Windows ops.
+- **Outcome:** Threads transcripts render more clearly, UI exposes restart controls with update toasts, and a PM2 ecosystem config was added for Windows ops.
 - **Why:** Make thread context easier to scan and provide a reliable restart path for local/PM2 workflows.
 - **Links:** commit `6b7c83b96dfb6e74603aa02ce3bddfb49a53eda9`
 

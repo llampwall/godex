@@ -22,7 +22,7 @@
 
 ## Data storage
 - Local store files live in `.godex/`: `data.json` and `godex.sqlite`
-- Restart logs: `.godex/restart.log` (diag restart) and `.godex/restart-run.log` (restart-run.cmd output)
+- Restart logs: `.godex/restart.log` (diag restart)
 
 ## Deployment
 - Build: `pnpm build`
@@ -66,6 +66,10 @@
 - `pnpm typecheck`
 - `pnpm test:server`
 - `pnpm test:ui`
+- `pm2 start "P:\software\godex\apps\server\dist\index.js" --name godex --cwd "P:\software\godex\apps\server"`
+- `pm2 stop godex`
+- `pm2 start godex`
+- `pm2 restart godex`
 - `start-godex.cmd` (builds then starts the server)
 - `start-caddy.cmd` (runs Caddy with `P:\software\caddy\Caddyfile`)
 - `scripts/godex-pm2-start.ps1` (PM2 start helper for Windows)
