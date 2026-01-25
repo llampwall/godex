@@ -23,3 +23,6 @@ build/
 coverage/
 
 .codex/sessions/
+
+# worktrees
+.worktrees/
