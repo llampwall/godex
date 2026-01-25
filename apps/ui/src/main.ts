@@ -1959,6 +1959,10 @@ const renderThreadDetail = async (threadId: string) => {
         <button id="archive-thread" class="ghost">${iconLabel("archive","archive locally")}</button>
       </div>
       <div id="thread-output" class="output transcript"></div>
+      <div id="thread-status" class="thread-status hidden">
+        <span class="spinner" aria-hidden="true"></span>
+        <span class="label">working…</span>
+      </div>
       <div class="input-row with-mic">
         <textarea id="thread-message" rows="2" placeholder="send message..."></textarea>
         <button id="thread-mic" class="mic" aria-label="dictation" title="dictation"><span class="icon">${icon("mic")}</span></button>
@@ -1986,6 +1990,7 @@ const renderThreadDetail = async (threadId: string) => {
   const setDefault = document.querySelector<HTMLButtonElement>("#set-default");
   const archiveBtn = document.querySelector<HTMLButtonElement>("#archive-thread");
   const refreshBtn = document.querySelector<HTMLButtonElement>("#refresh-thread");
+  const status = document.querySelector<HTMLDivElement>("#thread-status");
 
   let threadMeta: any = null;
   let isStreaming = false;
@@ -2048,11 +2053,14 @@ const renderThreadDetail = async (threadId: string) => {
         body: JSON.stringify({ text, workspace_id: workspace_id || undefined })
       });
       isStreaming = true;
+      if (status) status.classList.remove("hidden");
       attachThreadStream(res.run_id, output, async () => {
         isStreaming = false;
+        if (status) status.classList.add("hidden");
         await loadThread(true);
       });
     } catch (err) {
+      if (status) status.classList.add("hidden");
       appendChunk(output, String(err));
     }
   });
@@ -2362,6 +2370,10 @@ style.textContent = `
   .thread-message.assistant .thread-text { color: #f5efe6; }
   .thread-message.live .thread-text { color: #d5f5ff; }
   .thread-text { white-space: pre-wrap; line-height: 1.5; }
+  .thread-status { display: inline-flex; align-items: center; gap: 8px; color: #e4a05b; font-size: 12px; letter-spacing: 0.08em; text-transform: lowercase; margin-bottom: 10px; }
+  .thread-status.hidden { display: none; }
+  .thread-status .spinner { width: 12px; height: 12px; border-radius: 50%; border: 2px solid rgba(228,160,91,0.35); border-top-color: #e4a05b; animation: spin 0.9s linear infinite; }
+  @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
   .run-item { text-align: left; padding: 10px; border-radius: 3px; border: 1px solid #e0d9ce; background: #000; color: #f5efe6; }
   .run-item .meta { font-size: 11px; color: #6a6056; }
   .runs-header, .threads-header, .section-header { color: #f5efe6; display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
