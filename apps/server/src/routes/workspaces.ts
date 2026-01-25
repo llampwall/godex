@@ -1,6 +1,6 @@
 import { FastifyInstance } from "fastify";
 import { existsSync, statSync, mkdirSync } from "node:fs";
-import { resolve } from "node:path";
+import { resolve, dirname } from "node:path";
 import { spawn, spawnSync } from "node:child_process";
 import { RunManager } from "../run_manager.js";
 import { CodexAppServerManager } from "../codex_app_server_manager.js";
@@ -76,10 +76,28 @@ const resolveStrapCommand = (): string => {
   return "strap";
 };
 
-const shouldUseShellForCommand = (command: string): boolean => {
+const isWindowsCmd = (command: string): boolean => {
   if (process.platform !== "win32") return false;
   const lower = command.trim().toLowerCase();
   return lower.endsWith(".cmd") || lower.endsWith(".bat");
+};
+
+const buildStrapInvocation = (command: string, args: string[]) => {
+  if (isWindowsCmd(command)) {
+    const ps1Path = resolve(dirname(command), "strap.ps1");
+    if (existsSync(ps1Path)) {
+      return {
+        command: "pwsh",
+        args: ["-NoLogo", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", ps1Path, ...args],
+        label: `pwsh -File ${ps1Path} ${args.join(" ")}`
+      };
+    }
+  }
+  return {
+    command,
+    args,
+    label: `${command} ${args.join(" ")}`
+  };
 };
 
 const sendBootstrapNotify = async (input: {
@@ -325,7 +343,8 @@ export const registerWorkspaceRoutes = (
 
     const args = buildStrapArgs(name, templateUsed, root, body?.start);
     const strapCommand = resolveStrapCommand();
-    const commandLabel = `${strapCommand} ${args.join(" ")}`;
+    const invocation = buildStrapInvocation(strapCommand, args);
+    const commandLabel = invocation.label;
 
     const run_id = runManager.startExternalRun({
       type: "bootstrap",
@@ -334,10 +353,10 @@ export const registerWorkspaceRoutes = (
       cwd: root
     });
 
-    const child = spawn(strapCommand, args, {
+    const child = spawn(invocation.command, invocation.args, {
       cwd: root,
       windowsHide: true,
-      shell: shouldUseShellForCommand(strapCommand)
+      shell: isWindowsCmd(invocation.command)
     });
 
     child.stdout?.on("data", (chunk: Buffer) => {
@@ -367,6 +386,10 @@ export const registerWorkspaceRoutes = (
       }
 
       try {
+        if (!ensureDirectory(repoPath)) {
+          finalizeFailure(`strap completed but repo path missing: ${repoPath}`, 1);
+          return;
+        }
         if (!appServer.isReady()) {
           finalizeFailure("codex app-server unavailable", 1);
           return;

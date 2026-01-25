@@ -7,6 +7,16 @@ if (!root) {
   throw new Error("Missing #app root");
 }
 
+const showToast = (message: string) => {
+  const toast = document.querySelector<HTMLDivElement>("#toast");
+  if (!toast) return;
+  toast.textContent = message;
+  toast.classList.remove("hidden");
+  window.setTimeout(() => {
+    toast.classList.add("hidden");
+  }, 2500);
+};
+
 const qs = new URLSearchParams(window.location.search);
 const tokenParam = qs.get("token");
 
@@ -18,7 +28,19 @@ const getToken = () => localStorage.getItem("godex_token") ?? "";
 const apiBase = () => window.location.origin;
 
 if ("serviceWorker" in navigator) {
-  registerSW({ immediate: true });
+  const updateSW = registerSW({
+    immediate: true,
+    onRegisteredSW: (_swUrl, registration) => {
+      registration?.update();
+    },
+    onNeedRefresh: () => {
+      showToast("update available, reloading");
+      updateSW(true);
+    },
+    onOfflineReady: () => {
+      showToast("offline ready");
+    }
+  });
 }
 
 const withToken = (path: string) => {
@@ -157,17 +179,6 @@ const attachOnlineListeners = () => {
   window.addEventListener("offline", () => setOfflineBanner(true));
 };
 
-const showToast = (message: string) => {
-  const toast = document.querySelector<HTMLDivElement>("#toast");
-  if (!toast) return;
-  toast.textContent = message;
-  toast.classList.remove("hidden");
-  window.setTimeout(() => {
-    toast.classList.add("hidden");
-  }, 2500);
-};
-
-
 const updateHealth = async () => {
   const el = document.querySelector<HTMLDivElement>("#server-status");
   if (!el) return;
@@ -205,6 +216,7 @@ const renderLayout = (activeTab: "workspaces" | "threads", content: string, bann
         <img class="brand-image" src="/ui/godex.png" alt="godex" />
       </header>
       <nav class="tabs">
+        <button id="restart-server" class="tab-action" title="restart server">${icon("warning")} restart</button>
         <a class="tab ${activeTab === "workspaces" ? "active" : ""}" href="${withToken("/ui")}" style="color: cornflowerblue; margin-left: auto;">workspaces</a>
         <a class="tab ${activeTab === "threads" ? "active" : ""}" href="${withToken("/ui/threads")}">threads</a>
       </nav>
@@ -220,6 +232,48 @@ const renderLayout = (activeTab: "workspaces" | "threads", content: string, bann
   attachOnlineListeners();
   setOfflineBanner(!navigator.onLine);
   void updateHealth();
+  const restartBtn = document.querySelector<HTMLButtonElement>("#restart-server");
+  restartBtn?.addEventListener("click", async () => {
+    const ok = confirm("Restart server now?");
+    if (!ok) return;
+    showToast("Restarting server... this can take a minute.");
+    try {
+      const token = getToken();
+      const headers = new Headers();
+      if (token) {
+        headers.set("Authorization", `Bearer ${token}`);
+      }
+      const res = await apiFetchRaw("/diag/restart", {
+        method: "POST",
+        cache: "no-store",
+        body: JSON.stringify({})
+      });
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text || res.statusText);
+      }
+      const start = Date.now();
+      const poll = async () => {
+        try {
+          const health = await fetch(`${apiBase()}/health`, { headers, cache: "no-store" });
+          if (health.ok) {
+            window.location.reload();
+            return;
+          }
+        } catch {
+          // ignore until server is back
+        }
+        if (Date.now() - start < 120000) {
+          window.setTimeout(poll, 2000);
+        } else {
+          showToast("Restart timed out. Try again.");
+        }
+      };
+      window.setTimeout(poll, 2000);
+    } catch (err) {
+      showToast(String(err));
+    }
+  });
   if (healthInterval) {
     window.clearInterval(healthInterval);
   }
@@ -331,6 +385,13 @@ const iconMap: Record<string, string> = {
     <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
       <path d="M21 12a9 9 0 1 1-2.64-6.36" />
       <path d="M21 3v6h-6" />
+    </svg>
+  `,
+  warning: `
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M10 4h4l8 16H2z" />
+      <path d="M12 9v4" />
+      <path d="M12 17h.01" />
     </svg>
   `,
   plus: `
@@ -1031,7 +1092,16 @@ const renderWorkspacesList = async () => {
           attachStream(runId, output, async () => {
             try {
               const runData = await apiFetch(`/runs/${runId}`);
-              const meta = runData?.run?.meta;
+              const run = runData?.run;
+              const meta = run?.meta;
+              if (run && typeof run.exit_code === "number" && run.exit_code !== 0) {
+                const events = Array.isArray(runData?.events) ? runData.events : [];
+                const lastError = [...events].reverse().find((event) => event.stream === "stderr")?.chunk;
+                const summary = lastError || run.last_snippet || "bootstrap failed (see output)";
+                setError(summary);
+                setBusy(false);
+                return;
+              }
               if (meta?.workspace_id) {
                 window.location.href = withToken(`/ui/w/${meta.workspace_id}`);
               } else {
@@ -1452,48 +1522,145 @@ const renderWorkspaceDetail = async (workspaceId: string) => {
 
 const extractItemText = (item: any): string => {
   if (!item) return "";
+  if (typeof item === "string") return item;
   if (typeof item.text === "string") return item.text;
   if (typeof item.content === "string") return item.content;
+  if (Array.isArray(item.items)) {
+    return item.items.map((entry: any) => extractItemText(entry)).filter(Boolean).join("\n");
+  }
   if (Array.isArray(item.content)) {
     return item.content
       .map((entry: any) => {
+        if (typeof entry === "string") return entry;
         if (typeof entry?.text === "string") return entry.text;
         if (typeof entry?.content === "string") return entry.content;
         return "";
       })
+      .filter(Boolean)
       .join("");
   }
   return "";
 };
 
-const renderThreadTranscript = (output: HTMLElement, payload: { items?: any[]; turns?: any[] }) => {
-  output.textContent = "";
-  const lines: string[] = [];
+const extractCodexWrappedText = (raw: string) => {
+  if (!raw.includes("type=text")) return raw;
+  const match = raw.match(/text=([\s\S]*?); text_elements/i) || raw.match(/text=([\s\S]*?)\}$/i);
+  if (!match) return raw;
+  return match[1];
+};
+
+const cleanTranscriptText = (text: string) => {
+  const extracted = extractCodexWrappedText(text);
+  const requestMatch = extracted.match(/my request for codex\s*:\s*([\s\S]*)/i);
+  if (requestMatch?.[1]) {
+    return requestMatch[1].trim();
+  }
+  const lines = extracted.split(/\n/);
+  const cleaned: string[] = [];
+  let skippingContext = false;
+  for (const line of lines) {
+    if (/^#\s*context from my ide setup/i.test(line)) {
+      skippingContext = true;
+      continue;
+    }
+    if (/^##\s*my request for codex/i.test(line)) {
+      skippingContext = false;
+      continue;
+    }
+    if (skippingContext) continue;
+    cleaned.push(line);
+  }
+  return cleaned.join("\n").trim();
+};
+
+const normalizeRole = (value: unknown) => {
+  const role = String(value ?? "").toLowerCase();
+  if (role.includes("user") || role.includes("human") || role.includes("prompt")) {
+    return "user";
+  }
+  if (role.includes("assistant") || role.includes("agent") || role.includes("ai")) {
+    return "assistant";
+  }
+  if (role.includes("system") || role.includes("reasoning")) {
+    return "assistant";
+  }
+  return "assistant";
+};
+
+const shouldSkipItem = (item: any) => {
+  const type = String(item?.type ?? "").toLowerCase();
+  return type === "reasoning" || type === "toolcall" || type === "toolresult";
+};
+
+const collectTranscriptMessages = (payload: { items?: any[]; turns?: any[] }) => {
+  const messages: { role: string; text: string }[] = [];
 
   if (Array.isArray(payload.items)) {
     for (const item of payload.items) {
-      const role = item?.role ?? item?.author ?? item?.type ?? "item";
+      if (shouldSkipItem(item)) continue;
+      const role = normalizeRole(item?.role ?? item?.author ?? item?.type ?? "item");
       const text = extractItemText(item);
       if (text) {
-        lines.push(`${role}: ${text}`);
+        messages.push({ role, text });
       }
     }
-  } else if (Array.isArray(payload.turns)) {
+    return messages;
+  }
+
+  if (Array.isArray(payload.turns)) {
     for (const turn of payload.turns) {
-      const role = turn?.role ?? turn?.author ?? "turn";
+      const turnRole = normalizeRole(turn?.role ?? turn?.author ?? "turn");
+      const items = Array.isArray(turn?.items) ? turn.items : [];
+      if (items.length) {
+        for (const item of items) {
+          if (shouldSkipItem(item)) continue;
+          const role = normalizeRole(item?.role ?? item?.author ?? item?.type ?? turnRole);
+          const text = extractItemText(item);
+          if (text) {
+            messages.push({ role, text });
+          }
+        }
+        continue;
+      }
       const text = extractItemText(turn) || extractItemText(turn?.message);
       if (text) {
-        lines.push(`${role}: ${text}`);
+        messages.push({ role: turnRole, text });
       }
     }
   }
 
-  if (!lines.length) {
+  return messages;
+};
+
+const renderThreadTranscript = (output: HTMLElement, payload: { items?: any[]; turns?: any[] }) => {
+  output.textContent = "";
+  const messages = collectTranscriptMessages(payload)
+    .map((message) => ({
+      role: message.role,
+      text: cleanTranscriptText(message.text)
+    }))
+    .filter((message) => message.text);
+
+  if (!messages.length) {
     output.textContent = "no transcript available.";
     return;
   }
 
-  lines.forEach((line) => appendChunk(output, line));
+  messages.forEach((message, index) => {
+    if (index > 0) {
+      const divider = document.createElement("div");
+      divider.className = "thread-divider";
+      output.appendChild(divider);
+    }
+    const container = document.createElement("div");
+    container.className = `thread-message ${message.role === "user" ? "user" : "assistant"}`;
+    const text = document.createElement("div");
+    text.className = "thread-text";
+    text.textContent = message.text;
+    container.appendChild(text);
+    output.appendChild(container);
+  });
+
   output.scrollTop = output.scrollHeight;
 };
 
@@ -1710,7 +1877,7 @@ const renderThreadDetail = async (threadId: string) => {
         <button id="set-default" class="ghost">${iconLabel("star","set as default for workspace")}</button>
         <button id="archive-thread" class="ghost">${iconLabel("archive","archive locally")}</button>
       </div>
-      <pre id="thread-output" class="output"></pre>
+      <div id="thread-output" class="output transcript"></div>
       <div class="input-row with-mic">
         <textarea id="thread-message" rows="2" placeholder="send message..."></textarea>
         <button id="thread-mic" class="mic" aria-label="dictation" title="dictation"><span class="icon">${icon("mic")}</span></button>
@@ -1728,7 +1895,7 @@ const renderThreadDetail = async (threadId: string) => {
 
   const meta = document.querySelector<HTMLDivElement>("#thread-meta");
   const badges = document.querySelector<HTMLDivElement>("#thread-badges");
-  const output = document.querySelector<HTMLPreElement>("#thread-output");
+  const output = document.querySelector<HTMLDivElement>("#thread-output");
   const sendBtn = document.querySelector<HTMLButtonElement>("#thread-send");
   const input = document.querySelector<HTMLTextAreaElement>("#thread-message");
   const dictationBtn = document.querySelector<HTMLButtonElement>("#thread-mic");
@@ -1776,7 +1943,9 @@ const renderThreadDetail = async (threadId: string) => {
       if (archiveBtn) {
         archiveBtn.textContent = threadMeta?.archived ? "unarchive locally" : "archive locally";
       }
-      renderThreadTranscript(output, { items: data.items, turns: data.turns });
+      const turns = data.turns ?? data.thread?.turns;
+      const items = data.items ?? data.thread?.items;
+      renderThreadTranscript(output, { items, turns });
     } catch (err) {
       output.textContent = String(err);
     }
@@ -2028,6 +2197,9 @@ style.textContent = `
   .tab { text-decoration: none; font-weight: 600; color: #2a2420; padding: 6px 10px 10px; border-radius: 5px; border: 1px solid transparent; }
   .tab.active { background: #000; color: #e4a05b; border-color: #000; }
   .tab:hover { border-color: #2a2420; }
+  .tab-action { background: transparent; color: #e4a05b; border: 1px solid #6a6056; padding: 6px 10px; border-radius: 6px; display: inline-flex; align-items: center; gap: 8px; font-weight: 600; text-transform: lowercase; }
+  .tab-action .icon svg { width: 14px; height: 14px; }
+  .tab-action:hover { background: #111; border-color: #e4a05b; }
   .banner { background: #efe9de; color: #2a2420; padding: 10px 12px; border-bottom: 1px solid #d6d0c6; font-size: 12px; }
   .banner.hidden { display: none; }
   .banner.offline { background: #2a2420; color: #f5efe6; }
@@ -2081,6 +2253,12 @@ style.textContent = `
   .title-row { color: #f5efe6; display: flex; justify-content: space-between; align-items: baseline; }
   .location { font-size: 16px; color: #e4a05b; font-weight: 600; }
   .output { text-wrap: auto; background: #0f0d0b; color: #f5efe6; min-height: 220px; max-height: 320px; overflow: auto; padding: 12px; border-radius: 3px; margin-bottom: 8px; }
+  .output.transcript { display: flex; flex-direction: column; gap: 10px; }
+  .thread-divider { height: 1px; background: rgba(214, 208, 198, 0.2); }
+  .thread-message { display: flex; flex-direction: column; gap: 6px; padding: 6px 2px; }
+  .thread-message.user .thread-text { color: #7bd4ff; }
+  .thread-message.assistant .thread-text { color: #f5efe6; }
+  .thread-text { white-space: pre-wrap; line-height: 1.5; }
   .run-item { text-align: left; padding: 10px; border-radius: 3px; border: 1px solid #e0d9ce; background: #000; color: #f5efe6; }
   .run-item .meta { font-size: 11px; color: #6a6056; }
   .runs-header, .threads-header, .section-header { color: #f5efe6; display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }

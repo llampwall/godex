@@ -124,6 +124,9 @@ export const buildServer = () => {
     if (!uiIndexHtml) {
       return reply.code(503).send({ ok: false, error: "ui not built" });
     }
+    reply.header("Cache-Control", "no-store");
+    reply.header("Pragma", "no-cache");
+    reply.header("Expires", "0");
     reply.type("text/html").send(uiIndexHtml);
   };
 

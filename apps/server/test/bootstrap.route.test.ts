@@ -1,8 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import Fastify from "fastify";
-import { mkdtempSync, rmSync } from "node:fs";
+import { mkdtempSync, mkdirSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { join, resolve } from "node:path";
 import { EventEmitter } from "node:events";
 import { spawn } from "node:child_process";
 import { authGuard } from "../src/auth";
@@ -59,11 +59,21 @@ describe("workspaces bootstrap route", () => {
     (globalThis as any).fetch = vi.fn().mockResolvedValue({ ok: true });
 
     const spawnMock = spawn as unknown as ReturnType<typeof vi.fn>;
-    spawnMock.mockImplementation(() => {
+    spawnMock.mockImplementation((_command: string, args: string[]) => {
       const child = new EventEmitter() as any;
       child.stdout = new EventEmitter();
       child.stderr = new EventEmitter();
       process.nextTick(() => {
+        const nameArg = String(args?.[0] ?? "");
+        const rootIndex = args?.indexOf("-p") ?? -1;
+        const rootArg = rootIndex >= 0 ? String(args[rootIndex + 1] ?? "") : "";
+        if (nameArg && rootArg) {
+          try {
+            mkdirSync(resolve(rootArg, nameArg), { recursive: true });
+          } catch {
+            // ignore in test
+          }
+        }
         child.stdout.emit("data", Buffer.from("strap ok\n"));
         child.emit("close", 0);
       });

@@ -327,7 +327,7 @@ export const registerThreadRoutes = (
       return reply.code(400).send({ ok: false, error: "thread_id required" });
     }
 
-    const tryRead = async () => appServer.request("thread/read", { threadId: thread_id });
+    const tryRead = async () => appServer.request("thread/read", { threadId: thread_id, includeTurns: true });
     const tryResume = async () => appServer.request("thread/resume", { threadId: thread_id });
 
     let result: any;

@@ -40,6 +40,7 @@ export default defineConfig({
       includeAssets: ["godex.png", "pwa-192.png", "pwa-512.png"],
       manifestFilename: "manifest.webmanifest",
       workbox: {
+        cleanupOutdatedCaches: true,
         navigateFallback: "/ui/index.html",
         navigateFallbackAllowlist: [/^\/ui\//]
       }
