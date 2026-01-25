@@ -1,5 +1,10 @@
 # Worklog
 
+### 2026-01-25 - Threads UI restart controls + PM2 config
+- **Outcome:** Threads transcripts render more clearly, UI exposes restart controls with update toasts, and a PM2 ecosystem config plus restart-run scripts were added for Windows ops.
+- **Why:** Make thread context easier to scan and provide a reliable restart path for local/PM2 workflows.
+- **Links:** commit `6b7c83b96dfb6e74603aa02ce3bddfb49a53eda9`
+
 ### 2026-01-25 - Reliable PM2 restart flow
 - **Outcome:** Server restart uses `/diag/restart` with resolved pnpm/pm2 paths, shell execution, and logs to `.godex/restart.log`; Windows PM2 start helpers added.
 - **Why:** Make the restart button reliable under PM2 on Windows for local ops.

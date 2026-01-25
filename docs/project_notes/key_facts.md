@@ -22,6 +22,7 @@
 
 ## Data storage
 - Local store files live in `.godex/`: `data.json` and `godex.sqlite`
+- Restart logs: `.godex/restart.log` (diag restart) and `.godex/restart-run.log` (restart-run.cmd output)
 
 ## Deployment
 - Build: `pnpm build`
@@ -69,6 +70,7 @@
 - `start-caddy.cmd` (runs Caddy with `P:\software\caddy\Caddyfile`)
 - `scripts/godex-pm2-start.ps1` (PM2 start helper for Windows)
 - `scripts/godex-pm2-start.cmd` (PM2 start helper for Windows)
+- `ecosystem.config.cjs` (PM2 config for running `godex` via the Windows helper)
 
 ## Repo map
 - `.`: pnpm workspace root.
