@@ -22,8 +22,8 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
 
   const refreshWorkspaces = async (): Promise<void> => {
     try {
-      const data = await api.get<Workspace[]>("/workspaces");
-      setWorkspaces(data);
+      const response = await api.get<{ ok: boolean; workspaces: Workspace[] }>("/workspaces");
+      setWorkspaces(response.workspaces);
     } catch (error) {
       console.error("Failed to fetch workspaces:", error);
     }
@@ -43,7 +43,8 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
 
       let data: Workspace[] = [];
       try {
-        data = await api.get<Workspace[]>("/workspaces");
+        const response = await api.get<{ ok: boolean; workspaces: Workspace[] }>("/workspaces");
+        data = response.workspaces;
         setWorkspaces(data);
       } catch (error) {
         console.error("Failed to fetch workspaces:", error);
