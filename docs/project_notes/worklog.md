@@ -1,5 +1,10 @@
 # Worklog
 
+### 2026-01-25 - App shell header components
+- **Outcome:** UI now includes app shell header components for the main layout (header, actions menu, workspace switcher).
+- **Why:** Establish the top-level navigation and controls for upcoming layout and workflow work.
+- **Links:** commit `7193b6e1e4d4929497f375be4dbf7524daaadf03`
+
 ### 2026-01-25 - UI auth context
 - **Outcome:** UI now has an auth context that captures `?token=` into localStorage and exposes authenticated state to consumers.
 - **Why:** Centralize token handling and make auth state available to UI components.
