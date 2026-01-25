@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { api, Workspace } from "@/lib/api";
 
 interface WorkspaceContextType {
@@ -20,14 +20,12 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const [currentWorkspace, setCurrentWorkspaceState] = useState<Workspace | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const refreshWorkspaces = async () => {
+  const refreshWorkspaces = async (): Promise<void> => {
     try {
       const data = await api.get<Workspace[]>("/workspaces");
       setWorkspaces(data);
-      return data;
     } catch (error) {
       console.error("Failed to fetch workspaces:", error);
-      return [];
     }
   };
 
@@ -42,7 +40,14 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const init = async () => {
       setLoading(true);
-      const data = await refreshWorkspaces();
+
+      let data: Workspace[] = [];
+      try {
+        data = await api.get<Workspace[]>("/workspaces");
+        setWorkspaces(data);
+      } catch (error) {
+        console.error("Failed to fetch workspaces:", error);
+      }
 
       // Check for recent workspace
       const lastId = localStorage.getItem(LAST_WORKSPACE_KEY);
