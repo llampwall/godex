@@ -1,5 +1,12 @@
 # Bug Playbook
 
+### 2026-01-26 - Service worker register script served as HTML
+- **Symptom:** Service worker registration fails with `Unexpected token <` in `registerSW.js`.
+- **Root cause:** `registerSW.js` was not included in the server root static file list, so the UI path returned HTML instead of JavaScript.
+- **Fix:** Add `registerSW.js` to the server root files list so it is served as JavaScript.
+- **Prevention:** Keep PWA/static root file allowlists in sync with UI build assets when adding new root-level scripts.
+- **References:** commit `f5450d00f5cdda73eedafa18ef7a3922fd3e63d4`
+
 ### 2026-01-25 - PM2 restart fails on Windows
 - **Symptom:** Restart button fails under PM2 on Windows; server restart doesn't trigger reliably.
 - **Root cause:** PM2 restart path invoked via pnpm/.cmd without Windows shell or resolved paths, causing spawn failures.
