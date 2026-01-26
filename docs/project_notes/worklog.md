@@ -1,5 +1,110 @@
 # Worklog
 
+### 2026-01-26 - Thread header mobile-first menu alignment
+- **Outcome:** Thread detail header is mobile-first with a right-aligned actions menu, search moved into the menu, and a collapsible search input below the header.
+- **Why:** Improve mobile spacing while keeping search reachable without dedicating header space.
+- **Links:** commit `12d03eb031e7395c7e20c3904f58f67d6f439a6c`
+
+### 2026-01-26 - Thread detail header + workspace linking
+- **Outcome:** Thread detail now has its own header with back navigation, in-thread search, and an actions menu plus a dialog to manage workspace links.
+- **Why:** Make thread navigation faster, enable quick message filtering, and allow linking/unlinking workspaces directly from the thread view.
+- **Links:** commit `d4d343459df7334b8588ebaac5b2bebf1756dba5`
+
+### 2026-01-26 - Global workspace thread filtering
+- **Outcome:** `/threads?workspace_id=__global__` now returns only unattached threads by filtering on empty `attached_workspace_ids`.
+- **Why:** Keep the "Unlinked Threads" workspace aligned with server-side filtering without affecting real workspace queries.
+- **Links:** commit `dc5276ee38efe94b40740733612fc0357283209a`
+
+### 2026-01-26 - Workspace detail global workspace polish
+- **Outcome:** Workspace detail always sends `workspace_id` (including `__global__`), global workspace help text mentions linking, the label reads "Unlinked Threads", and mobile layout uses safer width/overflow utilities.
+- **Why:** Keep global workspace filtering consistent and prevent mobile overflow regressions while clarifying what unlinked threads represent.
+- **Links:** commit `70e50888bdb6bf7ab1c423877419585b5e328cb8`
+
+### 2026-01-26 - Workspace switcher menu ordering
+- **Outcome:** Workspace switcher now hides the `__global__` entry, orders menu items as Workspaces → All Workspaces → Unlinked Threads → New Repo, and highlights Unlinked Threads when selected.
+- **Why:** Keep the workspace switcher focused on user-relevant options and make the unlinked threads state more obvious.
+- **Links:** commit `5d6a90652c32e101aaa17eea1e03698828d8382c`
+
+### 2026-01-25 - Threads list response + global workspace
+- **Outcome:** Threads list now reads the server `data` wrapper, supports `/threads?workspace_id=...`, and adds a synthetic "All Threads" workspace for orphaned threads with actions/messaging disabled.
+- **Why:** Keep UI in sync with the server response shape and surface unassigned threads safely.
+- **Links:** commit `8363563605748ee1f10f60f9aa454365cfa6f82e`
+
+### 2026-01-25 - Workspace list loading states
+- **Outcome:** Workspace list shows explicit loading states while data fetches.
+- **Why:** Make list behavior clearer on slower connections and avoid empty-state confusion.
+- **Links:** commit `15384b8448827d59a6bd2e990e346f4b75b5c0a5`
+
+### 2026-01-25 - Mobile responsive utilities in UI pages
+- **Outcome:** Header, thread detail, and workspace detail views use updated responsive utility classes for better mobile layout behavior.
+- **Why:** Improve phone usability by tightening layout and spacing for small screens.
+- **Links:** commit `1cda25ccba612b2c4005d8f9d03f7249c795a776`
+
+### 2026-01-25 - Offline banner for network status
+- **Outcome:** UI now shows an offline/server-unreachable banner when the network status indicates the server is down.
+- **Why:** Make connectivity issues obvious so users can distinguish offline states from app errors.
+- **Links:** commit `20b9481bde80f4497fad3ed34f95e237ac2b737e`
+
+### 2026-01-25 - Share draft page for shared content
+- **Outcome:** UI now has a dedicated ShareDraftPage to capture shared text/URLs and route them into the draft flow.
+- **Why:** Ensure share-intent payloads land in the UI with a purpose-built entry point for users coming from the OS share sheet.
+- **Links:** commit `2c59303b7ad979f2db3de78c8ef0ddbec2bbb5a2`
+
+### 2026-01-25 - Workspace detail SSE messaging
+- **Outcome:** Workspace detail now sends messages with the shared MessageInput, creates a default thread if missing, and streams replies via SSE.
+- **Why:** Make the workspace detail page usable for sending prompts and seeing live responses without leaving the workspace view.
+- **Links:** commit `bfc013b120c773bd839ce559e3667a7b32bbabd7`
+
+### 2026-01-25 - Workspace detail thread navigation
+- **Outcome:** Linked threads on the workspace detail page now navigate directly to the thread detail view.
+- **Why:** Allow faster drill-down from a workspace overview into a specific thread.
+- **Links:** commit `cdd8d48c96f7641c0c3a9df2dcd809b7542e1053`
+
+### 2026-01-25 - Thread detail route wiring
+- **Outcome:** Thread detail view is reachable via the `/t/:threadId` route in the UI.
+- **Why:** Enable direct navigation to a specific thread detail page.
+- **Links:** commit `8cdc4346e9b204a4e3ae9451b78d79e2531e0000`
+
+### 2026-01-25 - Shared MessageInput component with dictation
+- **Outcome:** UI now has a reusable `MessageInput` component that includes dictation support for composing messages.
+- **Why:** Standardize the message composer behavior across UI surfaces and keep dictation support consistent.
+- **Links:** commit `779fa947296b6ffa2280a95968de3a4cd2186f22`
+
+### 2026-01-25 - Workspace detail UI quick actions + linked threads
+- **Outcome:** Workspace detail page now includes quick actions (git status/diff/tests), a main output area with message input, and a linked threads list powered by `/threads?workspace_id=...`.
+- **Why:** Provide an actionable workspace home view and surface linked threads at a glance.
+- **Links:** commit `0a77c803678ba0bca3ea10cdd1b67f9723559559`
+
+### 2026-01-25 - Workspace API response shape handling
+- **Outcome:** UI workspace context now supports the `/workspaces` response wrapper `{ ok, workspaces: [...] }` instead of assuming a bare array.
+- **Why:** Keep workspace list and detail views aligned with the server response format.
+- **Links:** commit `3fd070dfc259b50ee6c7ec6e5996e304bd0b9bfc`
+
+### 2026-01-25 - App shell header components
+- **Outcome:** UI now includes app shell header components for the main layout (header, actions menu, workspace switcher).
+- **Why:** Establish the top-level navigation and controls for upcoming layout and workflow work.
+- **Links:** commit `7193b6e1e4d4929497f375be4dbf7524daaadf03`
+
+### 2026-01-25 - UI auth context
+- **Outcome:** UI now has an auth context that captures `?token=` into localStorage and exposes authenticated state to consumers.
+- **Why:** Centralize token handling and make auth state available to UI components.
+- **Links:** commit `c0192310863a61469ce4880e328f59fbb1943be6`
+
+### 2026-01-25 - Core shadcn/ui components
+- **Outcome:** UI now has baseline shadcn/ui components (button, dialog, dropdown menu, input, scroll area).
+- **Why:** Establish reusable UI primitives for upcoming interface work.
+- **Links:** commit `f49189ccc6a6b2000ebba410664c1abb8e22b32c`
+
+### 2026-01-25 - React entry point wiring
+- **Outcome:** UI entry point now uses a React `main.tsx` entry with updated `index.html` wiring.
+- **Why:** Align the UI bootstrapping with React conventions for upcoming component work.
+- **Links:** commit `c49f33cbab533a5cbd968b23e9519325a8be498a`
+
+### 2026-01-25 - UI React + shadcn dependencies
+- **Outcome:** `apps/ui` now includes React/ReactDOM plus shadcn stack dependencies (Radix UI, CVA, Tailwind utilities).
+- **Why:** Establish the UI component stack for upcoming shadcn-based work.
+- **Links:** commit `22e9fa5ef2b73189c2f4462f7c2f30dce8670ea1`
+
 ### 2026-01-25 - Thread working state indicator
 - **Outcome:** Thread view shows a working spinner/status during streaming replies.
 - **Why:** Provide clear feedback while replies stream.
