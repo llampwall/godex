@@ -1,5 +1,10 @@
 # Worklog
 
+### 2026-01-25 - Offline banner for network status
+- **Outcome:** UI now shows an offline/server-unreachable banner when the network status indicates the server is down.
+- **Why:** Make connectivity issues obvious so users can distinguish offline states from app errors.
+- **Links:** commit `20b9481bde80f4497fad3ed34f95e237ac2b737e`
+
 ### 2026-01-25 - Share draft page for shared content
 - **Outcome:** UI now has a dedicated ShareDraftPage to capture shared text/URLs and route them into the draft flow.
 - **Why:** Ensure share-intent payloads land in the UI with a purpose-built entry point for users coming from the OS share sheet.
