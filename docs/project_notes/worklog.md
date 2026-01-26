@@ -1,5 +1,10 @@
 # Worklog
 
+### 2026-01-25 - Workspace list loading states
+- **Outcome:** Workspace list shows explicit loading states while data fetches.
+- **Why:** Make list behavior clearer on slower connections and avoid empty-state confusion.
+- **Links:** commit `15384b8448827d59a6bd2e990e346f4b75b5c0a5`
+
 ### 2026-01-25 - Mobile responsive utilities in UI pages
 - **Outcome:** Header, thread detail, and workspace detail views use updated responsive utility classes for better mobile layout behavior.
 - **Why:** Improve phone usability by tightening layout and spacing for small screens.
