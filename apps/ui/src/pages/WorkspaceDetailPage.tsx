@@ -9,7 +9,6 @@ import {
   GitBranch,
   GitCompare,
   Play,
-  Plus,
   MessageSquare,
   ChevronRight,
 } from "lucide-react";
@@ -19,7 +18,6 @@ export function WorkspaceDetailPage() {
   const navigate = useNavigate();
   const [threads, setThreads] = useState<Thread[]>([]);
   const [loadingThreads, setLoadingThreads] = useState(true);
-  const [currentRunId, setCurrentRunId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!currentWorkspace) return;
@@ -134,7 +132,6 @@ export function WorkspaceDetailPage() {
             <div className="p-4 border-t border-border">
               <MessageInput
                 onSend={handleSendMessage}
-                disabled={!!currentRunId}
                 placeholder="Type a message to start a new thread..."
               />
             </div>

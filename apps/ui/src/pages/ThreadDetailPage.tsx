@@ -84,21 +84,22 @@ export function ThreadDetailPage() {
             if (turn.items) {
               for (const item of turn.items) {
                 // Extract text from content array if needed
+                const itemAny = item as any;
                 let content = "";
-                if (typeof item.content === "string") {
-                  content = item.content;
-                } else if (Array.isArray(item.content)) {
-                  content = item.content
+                if (typeof itemAny.content === "string") {
+                  content = itemAny.content;
+                } else if (Array.isArray(itemAny.content)) {
+                  content = itemAny.content
                     .map((c: any) => c.text || c.content || "")
                     .join("");
-                } else if (item.text) {
-                  content = item.text;
+                } else if (itemAny.text) {
+                  content = itemAny.text;
                 }
 
                 if (content) {
                   parsedMessages.push({
-                    id: item.id || `${turn.id}-${parsedMessages.length}`,
-                    role: (item.type === "userMessage" ? "user" : "assistant") as DisplayMessage["role"],
+                    id: itemAny.id || `${turn.id}-${parsedMessages.length}`,
+                    role: (itemAny.type === "userMessage" ? "user" : "assistant") as DisplayMessage["role"],
                     content,
                   });
                 }
