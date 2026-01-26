@@ -1,5 +1,10 @@
 # Worklog
 
+### 2026-01-26 - Workspace switcher menu ordering
+- **Outcome:** Workspace switcher now hides the `__global__` entry, orders menu items as Workspaces → All Workspaces → Unlinked Threads → New Repo, and highlights Unlinked Threads when selected.
+- **Why:** Keep the workspace switcher focused on user-relevant options and make the unlinked threads state more obvious.
+- **Links:** commit `5d6a90652c32e101aaa17eea1e03698828d8382c`
+
 ### 2026-01-25 - Threads list response + global workspace
 - **Outcome:** Threads list now reads the server `data` wrapper, supports `/threads?workspace_id=...`, and adds a synthetic "All Threads" workspace for orphaned threads with actions/messaging disabled.
 - **Why:** Keep UI in sync with the server response shape and surface unassigned threads safely.
