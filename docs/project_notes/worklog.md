@@ -1,5 +1,10 @@
 # Worklog
 
+### 2026-01-26 - Global workspace thread filtering
+- **Outcome:** `/threads?workspace_id=__global__` now returns only unattached threads by filtering on empty `attached_workspace_ids`.
+- **Why:** Keep the "Unlinked Threads" workspace aligned with server-side filtering without affecting real workspace queries.
+- **Links:** commit `dc5276ee38efe94b40740733612fc0357283209a`
+
 ### 2026-01-26 - Workspace detail global workspace polish
 - **Outcome:** Workspace detail always sends `workspace_id` (including `__global__`), global workspace help text mentions linking, the label reads "Unlinked Threads", and mobile layout uses safer width/overflow utilities.
 - **Why:** Keep global workspace filtering consistent and prevent mobile overflow regressions while clarifying what unlinked threads represent.
