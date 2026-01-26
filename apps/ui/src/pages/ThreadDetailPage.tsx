@@ -1,13 +1,21 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { api, ThreadDetail } from "@/lib/api";
 import { useSSE } from "@/hooks/useSSE";
 import { MessageInput } from "@/components/thread/MessageInput";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ArrowLeft, User, Bot, Loader2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { ArrowLeft, User, Bot, Loader2, MoreVertical, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { LinkWorkspaceDialog } from "@/components/thread/LinkWorkspaceDialog";
 
 type DisplayMessage = {
   id: string;
@@ -18,14 +26,28 @@ type DisplayMessage = {
 
 export function ThreadDetailPage() {
   const { threadId } = useParams<{ threadId: string }>();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [linkWorkspaceOpen, setLinkWorkspaceOpen] = useState(false);
   const [thread, setThread] = useState<ThreadDetail | null>(null);
   const [messages, setMessages] = useState<DisplayMessage[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentRunId, setCurrentRunId] = useState<string | null>(null);
   const [streamingContent, setStreamingContent] = useState("");
+  const [lastUserMessage, setLastUserMessage] = useState<string>("");
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Check for run_id in URL params (from new thread creation)
+  useEffect(() => {
+    const runId = searchParams.get("run_id");
+    if (runId) {
+      setCurrentRunId(runId);
+      // Clean up the URL
+      navigate(`/t/${threadId}`, { replace: true });
+    }
+  }, [searchParams, threadId, navigate]);
 
   // Scroll to bottom when messages change
   const scrollToBottom = useCallback(() => {
@@ -52,15 +74,33 @@ export function ThreadDetailPage() {
         // Parse messages from turns or items
         const parsedMessages: DisplayMessage[] = [];
 
-        if (data.turns) {
-          for (const turn of data.turns) {
+        // Turns are nested inside data.thread.turns
+        const turns = data.turns || data.thread?.turns;
+        const items = data.items || data.thread?.items;
+
+        if (turns) {
+          for (const turn of turns) {
             if (turn.items) {
               for (const item of turn.items) {
-                parsedMessages.push({
-                  id: item.id || `${turn.id}-${parsedMessages.length}`,
-                  role: (item.role || turn.role || "assistant") as DisplayMessage["role"],
-                  content: item.content || "",
-                });
+                // Extract text from content array if needed
+                let content = "";
+                if (typeof item.content === "string") {
+                  content = item.content;
+                } else if (Array.isArray(item.content)) {
+                  content = item.content
+                    .map((c: any) => c.text || c.content || "")
+                    .join("");
+                } else if (item.text) {
+                  content = item.text;
+                }
+
+                if (content) {
+                  parsedMessages.push({
+                    id: item.id || `${turn.id}-${parsedMessages.length}`,
+                    role: (item.type === "userMessage" ? "user" : "assistant") as DisplayMessage["role"],
+                    content,
+                  });
+                }
               }
             } else if (turn.content) {
               parsedMessages.push({
@@ -70,8 +110,8 @@ export function ThreadDetailPage() {
               });
             }
           }
-        } else if (data.items) {
-          for (const item of data.items) {
+        } else if (items) {
+          for (const item of items) {
             parsedMessages.push({
               id: item.id,
               role: item.role,
@@ -93,24 +133,32 @@ export function ThreadDetailPage() {
 
   // SSE streaming
   const handleChunk = useCallback((data: string) => {
-    setStreamingContent((prev) => prev + data);
-  }, []);
+    setStreamingContent((prev) => {
+      // Skip echo of user message (first chunk often echoes the user's input)
+      if (!prev && data.trim() === lastUserMessage.trim()) {
+        return prev;
+      }
+      return prev + data;
+    });
+  }, [lastUserMessage]);
 
   const handleFinal = useCallback(() => {
-    // Move streaming content to messages
-    if (streamingContent) {
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: `assistant-${Date.now()}`,
-          role: "assistant",
-          content: streamingContent,
-        },
-      ]);
-      setStreamingContent("");
-    }
+    // Move streaming content to messages using state updater to avoid stale closure
+    setStreamingContent((content) => {
+      if (content) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: `assistant-${Date.now()}`,
+            role: "assistant",
+            content: content,
+          },
+        ]);
+      }
+      return "";
+    });
     setCurrentRunId(null);
-  }, [streamingContent]);
+  }, []);
 
   useSSE(currentRunId, {
     onChunk: handleChunk,
@@ -120,6 +168,9 @@ export function ThreadDetailPage() {
   // Send message
   const handleSend = async (text: string) => {
     if (!threadId) return;
+
+    // Track the user message to filter out echo
+    setLastUserMessage(text);
 
     // Add user message immediately
     setMessages((prev) => [
@@ -141,6 +192,32 @@ export function ThreadDetailPage() {
       setError(err instanceof Error ? err.message : "Failed to send message");
     }
   };
+
+  const handleCopyThreadId = () => {
+    if (threadId) {
+      navigator.clipboard.writeText(threadId);
+      // Could add toast notification here if available
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!threadId) return;
+    if (!confirm("Are you sure you want to delete this thread?")) return;
+
+    try {
+      await api.delete(`/threads/${threadId}`);
+      navigate(-1);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to delete thread");
+    }
+  };
+
+  // Filter messages by search query
+  const filteredMessages = searchQuery.trim()
+    ? messages.filter(m =>
+        m.content.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : messages;
 
   const threadTitle =
     thread?.meta?.title_override ||
@@ -168,14 +245,48 @@ export function ThreadDetailPage() {
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-4rem)]">
-      {/* Header */}
-      <div className="border-b border-border px-4 py-3 flex items-center gap-3">
+    <div className="flex flex-col h-screen">
+      {/* Thread Header */}
+      <header className="border-b border-border px-4 py-3 flex items-center gap-3 bg-card">
+        {/* Left: Back + Title */}
         <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
           <ArrowLeft className="w-4 h-4" />
         </Button>
-        <h1 className="font-medium truncate">{threadTitle}</h1>
-      </div>
+        <h1 className="font-medium truncate min-w-0">{threadTitle}</h1>
+
+        {/* Center: Search */}
+        <div className="flex-1 max-w-md mx-4 hidden md:block">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              placeholder="Search messages..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9"
+            />
+          </div>
+        </div>
+
+        {/* Right: Actions Menu */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon">
+              <MoreVertical className="w-4 h-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={handleCopyThreadId}>
+              Copy Thread ID
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setLinkWorkspaceOpen(true)}>
+              Link to Workspace
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleDelete} className="text-destructive">
+              Delete Thread
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </header>
 
       {/* Messages */}
       <ScrollArea className="flex-1" ref={scrollRef}>
@@ -186,7 +297,7 @@ export function ThreadDetailPage() {
             </div>
           )}
 
-          {messages.map((message) => (
+          {filteredMessages.map((message) => (
             <MessageBubble key={message.id} message={message} />
           ))}
 
@@ -222,6 +333,13 @@ export function ThreadDetailPage() {
           />
         </div>
       </div>
+
+      {/* Link to Workspace Dialog */}
+      <LinkWorkspaceDialog
+        open={linkWorkspaceOpen}
+        onOpenChange={setLinkWorkspaceOpen}
+        threadId={threadId || ""}
+      />
     </div>
   );
 }
