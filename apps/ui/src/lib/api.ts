@@ -83,3 +83,27 @@ export type Thread = {
   last_message_preview?: string;
   updated_at?: string;
 };
+
+export type Message = {
+  id: string;
+  role: "user" | "assistant" | "system";
+  content: string;
+  timestamp?: string;
+};
+
+export type ThreadDetail = {
+  thread: Thread;
+  items?: Message[];
+  turns?: Array<{
+    id: string;
+    role: string;
+    content?: string;
+    items?: Message[];
+  }>;
+  meta?: {
+    title_override?: string;
+    pinned?: boolean;
+    archived?: boolean;
+  };
+  attached_workspace_ids?: string[];
+};
