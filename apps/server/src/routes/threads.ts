@@ -282,7 +282,9 @@ export const registerThreadRoutes = (
 
     // Filter by workspace_id if provided
     const workspaceId = query?.workspace_id;
-    const filtered = workspaceId
+    const filtered = workspaceId === "__global__"
+      ? merged.filter((thread) => thread.attached_workspace_ids.length === 0)
+      : workspaceId
       ? merged.filter((thread) => thread.attached_workspace_ids.includes(workspaceId))
       : merged;
 
