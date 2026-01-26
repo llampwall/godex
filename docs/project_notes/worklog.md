@@ -1,5 +1,10 @@
 # Worklog
 
+### 2026-01-25 - Workspace detail thread navigation
+- **Outcome:** Linked threads on the workspace detail page now navigate directly to the thread detail view.
+- **Why:** Allow faster drill-down from a workspace overview into a specific thread.
+- **Links:** commit `cdd8d48c96f7641c0c3a9df2dcd809b7542e1053`
+
 ### 2026-01-25 - Thread detail route wiring
 - **Outcome:** Thread detail view is reachable via the `/t/:threadId` route in the UI.
 - **Why:** Enable direct navigation to a specific thread detail page.
