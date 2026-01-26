@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
 import { api, Thread } from "@/lib/api";
 import { Button } from "@/components/ui/button";
@@ -18,6 +19,7 @@ import {
 
 export function WorkspaceDetailPage() {
   const { currentWorkspace } = useWorkspace();
+  const navigate = useNavigate();
   const [threads, setThreads] = useState<Thread[]>([]);
   const [loadingThreads, setLoadingThreads] = useState(true);
   const [messageInput, setMessageInput] = useState("");
@@ -174,6 +176,7 @@ export function WorkspaceDetailPage() {
               {threads.slice(0, 5).map((thread) => (
                 <Card
                   key={thread.id}
+                  onClick={() => navigate(`/t/${thread.id}`)}
                   className="cursor-pointer hover:bg-accent/50 transition-colors"
                 >
                   <CardContent className="p-3 flex items-center gap-3">
