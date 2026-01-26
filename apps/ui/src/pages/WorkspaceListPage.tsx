@@ -1,9 +1,17 @@
 import { useWorkspace } from "@/contexts/WorkspaceContext";
 import { Card, CardContent } from "@/components/ui/card";
-import { Folder } from "lucide-react";
+import { Folder, Loader2 } from "lucide-react";
 
 export function WorkspaceListPage() {
-  const { workspaces, setCurrentWorkspace } = useWorkspace();
+  const { workspaces, setCurrentWorkspace, loading } = useWorkspace();
+
+  if (loading) {
+    return (
+      <div className="flex-1 flex items-center justify-center">
+        <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
 
   return (
     <div className="container max-w-4xl mx-auto p-6">
