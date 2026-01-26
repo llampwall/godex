@@ -122,7 +122,7 @@ export const registerDiagRoutes = (app: FastifyInstance, appServer: CodexAppServ
     }
 
     appendFileSync(logPath, `[${new Date().toISOString()}] pm2 restart starting (shell)\n`);
-    const restartResult = await runCommand(pm2Path, ["restart", "godex-ui-rewrite"], { cwd: repoRoot, shell: true });
+    const restartResult = await runCommand(pm2Path, ["restart", "godex"], { cwd: repoRoot, shell: true });
     appendFileSync(
       logPath,
       `[${new Date().toISOString()}] pm2 restart ok=${restartResult.ok} code=${restartResult.code ?? "null"}\n` +
