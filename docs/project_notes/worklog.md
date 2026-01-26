@@ -1,5 +1,10 @@
 # Worklog
 
+### 2026-01-25 - Share draft page for shared content
+- **Outcome:** UI now has a dedicated ShareDraftPage to capture shared text/URLs and route them into the draft flow.
+- **Why:** Ensure share-intent payloads land in the UI with a purpose-built entry point for users coming from the OS share sheet.
+- **Links:** commit `2c59303b7ad979f2db3de78c8ef0ddbec2bbb5a2`
+
 ### 2026-01-25 - Workspace detail SSE messaging
 - **Outcome:** Workspace detail now sends messages with the shared MessageInput, creates a default thread if missing, and streams replies via SSE.
 - **Why:** Make the workspace detail page usable for sending prompts and seeing live responses without leaving the workspace view.
