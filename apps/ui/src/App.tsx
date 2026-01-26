@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate, useSearchParams, useNavigate } from "react-router-dom";
+import { Routes, Route, Navigate, useSearchParams } from "react-router-dom";
 import { useEffect } from "react";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { WorkspaceProvider, useWorkspace } from "@/contexts/WorkspaceContext";
@@ -10,46 +10,7 @@ import { ThreadDetailPage } from "@/pages/ThreadDetailPage";
 import { ShareDraftPage } from "@/pages/ShareDraftPage";
 
 function AppContent() {
-  const { currentWorkspace, workspaces, setCurrentWorkspace, loading } = useWorkspace();
-  const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
-
-  // Sync URL with workspace state
-  useEffect(() => {
-    if (loading) return;
-
-    const workspaceParam = searchParams.get("workspace");
-
-    if (workspaceParam) {
-      // URL has workspace param - update current workspace if needed
-      if (!currentWorkspace || currentWorkspace.id !== workspaceParam) {
-        const workspace = workspaces.find(w => w.id === workspaceParam);
-        if (workspace) {
-          setCurrentWorkspace(workspace);
-        } else {
-          // Invalid workspace ID - clear param
-          navigate("/", { replace: true });
-        }
-      }
-    } else {
-      // No workspace param - clear current workspace if set
-      if (currentWorkspace) {
-        setCurrentWorkspace(null);
-      }
-    }
-  }, [searchParams, loading, workspaces]);
-
-  // Update URL when workspace changes
-  useEffect(() => {
-    if (loading) return;
-
-    const workspaceParam = searchParams.get("workspace");
-    if (currentWorkspace && currentWorkspace.id !== workspaceParam) {
-      navigate(`/?workspace=${currentWorkspace.id}`, { replace: true });
-    } else if (!currentWorkspace && workspaceParam) {
-      navigate("/", { replace: true });
-    }
-  }, [currentWorkspace, loading]);
+  const { currentWorkspace, loading } = useWorkspace();
 
   if (loading) {
     return (
