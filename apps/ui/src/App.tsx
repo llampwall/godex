@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { WorkspaceProvider, useWorkspace } from "@/contexts/WorkspaceContext";
 import { Header } from "@/components/layout/Header";
+import { OfflineBanner } from "@/components/layout/OfflineBanner";
 import { WorkspaceListPage } from "@/pages/WorkspaceListPage";
 import { WorkspaceDetailPage } from "@/pages/WorkspaceDetailPage";
 import { ThreadDetailPage } from "@/pages/ThreadDetailPage";
@@ -20,6 +21,7 @@ function AppContent() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
+      <OfflineBanner />
       <Header />
       <main className="flex-1">
         {currentWorkspace ? <WorkspaceDetailPage /> : <WorkspaceListPage />}
@@ -31,6 +33,7 @@ function AppContent() {
 function ThreadPage() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
+      <OfflineBanner />
       <Header />
       <main className="flex-1">
         <ThreadDetailPage />
