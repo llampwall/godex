@@ -47,10 +47,10 @@ export function LinkWorkspaceDialog({ open, onOpenChange, threadId }: LinkWorksp
 
   const fetchLinkedWorkspaces = async () => {
     try {
-      const response = await api.get<{ data: { attached_workspace_ids: string[] } }>(
+      const response = await api.get<{ attached_workspace_ids: string[] }>(
         `/threads/${threadId}`
       );
-      setLinkedWorkspaceIds(response.data?.attached_workspace_ids || []);
+      setLinkedWorkspaceIds(response.attached_workspace_ids || []);
     } catch (error) {
       console.error("Failed to fetch linked workspaces:", error);
     }
@@ -63,6 +63,7 @@ export function LinkWorkspaceDialog({ open, onOpenChange, threadId }: LinkWorksp
       await api.post(`/workspaces/${selectedWorkspaceId}/threads`, { thread_id: threadId });
       await fetchLinkedWorkspaces();
       setSelectedWorkspaceId("");
+      onOpenChange(false); // Close modal after linking
     } catch (error) {
       console.error("Failed to link workspace:", error);
     } finally {
@@ -90,31 +91,28 @@ export function LinkWorkspaceDialog({ open, onOpenChange, threadId }: LinkWorksp
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Link to Workspace</DialogTitle>
-          <DialogDescription>
-            Link this thread to one or more workspaces to organize your conversations.
-          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
           {/* Currently Linked Workspaces */}
           {linkedWorkspaces.length > 0 && (
             <div>
-              <p className="text-sm font-medium mb-2">Linked Workspaces</p>
-              <div className="flex flex-wrap gap-2">
+              <p className="text-sm font-medium mb-2">Linked</p>
+              <div className="flex flex-col gap-2">
                 {linkedWorkspaces.map(workspace => (
                   <div
                     key={workspace.id}
-                    className="inline-flex items-center gap-1 px-2 py-1 bg-secondary rounded text-sm"
+                    className="flex items-center justify-between"
                   >
-                    <span className="font-mono">{workspace.repo_path}</span>
+                    <p className="text-sm">- {workspace.repo_path}</p>
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-4 w-4 p-0 hover:bg-transparent"
+                      className="h-6 w-6 p-0 hover:bg-transparent"
                       onClick={() => handleUnlink(workspace.id)}
                       disabled={loading}
                     >
-                      <X className="w-3 h-3" />
+                      <X className="w-4 h-4" />
                     </Button>
                   </div>
                 ))}
@@ -152,6 +150,10 @@ export function LinkWorkspaceDialog({ open, onOpenChange, threadId }: LinkWorksp
             </p>
           )}
         </div>
+
+        <DialogDescription className="text-xs">
+          Link this thread to one or more workspaces to organize your conversations.
+        </DialogDescription>
       </DialogContent>
     </Dialog>
   );

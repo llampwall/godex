@@ -1,9 +1,11 @@
+import { useNavigate } from "react-router-dom";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
 import { Card, CardContent } from "@/components/ui/card";
 import { Folder, Loader2 } from "lucide-react";
 
 export function WorkspaceListPage() {
-  const { workspaces, setCurrentWorkspace, loading } = useWorkspace();
+  const { workspaces, loading } = useWorkspace();
+  const navigate = useNavigate();
 
   if (loading) {
     return (
@@ -39,7 +41,7 @@ export function WorkspaceListPage() {
             return (
               <Card
                 key={workspace.id}
-                onClick={() => setCurrentWorkspace(workspace)}
+                onClick={() => navigate(`/?workspace=${workspace.id}`)}
                 className="cursor-pointer hover:bg-accent/50 transition-colors"
               >
                 <CardContent className="p-4">

@@ -93,7 +93,21 @@ export type Message = {
 };
 
 export type ThreadDetail = {
-  thread: Thread;
+  thread: Thread & {
+    turns?: Array<{
+      id: string;
+      role?: string;
+      content?: string;
+      items?: Array<{
+        id: string;
+        type: string;
+        role?: string;
+        content?: string | Array<{ type: string; text?: string }>;
+        text?: string;
+      }>;
+    }>;
+    items?: Message[];
+  };
   items?: Message[];
   turns?: Array<{
     id: string;
@@ -102,9 +116,11 @@ export type ThreadDetail = {
     items?: Message[];
   }>;
   meta?: {
-    title_override?: string;
+    thread_id: string;
+    title_override?: string | null;
     pinned?: boolean;
     archived?: boolean;
+    last_seen_at?: string;
   };
   attached_workspace_ids?: string[];
 };

@@ -156,12 +156,6 @@ export function WorkspaceDetailPage() {
             <h2 className="text-sm font-medium text-foreground">
               {isGlobalWorkspace ? "Unlinked Threads" : "Linked Threads"}
             </h2>
-            {!isGlobalWorkspace && (
-              <Button variant="ghost" size="sm" className="gap-1 text-muted-foreground">
-                <Plus className="w-4 h-4" />
-                Link thread
-              </Button>
-            )}
           </div>
 
           {loadingThreads ? (

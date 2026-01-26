@@ -43,8 +43,9 @@ export function useSSE(runId: string | null, options: UseSSEOptions = {}) {
     eventSource.addEventListener("chunk", (event) => {
       try {
         const data = JSON.parse(event.data);
-        const text = data?.data ?? data?.text ?? data?.content ?? "";
-        if (text && options.onChunk) {
+        const text = data?.chunk ?? data?.data ?? data?.text ?? data?.content ?? "";
+        // Only process stdout chunks (skip stderr/notification chunks)
+        if (text && data.stream === "stdout" && options.onChunk) {
           options.onChunk(text);
         }
       } catch (e) {
