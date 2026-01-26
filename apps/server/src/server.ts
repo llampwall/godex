@@ -81,7 +81,8 @@ export const buildServer = () => {
       ["manifest.webmanifest", "application/manifest+json"],
       ["pwa-192.png", "image/png"],
       ["pwa-512.png", "image/png"],
-      ["sw.js", "application/javascript"]
+      ["sw.js", "application/javascript"],
+      ["registerSW.js", "application/javascript"]
     ];
     for (const [name, type] of rootFiles) {
       const filePath = resolve(uiDist, name);
