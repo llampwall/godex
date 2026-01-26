@@ -1,5 +1,10 @@
 # Worklog
 
+### 2026-01-25 - Shared MessageInput component with dictation
+- **Outcome:** UI now has a reusable `MessageInput` component that includes dictation support for composing messages.
+- **Why:** Standardize the message composer behavior across UI surfaces and keep dictation support consistent.
+- **Links:** commit `779fa947296b6ffa2280a95968de3a4cd2186f22`
+
 ### 2026-01-25 - Workspace detail UI quick actions + linked threads
 - **Outcome:** Workspace detail page now includes quick actions (git status/diff/tests), a main output area with message input, and a linked threads list powered by `/threads?workspace_id=...`.
 - **Why:** Provide an actionable workspace home view and surface linked threads at a glance.
