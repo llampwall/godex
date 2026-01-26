@@ -1,5 +1,10 @@
 # Worklog
 
+### 2026-01-26 - Workspace detail global workspace polish
+- **Outcome:** Workspace detail always sends `workspace_id` (including `__global__`), global workspace help text mentions linking, the label reads "Unlinked Threads", and mobile layout uses safer width/overflow utilities.
+- **Why:** Keep global workspace filtering consistent and prevent mobile overflow regressions while clarifying what unlinked threads represent.
+- **Links:** commit `70e50888bdb6bf7ab1c423877419585b5e328cb8`
+
 ### 2026-01-26 - Workspace switcher menu ordering
 - **Outcome:** Workspace switcher now hides the `__global__` entry, orders menu items as Workspaces → All Workspaces → Unlinked Threads → New Repo, and highlights Unlinked Threads when selected.
 - **Why:** Keep the workspace switcher focused on user-relevant options and make the unlinked threads state more obvious.

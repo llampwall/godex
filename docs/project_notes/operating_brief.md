@@ -13,7 +13,7 @@
 - Working: server serves built UI at `/ui`; dev uses Vite UI on `UI_PORT` when assets are not built.
 - Working: sessions persist `notify_mode`; server can send ntfy notifications and UI exposes per-session controls.
 - Working: Threads UI bridges to `codex app-server` so existing Codex threads can be listed and resumed.
-- Working: Threads list aligns to the server response shape, supports workspace filtering, and includes a synthetic "All Threads" workspace for orphaned threads (with message/actions disabled).
+- Working: Threads list aligns to the server response shape, supports workspace filtering, and includes a synthetic "Unlinked Threads" workspace for orphaned threads (with message/actions disabled).
 - Working: Workspaces are stored server-side as repo profiles; threads can be attached with local metadata (pinned/archived/title override).
 - Working: New repo bootstrap flow in the UI plus `/workspaces/bootstrap` endpoint can scaffold repos (strap + optional auto template).
 - Working: UI is installable as a PWA, shows an offline/server-unreachable banner, and serves PWA root assets from the server build output.
