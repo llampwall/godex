@@ -5,6 +5,7 @@ import { Header } from "@/components/layout/Header";
 import { WorkspaceListPage } from "@/pages/WorkspaceListPage";
 import { WorkspaceDetailPage } from "@/pages/WorkspaceDetailPage";
 import { ThreadDetailPage } from "@/pages/ThreadDetailPage";
+import { ShareDraftPage } from "@/pages/ShareDraftPage";
 
 function AppContent() {
   const { currentWorkspace, loading } = useWorkspace();
@@ -44,7 +45,7 @@ export default function App() {
       <WorkspaceProvider>
         <Routes>
           <Route path="/" element={<AppContent />} />
-          <Route path="/share" element={<div className="p-4">Share page - coming soon</div>} />
+          <Route path="/share" element={<ShareDraftPage />} />
           <Route path="/t/:threadId" element={<ThreadPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
