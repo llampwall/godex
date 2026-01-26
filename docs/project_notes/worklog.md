@@ -1,5 +1,10 @@
 # Worklog
 
+### 2026-01-25 - Mobile responsive utilities in UI pages
+- **Outcome:** Header, thread detail, and workspace detail views use updated responsive utility classes for better mobile layout behavior.
+- **Why:** Improve phone usability by tightening layout and spacing for small screens.
+- **Links:** commit `1cda25ccba612b2c4005d8f9d03f7249c795a776`
+
 ### 2026-01-25 - Offline banner for network status
 - **Outcome:** UI now shows an offline/server-unreachable banner when the network status indicates the server is down.
 - **Why:** Make connectivity issues obvious so users can distinguish offline states from app errors.
