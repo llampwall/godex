@@ -4,6 +4,7 @@ import { WorkspaceProvider, useWorkspace } from "@/contexts/WorkspaceContext";
 import { Header } from "@/components/layout/Header";
 import { WorkspaceListPage } from "@/pages/WorkspaceListPage";
 import { WorkspaceDetailPage } from "@/pages/WorkspaceDetailPage";
+import { ThreadDetailPage } from "@/pages/ThreadDetailPage";
 
 function AppContent() {
   const { currentWorkspace, loading } = useWorkspace();
@@ -26,6 +27,17 @@ function AppContent() {
   );
 }
 
+function ThreadPage() {
+  return (
+    <div className="min-h-screen bg-background flex flex-col">
+      <Header />
+      <main className="flex-1">
+        <ThreadDetailPage />
+      </main>
+    </div>
+  );
+}
+
 export default function App() {
   return (
     <AuthProvider>
@@ -33,7 +45,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<AppContent />} />
           <Route path="/share" element={<div className="p-4">Share page - coming soon</div>} />
-          <Route path="/t/:threadId" element={<div className="p-4">Thread detail - coming soon</div>} />
+          <Route path="/t/:threadId" element={<ThreadPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </WorkspaceProvider>
