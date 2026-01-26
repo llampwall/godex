@@ -201,6 +201,7 @@ export const registerThreadRoutes = (
       q?: string;
       include_archived?: string;
       archived?: string;
+      workspace_id?: string;
     } | undefined;
     const limit = Math.max(1, Math.min(Number(query?.limit ?? DEFAULT_LIMIT), 200));
     const offset = Math.max(0, Number(query?.offset ?? 0));
@@ -279,7 +280,13 @@ export const registerThreadRoutes = (
     const links = store.listWorkspaceThreads();
     const merged = mergeThreadList(data, metaList, links, includeArchived);
 
-    return { data: merged, next_cursor: nextCursor };
+    // Filter by workspace_id if provided
+    const workspaceId = query?.workspace_id;
+    const filtered = workspaceId
+      ? merged.filter((thread) => thread.attached_workspace_ids.includes(workspaceId))
+      : merged;
+
+    return { data: filtered, next_cursor: nextCursor };
   });
 
   app.get("/threads/meta", async () => {

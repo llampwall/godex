@@ -21,9 +21,7 @@ export function WorkspaceDetailPage() {
   const navigate = useNavigate();
   const [threads, setThreads] = useState<Thread[]>([]);
   const [loadingThreads, setLoadingThreads] = useState(true);
-  const [output, setOutput] = useState<string[]>([
-    "Welcome to Godex. Type a message or use quick actions to get started.",
-  ]);
+  const [output, setOutput] = useState<string[]>([]);
   const [currentRunId, setCurrentRunId] = useState<string | null>(null);
   const [streamingContent, setStreamingContent] = useState("");
 
@@ -47,13 +45,23 @@ export function WorkspaceDetailPage() {
   useEffect(() => {
     if (!currentWorkspace) return;
 
+    // Set welcome message based on workspace type
+    if (currentWorkspace.id === "__global__") {
+      setOutput(["Select a workspace from the menu to interact with it, or click a thread to view it."]);
+    } else {
+      setOutput(["Welcome to Godex. Type a message or use quick actions to get started."]);
+    }
+
     const fetchThreads = async () => {
       setLoadingThreads(true);
       try {
-        const response = await api.get<{ ok: boolean; threads: Thread[] }>(
-          `/threads?workspace_id=${currentWorkspace.id}`
-        );
-        setThreads(response.threads || []);
+        // For global workspace, fetch all threads; otherwise filter by workspace
+        const url =
+          currentWorkspace.id === "__global__"
+            ? "/threads"
+            : `/threads?workspace_id=${currentWorkspace.id}`;
+        const response = await api.get<{ data: Thread[] }>(url);
+        setThreads(response.data || []);
       } catch (error) {
         console.error("Failed to fetch threads:", error);
       } finally {
@@ -112,12 +120,15 @@ export function WorkspaceDetailPage() {
     }
   };
 
+  const isGlobalWorkspace = currentWorkspace.id === "__global__";
+
   return (
     <div className="flex flex-col h-[calc(100vh-4rem)]">
       {/* Main Content */}
       <div className="flex-1 container max-w-5xl mx-auto p-4 md:p-6 flex flex-col gap-4 md:gap-6 overflow-hidden">
-        {/* Quick Actions */}
-        <div className="flex items-center gap-2">
+        {/* Quick Actions - only show for real workspaces, not global */}
+        {!isGlobalWorkspace && (
+          <div className="flex items-center gap-2">
           <Button
             variant="outline"
             size="sm"
@@ -146,6 +157,7 @@ export function WorkspaceDetailPage() {
             run tests
           </Button>
         </div>
+        )}
 
         {/* Main Thread / Output Area */}
         <Card className="flex-1 flex flex-col overflow-hidden">
@@ -181,20 +193,28 @@ export function WorkspaceDetailPage() {
           <div className="p-4 border-t border-border">
             <MessageInput
               onSend={handleSendMessage}
-              disabled={!!currentRunId}
-              placeholder="Type a message..."
+              disabled={!!currentRunId || isGlobalWorkspace}
+              placeholder={
+                isGlobalWorkspace
+                  ? "Select a workspace to send messages..."
+                  : "Type a message..."
+              }
             />
           </div>
         </Card>
 
-        {/* Linked Threads Section */}
+        {/* Threads Section */}
         <div>
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-medium text-foreground">Linked Threads</h2>
-            <Button variant="ghost" size="sm" className="gap-1 text-muted-foreground">
-              <Plus className="w-4 h-4" />
-              Link thread
-            </Button>
+            <h2 className="text-sm font-medium text-foreground">
+              {isGlobalWorkspace ? "All Threads" : "Linked Threads"}
+            </h2>
+            {!isGlobalWorkspace && (
+              <Button variant="ghost" size="sm" className="gap-1 text-muted-foreground">
+                <Plus className="w-4 h-4" />
+                Link thread
+              </Button>
+            )}
           </div>
 
           {loadingThreads ? (
@@ -202,15 +222,17 @@ export function WorkspaceDetailPage() {
           ) : threads.length === 0 ? (
             <Card className="border-dashed">
               <CardContent className="py-6 text-center text-muted-foreground text-sm">
-                No linked threads yet. Create one to start a conversation.
+                {isGlobalWorkspace
+                  ? "No threads found."
+                  : "No linked threads yet. Create one to start a conversation."}
               </CardContent>
             </Card>
           ) : (
             <div className="grid gap-2">
               {threads.slice(0, 5).map((thread) => (
                 <Card
-                  key={thread.id}
-                  onClick={() => navigate(`/t/${thread.id}`)}
+                  key={thread.thread_id}
+                  onClick={() => navigate(`/t/${thread.thread_id}`)}
                   className="cursor-pointer hover:bg-accent/50 transition-colors"
                 >
                   <CardContent className="p-3 flex items-center gap-3">
@@ -219,11 +241,11 @@ export function WorkspaceDetailPage() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="font-medium text-sm truncate">
-                        {thread.title_override || thread.title || `Thread ${thread.id.slice(0, 8)}`}
+                        {thread.title_override || thread.title || `Thread ${thread.thread_id.slice(0, 8)}`}
                       </div>
-                      {thread.last_message_preview && (
+                      {thread.summary && (
                         <div className="text-xs text-muted-foreground truncate">
-                          {thread.last_message_preview}
+                          {thread.summary}
                         </div>
                       )}
                     </div>

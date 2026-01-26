@@ -74,14 +74,15 @@ export type Workspace = {
 };
 
 export type Thread = {
-  id: string;
+  thread_id: string;
   title?: string;
   title_override?: string;
   pinned?: boolean;
   archived?: boolean;
-  workspace_ids?: string[];
-  last_message_preview?: string;
+  attached_workspace_ids?: string[];
+  summary?: string;
   updated_at?: string;
+  last_seen_at?: string | null;
 };
 
 export type Message = {

@@ -15,6 +15,13 @@ const LAST_WORKSPACE_KEY = "godex_last_workspace";
 const LAST_VISITED_KEY = "godex_last_visited";
 const STALE_THRESHOLD_MS = 24 * 60 * 60 * 1000; // 24 hours
 
+// Synthetic global workspace for threads not attached to any workspace
+const GLOBAL_WORKSPACE: Workspace = {
+  id: "__global__",
+  title: "All Threads",
+  repo_path: "",
+};
+
 export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [currentWorkspace, setCurrentWorkspaceState] = useState<Workspace | null>(null);
@@ -23,7 +30,8 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const refreshWorkspaces = async (): Promise<void> => {
     try {
       const response = await api.get<{ ok: boolean; workspaces: Workspace[] }>("/workspaces");
-      setWorkspaces(response.workspaces);
+      // Prepend global workspace for all threads
+      setWorkspaces([GLOBAL_WORKSPACE, ...response.workspaces]);
     } catch (error) {
       console.error("Failed to fetch workspaces:", error);
     }
@@ -45,7 +53,8 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
       try {
         const response = await api.get<{ ok: boolean; workspaces: Workspace[] }>("/workspaces");
         data = response.workspaces;
-        setWorkspaces(data);
+        // Prepend global workspace for all threads
+        setWorkspaces([GLOBAL_WORKSPACE, ...data]);
       } catch (error) {
         console.error("Failed to fetch workspaces:", error);
       }
