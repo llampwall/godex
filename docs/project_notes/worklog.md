@@ -1,5 +1,10 @@
 # Worklog
 
+### 2026-01-25 - Workspace detail UI quick actions + linked threads
+- **Outcome:** Workspace detail page now includes quick actions (git status/diff/tests), a main output area with message input, and a linked threads list powered by `/threads?workspace_id=...`.
+- **Why:** Provide an actionable workspace home view and surface linked threads at a glance.
+- **Links:** commit `0a77c803678ba0bca3ea10cdd1b67f9723559559`
+
 ### 2026-01-25 - Workspace API response shape handling
 - **Outcome:** UI workspace context now supports the `/workspaces` response wrapper `{ ok, workspaces: [...] }` instead of assuming a bare array.
 - **Why:** Keep workspace list and detail views aligned with the server response format.
