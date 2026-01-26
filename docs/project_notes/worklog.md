@@ -1,5 +1,10 @@
 # Worklog
 
+### 2026-01-25 - Threads list response + global workspace
+- **Outcome:** Threads list now reads the server `data` wrapper, supports `/threads?workspace_id=...`, and adds a synthetic "All Threads" workspace for orphaned threads with actions/messaging disabled.
+- **Why:** Keep UI in sync with the server response shape and surface unassigned threads safely.
+- **Links:** commit `8363563605748ee1f10f60f9aa454365cfa6f82e`
+
 ### 2026-01-25 - Workspace list loading states
 - **Outcome:** Workspace list shows explicit loading states while data fetches.
 - **Why:** Make list behavior clearer on slower connections and avoid empty-state confusion.

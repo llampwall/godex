@@ -40,6 +40,7 @@
 
 ## Threads + diagnostics
 - Threads UI uses `codex app-server` (spawned by the server); requires `codex` on PATH or `CODEX_BIN` set.
+- Threads list endpoint: `GET /threads` (optional `workspace_id`) returns `{ ok, data: [...] }`.
 - Thread detail route: `/ui/t/:thread_id`
 - Diagnostics: `GET /diag/codex` returns spawn config + `codex --version`
 - Diagnostics: `POST /diag/restart` runs build + server restart and logs to `.godex/restart.log`
