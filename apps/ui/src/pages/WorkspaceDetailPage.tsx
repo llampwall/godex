@@ -1,12 +1,10 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
 import { api, Thread } from "@/lib/api";
-import { useSSE } from "@/hooks/useSSE";
 import { MessageInput } from "@/components/thread/MessageInput";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   GitBranch,
   GitCompare,
@@ -21,45 +19,15 @@ export function WorkspaceDetailPage() {
   const navigate = useNavigate();
   const [threads, setThreads] = useState<Thread[]>([]);
   const [loadingThreads, setLoadingThreads] = useState(true);
-  const [output, setOutput] = useState<string[]>([]);
   const [currentRunId, setCurrentRunId] = useState<string | null>(null);
-  const [streamingContent, setStreamingContent] = useState("");
-
-  const handleChunk = useCallback((data: string) => {
-    setStreamingContent((prev) => prev + data);
-  }, []);
-
-  const handleFinal = useCallback(() => {
-    if (streamingContent) {
-      setOutput((prev) => [...prev, streamingContent]);
-      setStreamingContent("");
-    }
-    setCurrentRunId(null);
-  }, [streamingContent]);
-
-  useSSE(currentRunId, {
-    onChunk: handleChunk,
-    onFinal: handleFinal,
-  });
 
   useEffect(() => {
     if (!currentWorkspace) return;
 
-    // Set welcome message based on workspace type
-    if (currentWorkspace.id === "__global__") {
-      setOutput(["Select a workspace from the menu to interact with it, or click a thread to view it."]);
-    } else {
-      setOutput(["Welcome to Godex. Type a message or use quick actions to get started."]);
-    }
-
     const fetchThreads = async () => {
       setLoadingThreads(true);
       try {
-        // For global workspace, fetch all threads; otherwise filter by workspace
-        const url =
-          currentWorkspace.id === "__global__"
-            ? "/threads"
-            : `/threads?workspace_id=${currentWorkspace.id}`;
+        const url = `/threads?workspace_id=${currentWorkspace.id}`;
         const response = await api.get<{ data: Thread[] }>(url);
         setThreads(response.data || []);
       } catch (error) {
@@ -77,46 +45,44 @@ export function WorkspaceDetailPage() {
   }
 
   const handleQuickAction = async (action: "status" | "diff" | "test") => {
-    setOutput((prev) => [...prev, `> Running git ${action}...`]);
     try {
       const endpoint =
         action === "test"
           ? `/workspaces/${currentWorkspace.id}/test`
           : `/workspaces/${currentWorkspace.id}/git/${action}`;
-      const response = await api.post<{ ok: boolean; output?: string }>(endpoint);
-      if (response.output) {
-        setOutput((prev) => [...prev, response.output!]);
-      }
+      await api.post<{ ok: boolean; output?: string }>(endpoint);
     } catch (error) {
-      setOutput((prev) => [...prev, `Error: ${error}`]);
+      console.error(`Quick action ${action} failed:`, error);
     }
   };
 
   const handleSendMessage = async (text: string) => {
-    if (!currentWorkspace) return;
-
-    setOutput((prev) => [...prev, `You: ${text}`]);
-
-    // Get or create default thread
-    let threadId = currentWorkspace.default_thread_id;
-    if (!threadId) {
-      try {
-        const createResponse = await api.post<{ ok: boolean; thread_id: string }>("/threads/create");
-        threadId = createResponse.thread_id;
-      } catch (error) {
-        setOutput((prev) => [...prev, `Error: Failed to create thread`]);
-        return;
-      }
-    }
+    if (!currentWorkspace || isGlobalWorkspace) return;
 
     try {
-      const response = await api.post<{ run_id: string }>(
+      // Create a new thread
+      const createResponse = await api.post<{ ok: boolean; thread_id: string }>("/threads/create", {});
+
+      if (!createResponse.thread_id) {
+        console.error("Failed to create thread");
+        return;
+      }
+
+      const threadId = createResponse.thread_id;
+
+      // Link the thread to this workspace
+      await api.post(`/workspaces/${currentWorkspace.id}/threads`, { thread_id: threadId });
+
+      // Send the message to the new thread
+      const messageResponse = await api.post<{ run_id: string }>(
         `/threads/${threadId}/message`,
         { text, workspace_id: currentWorkspace.id }
       );
-      setCurrentRunId(response.run_id);
+
+      // Navigate to the thread detail page with the run_id to continue streaming
+      navigate(`/t/${threadId}?run_id=${messageResponse.run_id}`);
     } catch (error) {
-      setOutput((prev) => [...prev, `Error: ${error}`]);
+      console.error("Failed to create thread or send message:", error);
     }
   };
 
@@ -159,55 +125,36 @@ export function WorkspaceDetailPage() {
         </div>
         )}
 
-        {/* Main Thread / Output Area */}
-        <Card className="flex-1 flex flex-col overflow-hidden">
-          <CardHeader className="py-3 px-4 border-b border-border">
-            <CardTitle className="text-sm font-medium">Main Thread</CardTitle>
-          </CardHeader>
-          <ScrollArea className="flex-1">
-            <div className="p-4 font-mono text-sm space-y-2">
-              {output.map((line, i) => (
-                <div
-                  key={i}
-                  className={
-                    line.startsWith(">")
-                      ? "text-muted-foreground"
-                      : line.startsWith("You:")
-                        ? "text-primary"
-                        : line.startsWith("Error")
-                          ? "text-destructive"
-                          : "text-foreground whitespace-pre-wrap"
-                  }
-                >
-                  {line}
-                </div>
-              ))}
-              {streamingContent && (
-                <div className="text-foreground whitespace-pre-wrap">
-                  {streamingContent}
-                  <span className="inline-block w-2 h-4 bg-foreground animate-pulse ml-0.5" />
-                </div>
-              )}
+        {/* New Thread Input - only show for real workspaces, not global */}
+        {!isGlobalWorkspace && (
+          <Card className="w-full">
+            <CardHeader className="py-3 px-4 border-b border-border">
+              <CardTitle className="text-sm font-medium">New Thread</CardTitle>
+            </CardHeader>
+            <div className="p-4 border-t border-border">
+              <MessageInput
+                onSend={handleSendMessage}
+                disabled={!!currentRunId}
+                placeholder="Type a message to start a new thread..."
+              />
             </div>
-          </ScrollArea>
-          <div className="p-4 border-t border-border">
-            <MessageInput
-              onSend={handleSendMessage}
-              disabled={!!currentRunId || isGlobalWorkspace}
-              placeholder={
-                isGlobalWorkspace
-                  ? "Select a workspace to send messages..."
-                  : "Type a message..."
-              }
-            />
-          </div>
-        </Card>
+          </Card>
+        )}
+
+        {/* Global workspace message */}
+        {isGlobalWorkspace && (
+          <Card className="p-6 text-center border-dashed">
+            <CardContent className="text-muted-foreground text-sm">
+              These are threads not linked to any workspace. Click a thread to view it, or link it to a workspace from the thread page.
+            </CardContent>
+          </Card>
+        )}
 
         {/* Threads Section */}
         <div>
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-sm font-medium text-foreground">
-              {isGlobalWorkspace ? "All Threads" : "Linked Threads"}
+              {isGlobalWorkspace ? "Unlinked Threads" : "Linked Threads"}
             </h2>
             {!isGlobalWorkspace && (
               <Button variant="ghost" size="sm" className="gap-1 text-muted-foreground">
@@ -228,18 +175,18 @@ export function WorkspaceDetailPage() {
               </CardContent>
             </Card>
           ) : (
-            <div className="grid gap-2">
+            <div className="flex flex-col gap-2">
               {threads.slice(0, 5).map((thread) => (
                 <Card
                   key={thread.thread_id}
                   onClick={() => navigate(`/t/${thread.thread_id}`)}
-                  className="cursor-pointer hover:bg-accent/50 transition-colors"
+                  className="cursor-pointer hover:bg-accent/50 transition-colors w-full"
                 >
-                  <CardContent className="p-3 flex items-center gap-3">
+                  <CardContent className="p-3 flex items-center gap-3 min-w-0">
                     <div className="w-8 h-8 rounded bg-secondary flex items-center justify-center shrink-0">
                       <MessageSquare className="w-4 h-4 text-muted-foreground" />
                     </div>
-                    <div className="flex-1 min-w-0">
+                    <div className="flex-1 min-w-0 overflow-hidden">
                       <div className="font-medium text-sm truncate">
                         {thread.title_override || thread.title || `Thread ${thread.thread_id.slice(0, 8)}`}
                       </div>
