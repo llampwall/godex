@@ -16,10 +16,12 @@ const LAST_VISITED_KEY = "godex_last_visited";
 const STALE_THRESHOLD_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 // Synthetic global workspace for threads not attached to any workspace
-const GLOBAL_WORKSPACE: Workspace = {
+export const GLOBAL_WORKSPACE: Workspace = {
   id: "__global__",
-  title: "All Threads",
-  repo_path: "",
+  title: "Unlinked Threads",
+  repo_path: "Unlinked Threads",
+  notify_policy: "none" as const,
+  test_command_override: undefined,
 };
 
 export function WorkspaceProvider({ children }: { children: ReactNode }) {
