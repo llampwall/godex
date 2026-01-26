@@ -1,5 +1,10 @@
 # Worklog
 
+### 2026-01-25 - Thread detail route wiring
+- **Outcome:** Thread detail view is reachable via the `/t/:threadId` route in the UI.
+- **Why:** Enable direct navigation to a specific thread detail page.
+- **Links:** commit `8cdc4346e9b204a4e3ae9451b78d79e2531e0000`
+
 ### 2026-01-25 - Shared MessageInput component with dictation
 - **Outcome:** UI now has a reusable `MessageInput` component that includes dictation support for composing messages.
 - **Why:** Standardize the message composer behavior across UI surfaces and keep dictation support consistent.
