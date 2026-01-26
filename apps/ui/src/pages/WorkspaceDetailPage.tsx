@@ -1,17 +1,16 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
 import { api, Thread } from "@/lib/api";
+import { useSSE } from "@/hooks/useSSE";
+import { MessageInput } from "@/components/thread/MessageInput";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   GitBranch,
   GitCompare,
   Play,
-  Send,
-  Mic,
   Plus,
   MessageSquare,
   ChevronRight,
@@ -22,10 +21,28 @@ export function WorkspaceDetailPage() {
   const navigate = useNavigate();
   const [threads, setThreads] = useState<Thread[]>([]);
   const [loadingThreads, setLoadingThreads] = useState(true);
-  const [messageInput, setMessageInput] = useState("");
   const [output, setOutput] = useState<string[]>([
     "Welcome to Godex. Type a message or use quick actions to get started.",
   ]);
+  const [currentRunId, setCurrentRunId] = useState<string | null>(null);
+  const [streamingContent, setStreamingContent] = useState("");
+
+  const handleChunk = useCallback((data: string) => {
+    setStreamingContent((prev) => prev + data);
+  }, []);
+
+  const handleFinal = useCallback(() => {
+    if (streamingContent) {
+      setOutput((prev) => [...prev, streamingContent]);
+      setStreamingContent("");
+    }
+    setCurrentRunId(null);
+  }, [streamingContent]);
+
+  useSSE(currentRunId, {
+    onChunk: handleChunk,
+    onFinal: handleFinal,
+  });
 
   useEffect(() => {
     if (!currentWorkspace) return;
@@ -67,11 +84,32 @@ export function WorkspaceDetailPage() {
     }
   };
 
-  const handleSendMessage = () => {
-    if (!messageInput.trim()) return;
-    setOutput((prev) => [...prev, `You: ${messageInput}`]);
-    setMessageInput("");
-    // TODO: Actually send message to thread in Phase 3
+  const handleSendMessage = async (text: string) => {
+    if (!currentWorkspace) return;
+
+    setOutput((prev) => [...prev, `You: ${text}`]);
+
+    // Get or create default thread
+    let threadId = currentWorkspace.default_thread_id;
+    if (!threadId) {
+      try {
+        const createResponse = await api.post<{ ok: boolean; thread_id: string }>("/threads/create");
+        threadId = createResponse.thread_id;
+      } catch (error) {
+        setOutput((prev) => [...prev, `Error: Failed to create thread`]);
+        return;
+      }
+    }
+
+    try {
+      const response = await api.post<{ run_id: string }>(
+        `/threads/${threadId}/message`,
+        { text, workspace_id: currentWorkspace.id }
+      );
+      setCurrentRunId(response.run_id);
+    } catch (error) {
+      setOutput((prev) => [...prev, `Error: ${error}`]);
+    }
   };
 
   return (
@@ -132,24 +170,20 @@ export function WorkspaceDetailPage() {
                   {line}
                 </div>
               ))}
+              {streamingContent && (
+                <div className="text-foreground whitespace-pre-wrap">
+                  {streamingContent}
+                  <span className="inline-block w-2 h-4 bg-foreground animate-pulse ml-0.5" />
+                </div>
+              )}
             </div>
           </ScrollArea>
           <div className="p-4 border-t border-border">
-            <div className="flex items-center gap-2">
-              <Input
-                value={messageInput}
-                onChange={(e) => setMessageInput(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
-                placeholder="Type a message..."
-                className="flex-1"
-              />
-              <Button variant="ghost" size="icon" className="shrink-0">
-                <Mic className="w-4 h-4" />
-              </Button>
-              <Button onClick={handleSendMessage} size="icon" className="shrink-0">
-                <Send className="w-4 h-4" />
-              </Button>
-            </div>
+            <MessageInput
+              onSend={handleSendMessage}
+              disabled={!!currentRunId}
+              placeholder="Type a message..."
+            />
           </div>
         </Card>
 
