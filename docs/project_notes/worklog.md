@@ -1,5 +1,10 @@
 # Worklog
 
+### 2026-01-26 - Thread header mobile-first menu alignment
+- **Outcome:** Thread detail header is mobile-first with a right-aligned actions menu, search moved into the menu, and a collapsible search input below the header.
+- **Why:** Improve mobile spacing while keeping search reachable without dedicating header space.
+- **Links:** commit `12d03eb031e7395c7e20c3904f58f67d6f439a6c`
+
 ### 2026-01-26 - Thread detail header + workspace linking
 - **Outcome:** Thread detail now has its own header with back navigation, in-thread search, and an actions menu plus a dialog to manage workspace links.
 - **Why:** Make thread navigation faster, enable quick message filtering, and allow linking/unlinking workspaces directly from the thread view.
