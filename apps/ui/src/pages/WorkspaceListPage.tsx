@@ -51,7 +51,7 @@ export function WorkspaceListPage() {
                       <h3 className="font-medium text-foreground truncate">
                         {displayName}
                       </h3>
-                      <p className="text-sm text-muted-foreground font-mono truncate mt-0.5">
+                      <p className="text-sm text-muted-foreground font-mono mt-0.5">
                         {workspace.repo_path}
                       </p>
                       {workspace.notify_policy && (
