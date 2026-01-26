@@ -1,5 +1,10 @@
 # Worklog
 
+### 2026-01-25 - Workspace detail SSE messaging
+- **Outcome:** Workspace detail now sends messages with the shared MessageInput, creates a default thread if missing, and streams replies via SSE.
+- **Why:** Make the workspace detail page usable for sending prompts and seeing live responses without leaving the workspace view.
+- **Links:** commit `bfc013b120c773bd839ce559e3667a7b32bbabd7`
+
 ### 2026-01-25 - Workspace detail thread navigation
 - **Outcome:** Linked threads on the workspace detail page now navigate directly to the thread detail view.
 - **Why:** Allow faster drill-down from a workspace overview into a specific thread.

@@ -19,6 +19,7 @@
 - Working: Threads streaming aggregates deltas to hide raw SSE tags, adds manual/auto refresh on thread detail, plus UI restart controls and service-worker update toasts.
 - Working: Thread view shows a working spinner/status while streaming replies.
 - Working: App shell header components are in place (header, actions menu, workspace switcher).
+- Working: Workspace detail sends messages via the shared MessageInput and streams replies via SSE.
 - Working: Share drafts flow at `/ui/share` saves incoming share text/URLs to localStorage before sending.
 - Working: Dictation is available via mic controls on workspace/thread inputs (Chrome + mic permission).
 - Working: Windows restart tooling includes a PM2 ecosystem config for `godex`.
