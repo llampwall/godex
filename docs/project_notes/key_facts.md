@@ -16,6 +16,7 @@
 - UI token storage: `?token=` is stored in localStorage as `godex_token` and removed from the URL.
 - Runs SSE stream: `/runs/:id/stream` accepts `replay=0` to skip replaying recent events
 - Common paths: `apps/server`, `apps/ui`, `packages`
+ - PM2 process name (ui-rewrite worktree): `godex-ui-rewrite`
 
 ## Notifications
 - Session notify modes: `off`, `needs_input_failed`, `all` (default `needs_input_failed`)
@@ -68,10 +69,10 @@
 - `pnpm typecheck`
 - `pnpm test:server`
 - `pnpm test:ui`
-- `pm2 start "P:\software\godex\apps\server\dist\index.js" --name godex --cwd "P:\software\godex\apps\server"`
-- `pm2 stop godex`
-- `pm2 start godex`
-- `pm2 restart godex`
+- `pm2 start "P:\software\godex\apps\server\dist\index.js" --name godex-ui-rewrite --cwd "P:\software\godex\apps\server"`
+- `pm2 stop godex-ui-rewrite`
+- `pm2 start godex-ui-rewrite`
+- `pm2 restart godex-ui-rewrite`
 - `start-godex.cmd` (builds then starts the server)
 - `start-caddy.cmd` (runs Caddy with `P:\software\caddy\Caddyfile`)
 - `scripts/godex-pm2-start.ps1` (PM2 start helper for Windows)
