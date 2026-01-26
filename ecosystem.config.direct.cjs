@@ -9,6 +9,12 @@ module.exports = {
         CODEX_RELAY_TOKEN: "zflipcommand",
         NODE_ENV: "production"
       }
+    },
+    {
+      name: "caddy",
+      script: "caddy",
+      args: "run --config P:\\software\\caddy\\Caddyfile",
+      cwd: "P:\\software\\godex"
     }
   ]
 };

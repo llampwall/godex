@@ -32,7 +32,7 @@ export function ActionsMenu({ workspace }: ActionsMenuProps) {
   };
 
   const handleRestart = async () => {
-    await api.post("/diag/restart");
+    await api.post("/diag/restart", {});
   };
 
   const handleDelete = async () => {
