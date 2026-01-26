@@ -16,7 +16,7 @@ export function Header() {
   return (
     <>
       <header className="flex items-center justify-between px-4 py-3 border-b border-border bg-card">
-        <div className="flex-1 min-w-0 mr-3">
+        <div className="flex-1 min-w-0 mr-2 md:mr-3">
           <WorkspaceSwitcher onNewRepo={() => setNewRepoOpen(true)} />
         </div>
         <div className="flex items-center gap-2">

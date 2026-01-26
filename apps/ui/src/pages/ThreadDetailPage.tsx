@@ -179,7 +179,7 @@ export function ThreadDetailPage() {
 
       {/* Messages */}
       <ScrollArea className="flex-1" ref={scrollRef}>
-        <div className="container max-w-3xl mx-auto p-4 space-y-4">
+        <div className="container max-w-3xl mx-auto p-3 md:p-4 space-y-3 md:space-y-4">
           {messages.length === 0 && !streamingContent && (
             <div className="text-center text-muted-foreground py-8">
               No messages yet. Start the conversation below.
@@ -213,7 +213,7 @@ export function ThreadDetailPage() {
       </ScrollArea>
 
       {/* Input */}
-      <div className="border-t border-border p-4">
+      <div className="border-t border-border p-3 md:p-4">
         <div className="container max-w-3xl mx-auto">
           <MessageInput
             onSend={handleSend}
