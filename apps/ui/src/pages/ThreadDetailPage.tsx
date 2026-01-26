@@ -29,6 +29,7 @@ export function ThreadDetailPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchOpen, setSearchOpen] = useState(false);
   const [linkWorkspaceOpen, setLinkWorkspaceOpen] = useState(false);
   const [thread, setThread] = useState<ThreadDetail | null>(null);
   const [messages, setMessages] = useState<DisplayMessage[]>([]);
@@ -248,33 +249,22 @@ export function ThreadDetailPage() {
     <div className="flex flex-col h-screen">
       {/* Thread Header */}
       <header className="border-b border-border px-4 py-3 flex items-center gap-3 bg-card">
-        {/* Left: Back + Title */}
         <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
           <ArrowLeft className="w-4 h-4" />
         </Button>
-        <h1 className="font-medium truncate min-w-0">{threadTitle}</h1>
+        <h1 className="font-medium truncate flex-1 min-w-0">{threadTitle}</h1>
 
-        {/* Center: Search */}
-        <div className="flex-1 max-w-md mx-4 hidden md:block">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input
-              placeholder="Search messages..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9"
-            />
-          </div>
-        </div>
-
-        {/* Right: Actions Menu */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" className="ml-auto">
               <MoreVertical className="w-4 h-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
+          <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuItem onClick={() => setSearchOpen(true)}>
+              <Search className="w-4 h-4 mr-2" />
+              Search Messages
+            </DropdownMenuItem>
             <DropdownMenuItem onClick={handleCopyThreadId}>
               Copy Thread ID
             </DropdownMenuItem>
@@ -287,6 +277,33 @@ export function ThreadDetailPage() {
           </DropdownMenuContent>
         </DropdownMenu>
       </header>
+
+      {/* Search Input (Mobile-First) */}
+      {searchOpen && (
+        <div className="border-b border-border px-4 py-3 bg-card">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              placeholder="Search messages..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9"
+              autoFocus
+            />
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setSearchOpen(false);
+                setSearchQuery("");
+              }}
+              className="absolute right-2 top-1/2 transform -translate-y-1/2"
+            >
+              Clear
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* Messages */}
       <ScrollArea className="flex-1" ref={scrollRef}>
