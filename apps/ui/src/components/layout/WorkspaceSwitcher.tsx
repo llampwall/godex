@@ -1,5 +1,4 @@
 import { ChevronDown, Plus } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -15,8 +14,7 @@ interface WorkspaceSwitcherProps {
 }
 
 export function WorkspaceSwitcher({ onNewRepo }: WorkspaceSwitcherProps) {
-  const { workspaces, currentWorkspace } = useWorkspace();
-  const navigate = useNavigate();
+  const { workspaces, currentWorkspace, setCurrentWorkspace } = useWorkspace();
 
   const displayName = currentWorkspace?.repo_path || "godex";
 
@@ -35,7 +33,7 @@ export function WorkspaceSwitcher({ onNewRepo }: WorkspaceSwitcherProps) {
         {workspaces.filter(w => w.id !== "__global__").map((workspace) => (
           <DropdownMenuItem
             key={workspace.id}
-            onClick={() => navigate(`/?workspace=${workspace.id}`)}
+            onClick={() => setCurrentWorkspace(workspace)}
             className={`cursor-pointer font-mono text-sm truncate ${
               currentWorkspace?.id === workspace.id ? "bg-accent" : ""
             }`}
@@ -47,13 +45,13 @@ export function WorkspaceSwitcher({ onNewRepo }: WorkspaceSwitcherProps) {
           <DropdownMenuSeparator className="bg-border" />
         )}
         <DropdownMenuItem
-          onClick={() => navigate("/")}
+          onClick={() => setCurrentWorkspace(null)}
           className="cursor-pointer"
         >
           All Workspaces
         </DropdownMenuItem>
         <DropdownMenuItem
-          onClick={() => navigate(`/?workspace=${GLOBAL_WORKSPACE.id}`)}
+          onClick={() => setCurrentWorkspace(GLOBAL_WORKSPACE)}
           className={`cursor-pointer ${
             currentWorkspace?.id === "__global__" ? "bg-accent" : ""
           }`}

@@ -1,5 +1,4 @@
-import { Routes, Route, Navigate, useSearchParams } from "react-router-dom";
-import { useEffect } from "react";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { WorkspaceProvider, useWorkspace } from "@/contexts/WorkspaceContext";
 import { Header } from "@/components/layout/Header";
