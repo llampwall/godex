@@ -19,6 +19,7 @@
 - Working: UI is installable as a PWA, shows an offline/server-unreachable banner, and serves PWA root assets from the server build output.
 - Working: Threads streaming aggregates deltas to hide raw SSE tags, adds manual/auto refresh on thread detail, plus UI restart controls and service-worker update toasts.
 - Working: Thread view shows a working spinner/status while streaming replies.
+- Working: Thread detail uses a dedicated header with in-thread search, actions, and workspace link management.
 - Working: App shell header components are in place (header, actions menu, workspace switcher).
 - Working: Workspace detail sends messages via the shared MessageInput and streams replies via SSE.
 - Working: Share drafts flow at `/ui/share` saves incoming share text/URLs to localStorage before sending.

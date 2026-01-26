@@ -1,5 +1,10 @@
 # Worklog
 
+### 2026-01-26 - Thread detail header + workspace linking
+- **Outcome:** Thread detail now has its own header with back navigation, in-thread search, and an actions menu plus a dialog to manage workspace links.
+- **Why:** Make thread navigation faster, enable quick message filtering, and allow linking/unlinking workspaces directly from the thread view.
+- **Links:** commit `d4d343459df7334b8588ebaac5b2bebf1756dba5`
+
 ### 2026-01-26 - Global workspace thread filtering
 - **Outcome:** `/threads?workspace_id=__global__` now returns only unattached threads by filtering on empty `attached_workspace_ids`.
 - **Why:** Keep the "Unlinked Threads" workspace aligned with server-side filtering without affecting real workspace queries.
