@@ -105,7 +105,7 @@ Notes:
 
 Notes:
 - Start the backend before using the UI: run `pnpm start`.
-- If using HTTPS via Caddy, run `caddy run --config P:\software\caddy\Caddyfile` in a separate terminal.
+- If using HTTPS via Caddy, run `caddy run --config P:\software\godex\caddy\Caddyfile` in a separate terminal.
 - For SSE stability, add no-buffer headers in Caddy (example below).
 - The app still needs a valid token in localStorage. If you have not set one, open the UI once with `?token=...` first.
 - Share drafts are stored locally and survive refresh until sent or cleared.

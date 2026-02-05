@@ -1,0 +1,23 @@
+central-command:443 {
+  tls internal
+
+  @sse path /runs/*/stream
+  header @sse {
+    Cache-Control "no-cache"
+    X-Accel-Buffering "no"
+  }
+  reverse_proxy 127.0.0.1:7777
+}
+
+chinvex:443 {
+  tls internal
+  reverse_proxy 127.0.0.1:7778
+}
+
+http://central-command {
+  redir https://{host}{uri}
+}
+
+http://chinvex {
+  redir https://{host}{uri}
+}

@@ -1,0 +1,5472 @@
+This file is a merged representation of a subset of the codebase, containing specifically included files, combined into a single document by Repomix.
+The content has been processed where content has been compressed (code blocks are separated by ⋮---- delimiter).
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of a subset of the repository's contents that is considered the most important context.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Only files matching these patterns are included: README.md, docs/**, src/**, packages/**, apps/**, scripts/**, *.md, *.js, *.cjs, *.json, *.ts, *.tsx, *.py, *.cmd, *.ps1
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Content has been compressed - code blocks are separated by ⋮---- delimiter
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+AGENTS.md
+apps/server/bootstrap_template.schema.json
+apps/server/package.json
+apps/server/SERVER_PORT=7777
+apps/server/src/auth.ts
+apps/server/src/bootstrap.ts
+apps/server/src/codex_app_server_manager.ts
+apps/server/src/index.ts
+apps/server/src/routes/diag.ts
+apps/server/src/routes/runs.ts
+apps/server/src/routes/threads.ts
+apps/server/src/routes/workspaces.ts
+apps/server/src/run_manager.ts
+apps/server/src/server.ts
+apps/server/src/store.ts
+apps/server/test/bootstrap.codex.test.ts
+apps/server/test/bootstrap.route.test.ts
+apps/server/test/bootstrap.test.ts
+apps/server/test/notify.test.ts
+apps/server/test/smoke.test.ts
+apps/server/test/workspaces.test.ts
+apps/server/tsconfig.json
+apps/ui/index.html
+apps/ui/package.json
+apps/ui/public/new-repo-modal.rar
+apps/ui/public/new-repo-modal.tsx
+apps/ui/public/new-repo-modal/.gitignore
+apps/ui/public/new-repo-modal/app/globals.css
+apps/ui/public/new-repo-modal/app/layout.tsx
+apps/ui/public/new-repo-modal/app/page.tsx
+apps/ui/public/new-repo-modal/components.json
+apps/ui/public/new-repo-modal/components/new-repo-modal.tsx
+apps/ui/public/new-repo-modal/components/theme-provider.tsx
+apps/ui/public/new-repo-modal/components/ui/accordion.tsx
+apps/ui/public/new-repo-modal/components/ui/alert-dialog.tsx
+apps/ui/public/new-repo-modal/components/ui/alert.tsx
+apps/ui/public/new-repo-modal/components/ui/aspect-ratio.tsx
+apps/ui/public/new-repo-modal/components/ui/avatar.tsx
+apps/ui/public/new-repo-modal/components/ui/badge.tsx
+apps/ui/public/new-repo-modal/components/ui/breadcrumb.tsx
+apps/ui/public/new-repo-modal/components/ui/button-group.tsx
+apps/ui/public/new-repo-modal/components/ui/button.tsx
+apps/ui/public/new-repo-modal/components/ui/calendar.tsx
+apps/ui/public/new-repo-modal/components/ui/card.tsx
+apps/ui/public/new-repo-modal/components/ui/carousel.tsx
+apps/ui/public/new-repo-modal/components/ui/chart.tsx
+apps/ui/public/new-repo-modal/components/ui/checkbox.tsx
+apps/ui/public/new-repo-modal/components/ui/collapsible.tsx
+apps/ui/public/new-repo-modal/components/ui/command.tsx
+apps/ui/public/new-repo-modal/components/ui/context-menu.tsx
+apps/ui/public/new-repo-modal/components/ui/dialog.tsx
+apps/ui/public/new-repo-modal/components/ui/drawer.tsx
+apps/ui/public/new-repo-modal/components/ui/dropdown-menu.tsx
+apps/ui/public/new-repo-modal/components/ui/empty.tsx
+apps/ui/public/new-repo-modal/components/ui/field.tsx
+apps/ui/public/new-repo-modal/components/ui/form.tsx
+apps/ui/public/new-repo-modal/components/ui/hover-card.tsx
+apps/ui/public/new-repo-modal/components/ui/input-group.tsx
+apps/ui/public/new-repo-modal/components/ui/input-otp.tsx
+apps/ui/public/new-repo-modal/components/ui/input.tsx
+apps/ui/public/new-repo-modal/components/ui/item.tsx
+apps/ui/public/new-repo-modal/components/ui/kbd.tsx
+apps/ui/public/new-repo-modal/components/ui/label.tsx
+apps/ui/public/new-repo-modal/components/ui/menubar.tsx
+apps/ui/public/new-repo-modal/components/ui/navigation-menu.tsx
+apps/ui/public/new-repo-modal/components/ui/pagination.tsx
+apps/ui/public/new-repo-modal/components/ui/popover.tsx
+apps/ui/public/new-repo-modal/components/ui/progress.tsx
+apps/ui/public/new-repo-modal/components/ui/radio-group.tsx
+apps/ui/public/new-repo-modal/components/ui/resizable.tsx
+apps/ui/public/new-repo-modal/components/ui/scroll-area.tsx
+apps/ui/public/new-repo-modal/components/ui/select.tsx
+apps/ui/public/new-repo-modal/components/ui/separator.tsx
+apps/ui/public/new-repo-modal/components/ui/sheet.tsx
+apps/ui/public/new-repo-modal/components/ui/sidebar.tsx
+apps/ui/public/new-repo-modal/components/ui/skeleton.tsx
+apps/ui/public/new-repo-modal/components/ui/slider.tsx
+apps/ui/public/new-repo-modal/components/ui/sonner.tsx
+apps/ui/public/new-repo-modal/components/ui/spinner.tsx
+apps/ui/public/new-repo-modal/components/ui/switch.tsx
+apps/ui/public/new-repo-modal/components/ui/table.tsx
+apps/ui/public/new-repo-modal/components/ui/tabs.tsx
+apps/ui/public/new-repo-modal/components/ui/textarea.tsx
+apps/ui/public/new-repo-modal/components/ui/toast.tsx
+apps/ui/public/new-repo-modal/components/ui/toaster.tsx
+apps/ui/public/new-repo-modal/components/ui/toggle-group.tsx
+apps/ui/public/new-repo-modal/components/ui/toggle.tsx
+apps/ui/public/new-repo-modal/components/ui/tooltip.tsx
+apps/ui/public/new-repo-modal/components/ui/use-mobile.tsx
+apps/ui/public/new-repo-modal/components/ui/use-toast.ts
+apps/ui/public/new-repo-modal/hooks/use-mobile.ts
+apps/ui/public/new-repo-modal/hooks/use-toast.ts
+apps/ui/public/new-repo-modal/lib/utils.ts
+apps/ui/public/new-repo-modal/next.config.mjs
+apps/ui/public/new-repo-modal/package.json
+apps/ui/public/new-repo-modal/postcss.config.mjs
+apps/ui/public/new-repo-modal/styles/globals.css
+apps/ui/public/new-repo-modal/tsconfig.json
+apps/ui/public/repo-main-page.rar
+apps/ui/public/repo-main-page/.gitignore
+apps/ui/public/repo-main-page/app/globals.css
+apps/ui/public/repo-main-page/app/layout.tsx
+apps/ui/public/repo-main-page/app/page.tsx
+apps/ui/public/repo-main-page/components.json
+apps/ui/public/repo-main-page/components/new-repo-modal.tsx
+apps/ui/public/repo-main-page/components/repo-page.tsx
+apps/ui/public/repo-main-page/components/theme-provider.tsx
+apps/ui/public/repo-main-page/components/ui/accordion.tsx
+apps/ui/public/repo-main-page/components/ui/alert-dialog.tsx
+apps/ui/public/repo-main-page/components/ui/alert.tsx
+apps/ui/public/repo-main-page/components/ui/aspect-ratio.tsx
+apps/ui/public/repo-main-page/components/ui/avatar.tsx
+apps/ui/public/repo-main-page/components/ui/badge.tsx
+apps/ui/public/repo-main-page/components/ui/breadcrumb.tsx
+apps/ui/public/repo-main-page/components/ui/button-group.tsx
+apps/ui/public/repo-main-page/components/ui/button.tsx
+apps/ui/public/repo-main-page/components/ui/calendar.tsx
+apps/ui/public/repo-main-page/components/ui/card.tsx
+apps/ui/public/repo-main-page/components/ui/carousel.tsx
+apps/ui/public/repo-main-page/components/ui/chart.tsx
+apps/ui/public/repo-main-page/components/ui/checkbox.tsx
+apps/ui/public/repo-main-page/components/ui/collapsible.tsx
+apps/ui/public/repo-main-page/components/ui/command.tsx
+apps/ui/public/repo-main-page/components/ui/context-menu.tsx
+apps/ui/public/repo-main-page/components/ui/dialog.tsx
+apps/ui/public/repo-main-page/components/ui/drawer.tsx
+apps/ui/public/repo-main-page/components/ui/dropdown-menu.tsx
+apps/ui/public/repo-main-page/components/ui/empty.tsx
+apps/ui/public/repo-main-page/components/ui/field.tsx
+apps/ui/public/repo-main-page/components/ui/form.tsx
+apps/ui/public/repo-main-page/components/ui/hover-card.tsx
+apps/ui/public/repo-main-page/components/ui/input-group.tsx
+apps/ui/public/repo-main-page/components/ui/input-otp.tsx
+apps/ui/public/repo-main-page/components/ui/input.tsx
+apps/ui/public/repo-main-page/components/ui/item.tsx
+apps/ui/public/repo-main-page/components/ui/kbd.tsx
+apps/ui/public/repo-main-page/components/ui/label.tsx
+apps/ui/public/repo-main-page/components/ui/menubar.tsx
+apps/ui/public/repo-main-page/components/ui/navigation-menu.tsx
+apps/ui/public/repo-main-page/components/ui/pagination.tsx
+apps/ui/public/repo-main-page/components/ui/popover.tsx
+apps/ui/public/repo-main-page/components/ui/progress.tsx
+apps/ui/public/repo-main-page/components/ui/radio-group.tsx
+apps/ui/public/repo-main-page/components/ui/resizable.tsx
+apps/ui/public/repo-main-page/components/ui/scroll-area.tsx
+apps/ui/public/repo-main-page/components/ui/select.tsx
+apps/ui/public/repo-main-page/components/ui/separator.tsx
+apps/ui/public/repo-main-page/components/ui/sheet.tsx
+apps/ui/public/repo-main-page/components/ui/sidebar.tsx
+apps/ui/public/repo-main-page/components/ui/skeleton.tsx
+apps/ui/public/repo-main-page/components/ui/slider.tsx
+apps/ui/public/repo-main-page/components/ui/sonner.tsx
+apps/ui/public/repo-main-page/components/ui/spinner.tsx
+apps/ui/public/repo-main-page/components/ui/switch.tsx
+apps/ui/public/repo-main-page/components/ui/table.tsx
+apps/ui/public/repo-main-page/components/ui/tabs.tsx
+apps/ui/public/repo-main-page/components/ui/textarea.tsx
+apps/ui/public/repo-main-page/components/ui/toast.tsx
+apps/ui/public/repo-main-page/components/ui/toaster.tsx
+apps/ui/public/repo-main-page/components/ui/toggle-group.tsx
+apps/ui/public/repo-main-page/components/ui/toggle.tsx
+apps/ui/public/repo-main-page/components/ui/tooltip.tsx
+apps/ui/public/repo-main-page/components/ui/use-mobile.tsx
+apps/ui/public/repo-main-page/components/ui/use-toast.ts
+apps/ui/public/repo-main-page/hooks/use-mobile.ts
+apps/ui/public/repo-main-page/hooks/use-toast.ts
+apps/ui/public/repo-main-page/lib/utils.ts
+apps/ui/public/repo-main-page/next.config.mjs
+apps/ui/public/repo-main-page/package.json
+apps/ui/public/repo-main-page/postcss.config.mjs
+apps/ui/public/repo-main-page/styles/globals.css
+apps/ui/public/repo-main-page/tsconfig.json
+apps/ui/src/App.tsx
+apps/ui/src/components/layout/ActionsMenu.tsx
+apps/ui/src/components/layout/Header.tsx
+apps/ui/src/components/layout/OfflineBanner.tsx
+apps/ui/src/components/layout/WorkspaceSwitcher.tsx
+apps/ui/src/components/thread/LinkWorkspaceDialog.tsx
+apps/ui/src/components/thread/MessageInput.tsx
+apps/ui/src/components/ui/button.tsx
+apps/ui/src/components/ui/card.tsx
+apps/ui/src/components/ui/dialog.tsx
+apps/ui/src/components/ui/dropdown-menu.tsx
+apps/ui/src/components/ui/input.tsx
+apps/ui/src/components/ui/label.tsx
+apps/ui/src/components/ui/scroll-area.tsx
+apps/ui/src/components/ui/select.tsx
+apps/ui/src/components/ui/textarea.tsx
+apps/ui/src/components/workspace/NewRepoModal.tsx
+apps/ui/src/contexts/AuthContext.tsx
+apps/ui/src/contexts/WorkspaceContext.tsx
+apps/ui/src/hooks/useDictation.ts
+apps/ui/src/hooks/useOnline.ts
+apps/ui/src/hooks/useSSE.ts
+apps/ui/src/lib/api.ts
+apps/ui/src/lib/utils.ts
+apps/ui/src/main.tsx
+apps/ui/src/pages/ShareDraftPage.tsx
+apps/ui/src/pages/ThreadDetailPage.tsx
+apps/ui/src/pages/WorkspaceDetailPage.tsx
+apps/ui/src/pages/WorkspaceListPage.tsx
+apps/ui/src/styles/globals.css
+apps/ui/src/types/speech.d.ts
+apps/ui/src/vite-env.d.ts
+apps/ui/tsconfig.json
+apps/ui/vite.config.ts
+CLAUDE.md
+docs/project_notes/adrs.md
+docs/project_notes/bugs.md
+docs/project_notes/key_facts.md
+docs/project_notes/operating_brief.md
+docs/project_notes/worklog.md
+ecosystem.config.cjs
+ecosystem.config.direct.cjs
+package.json
+packages/shared/package.json
+packages/shared/src/index.ts
+packages/shared/tsconfig.json
+PM2_CONFIG.md
+PM2_SWITCH.md
+README.md
+repomix.config.json
+scripts/godex-pm2-start.cmd
+scripts/godex-pm2-start.ps1
+scripts/smoke-codex.mjs
+start-caddy.cmd
+start-godex.cmd
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path="apps/server/package.json">
+{
+  "name": "godex-server",
+  "private": true,
+  "version": "0.1.0",
+  "type": "commonjs",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@fastify/cors": "^9.0.1",
+    "@fastify/static": "^7.0.4",
+    "dotenv": "^16.4.5",
+    "execa": "^7.2.0",
+    "fastify": "^4.28.1",
+    "strip-ansi": "^7.1.0"
+  },
+  "optionalDependencies": {
+    "better-sqlite3": "^9.4.5"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.30",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.2",
+    "vitest": "^2.1.0"
+  }
+}
+</file>
+
+<file path="apps/server/src/auth.ts">
+import { FastifyReply, FastifyRequest } from "fastify";
+⋮----
+const getTokenFromAuthHeader = (req: FastifyRequest): string | null =>
+⋮----
+const getTokenFromQuery = (req: FastifyRequest): string | null =>
+⋮----
+const isPublicPath = (url?: string) =>
+⋮----
+export const authGuard = async (req: FastifyRequest, reply: FastifyReply) =>
+</file>
+
+<file path="apps/server/src/codex_app_server_manager.ts">
+import { spawn, ChildProcessWithoutNullStreams } from "node:child_process";
+import { createInterface } from "node:readline";
+import { resolve } from "node:path";
+⋮----
+interface Logger {
+  info: (obj: unknown, msg?: string) => void;
+  error: (obj: unknown, msg?: string) => void;
+  warn?: (obj: unknown, msg?: string) => void;
+  debug?: (obj: unknown, msg?: string) => void;
+}
+⋮----
+type AppServerMessage = {
+  id?: string | number;
+  method?: string;
+  params?: any;
+  result?: any;
+  error?: { code?: number; message?: string; data?: unknown };
+};
+⋮----
+type PendingRequest = {
+  resolve: (value: any) => void;
+  reject: (error: Error) => void;
+  timeout: NodeJS.Timeout;
+};
+⋮----
+type StatusState = "starting" | "ready" | "error" | "stopped";
+⋮----
+type StatusSnapshot = {
+  state: StatusState;
+  pid: number | null;
+  last_error: string | null;
+  restarting: boolean;
+};
+⋮----
+type NotificationHandler = (message: AppServerMessage) => void;
+⋮----
+export type CodexSpawnSpec = {
+  command: string;
+  args: string[];
+  options: {
+    cwd: string;
+    stdio: ["pipe", "pipe", "pipe"];
+    env: NodeJS.ProcessEnv;
+    shell: boolean;
+    windowsHide: boolean;
+  };
+};
+⋮----
+const nowIso = ()
+⋮----
+const safeStringify = (input: unknown) =>
+⋮----
+const resolveCodexBinary = (): string =>
+⋮----
+export const buildCodexSpawnSpec = (cwd: string): CodexSpawnSpec =>
+⋮----
+export const buildCodexCommandSpec = (cwd: string, args: string[]): CodexSpawnSpec =>
+⋮----
+export class CodexAppServerManager {
+⋮----
+constructor(logger?: Logger)
+⋮----
+getStatus(): StatusSnapshot
+⋮----
+getLogLines(): string[]
+⋮----
+isReady(): boolean
+⋮----
+getCwd(): string
+⋮----
+getSpawnSpec(): CodexSpawnSpec
+⋮----
+subscribe(handler: NotificationHandler): () => void
+⋮----
+start()
+⋮----
+async request(method: string, params?: unknown, timeoutMs = 60000): Promise<any>
+⋮----
+notify(method: string, params?: unknown)
+⋮----
+private sendRequest(method: string, params?: unknown, timeoutMs = 60000): Promise<any>
+⋮----
+private spawnProcess()
+⋮----
+private async initialize()
+⋮----
+private async requestInitialize()
+⋮----
+private scheduleRestart()
+⋮----
+private handleStdoutLine(line: string)
+⋮----
+private respondError(id: string | number, code: number, message: string)
+⋮----
+private emitNotification(message: AppServerMessage)
+⋮----
+private rejectAllPending(error: Error)
+⋮----
+private appendLog(line: string)
+</file>
+
+<file path="apps/server/src/index.ts">
+import { buildServer } from "./server.js";
+</file>
+
+<file path="apps/server/src/routes/runs.ts">
+import { FastifyInstance } from "fastify";
+import { RunManager } from "../run_manager.js";
+import { Store } from "../store.js";
+⋮----
+const writeEvent = (res: NodeJS.WritableStream, event: string, data: unknown) =>
+⋮----
+export const registerRunRoutes = (app: FastifyInstance, store: Store, runManager: RunManager) =>
+</file>
+
+<file path="apps/server/test/smoke.test.ts">
+import { describe, expect, it } from "vitest";
+import { buildServer } from "../src/server";
+</file>
+
+<file path="apps/server/tsconfig.json">
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "CommonJS",
+    "outDir": "dist",
+    "rootDir": "src",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true
+  },
+  "include": [
+    "src"
+  ]
+}
+</file>
+
+<file path="docs/project_notes/adrs.md">
+# ADRs
+
+- No ADRs recorded yet.
+</file>
+
+<file path="package.json">
+{
+  "name": "godex",
+  "private": true,
+  "version": "0.1.0",
+  "packageManager": "pnpm@9.12.3",
+  "scripts": {
+    "dev": "pnpm -r --parallel dev",
+    "build": "pnpm -r build",
+    "start": "pnpm -s build && pnpm --filter ./apps/server start",
+    "typecheck": "pnpm -r typecheck",
+    "test:server": "pnpm --filter ./apps/server test",
+    "test:ui": "pnpm --filter ./apps/ui build",
+    "test": "pnpm -s test:server && pnpm -s test:ui",
+    "smoke": "node scripts/smoke-codex.mjs"
+  }
+}
+</file>
+
+<file path="packages/shared/package.json">
+{
+  "name": "@godex/shared",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.2"
+  }
+}
+</file>
+
+<file path="packages/shared/src/index.ts">
+export type Health = {
+  ok: boolean;
+};
+</file>
+
+<file path="packages/shared/tsconfig.json">
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "strict": true,
+    "skipLibCheck": true,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "outDir": "dist"
+  },
+  "include": ["src"]
+}
+</file>
+
+<file path="repomix.config.json">
+{
+  "$schema": "https://repomix.com/schemas/latest/schema.json",
+  "input": {
+    "maxFileSize": 52428800
+  },
+  "output": {
+    "filePath": "repomix-output.xml",
+    "style": "xml",
+    "parsableStyle": false,
+    "fileSummary": true,
+    "directoryStructure": true,
+    "files": true,
+    "removeComments": false,
+    "removeEmptyLines": false,
+    "compress": false,
+    "topFilesLength": 5,
+    "showLineNumbers": false,
+    "truncateBase64": false,
+    "copyToClipboard": false,
+    "includeFullDirectoryStructure": false,
+    "tokenCountTree": false,
+    "git": {
+      "sortByChanges": true,
+      "sortByChangesMaxCommits": 100,
+      "includeDiffs": false,
+      "includeLogs": false,
+      "includeLogsCount": 50
+    }
+  },
+  "include": [],
+  "ignore": {
+    "useGitignore": true,
+    "useDotIgnore": true,
+    "useDefaultPatterns": true,
+    "customPatterns": []
+  },
+  "security": {
+    "enableSecurityCheck": true
+  },
+  "tokenCount": {
+    "encoding": "o200k_base"
+  }
+}
+</file>
+
+<file path="scripts/smoke-codex.mjs">
+const loadEnv = () =>
+⋮----
+const main = async () =>
+</file>
+
+<file path="apps/server/bootstrap_template.schema.json">
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["template_used", "confidence", "alternatives", "reasoning"],
+  "properties": {
+    "template_used": {
+      "type": "string",
+      "enum": ["mono", "service", "web", "python", "blank"]
+    },
+    "confidence": {
+      "type": "string",
+      "enum": ["high", "medium", "low"]
+    },
+    "alternatives": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["mono", "service", "web", "python", "blank"]
+      }
+    },
+    "reasoning": {
+      "type": "string"
+    }
+  }
+}
+</file>
+
+<file path="apps/server/src/bootstrap.ts">
+import { appendFileSync, existsSync, mkdirSync, statSync } from "node:fs";
+import { homedir } from "node:os";
+import { resolve } from "node:path";
+import { Store } from "./store.js";
+⋮----
+export type BootstrapTemplate = "mono" | "service" | "web" | "python" | "blank" | "auto";
+export type TemplateUsed = Exclude<BootstrapTemplate, "auto">;
+⋮----
+export type TemplateConfidence = "high" | "medium" | "low";
+export type TemplateDecision = {
+  template_used: TemplateUsed;
+  confidence: TemplateConfidence;
+  alternatives?: TemplateUsed[];
+  reasoning?: string;
+};
+⋮----
+const buildTemplatePrompt = (name: string, description: string) =>
+⋮----
+export const parseTemplateDecision = (text: string): TemplateDecision | null =>
+⋮----
+const buildCodexExecArgs = (prompt: string) =>
+⋮----
+const dynamicImport = (specifier: string) =>
+⋮----
+const loadExeca = async () =>
+⋮----
+const resolveLogDir = () =>
+⋮----
+const appendBootstrapLog = (entry: string) =>
+⋮----
+// ignore log failures
+⋮----
+export const resolveTemplateWithCodex = async (name: string, description: string): Promise<TemplateDecision> =>
+⋮----
+export const validateRepoName = (name: string):
+⋮----
+const isDirectory = (path: string): boolean =>
+⋮----
+export const resolveDefaultRepoRoot = (): string | null =>
+⋮----
+export const resolveRepoRoot = (input?: string | null): string | null =>
+⋮----
+export const buildTargetRepoPath = (root: string, name: string): string =>
+⋮----
+export const checkRepoAvailability = (root: string, name: string):
+  | { ok: true; repo_path: string }
+  | { ok: false; error: "repo_exists"; repo_path: string } => {
+  const repo_path = buildTargetRepoPath(root, name);
+⋮----
+export const buildStrapArgs = (name: string, template: TemplateUsed, root: string, start?: boolean) =>
+⋮----
+export const buildBootstrapMessage = (name: string, repoPath: string, template: TemplateUsed) =>
+⋮----
+export interface AppServerClient {
+  isReady: () => boolean;
+  request: (method: string, params: Record<string, unknown>) => Promise<any>;
+}
+⋮----
+const extractThreadIdFromResponse = (result: any): string | null =>
+⋮----
+export const createThread = async (appServer: AppServerClient, title?: string) =>
+⋮----
+export const sendThreadMessage = async (appServer: AppServerClient, threadId: string, text: string) =>
+⋮----
+export const finalizeBootstrapSuccess = async (store: Store, appServer: AppServerClient, input: {
+  name: string;
+  repo_path: string;
+  template_used: TemplateUsed;
+  set_default_thread?: boolean;
+}) =>
+</file>
+
+<file path="apps/server/src/run_manager.ts">
+import { randomUUID } from "node:crypto";
+import { Store, RunStream, WorkspaceStatus, NotifyPolicy } from "./store.js";
+⋮----
+const dynamicImport = (specifier: string) =>
+⋮----
+const loadExeca = async () =>
+⋮----
+const fallbackStrip = (input: string) =>
+⋮----
+interface Logger {
+  info: (obj: unknown, msg?: string) => void;
+  error: (obj: unknown, msg?: string) => void;
+  debug?: (obj: unknown, msg?: string) => void;
+}
+⋮----
+const loadStripAnsi = async (logger?: Logger) =>
+⋮----
+export interface RunStartInput {
+  type: string;
+  workspace_id: string | null;
+  command: string;
+  args?: string[];
+  cwd: string;
+}
+⋮----
+export interface ExternalRunStartInput {
+  type: string;
+  workspace_id: string | null;
+  command: string;
+  cwd: string;
+}
+⋮----
+export interface RunEventPayload {
+  run_id: string;
+  ts: string;
+  stream: RunStream;
+  chunk: string;
+  seq: number;
+}
+⋮----
+export interface FinalEventPayload {
+  run_id: string;
+  ts: string;
+  exit_code: number | null;
+}
+⋮----
+type Subscriber = (event: { type: "chunk"; data: RunEventPayload } | { type: "final"; data: FinalEventPayload }) => void;
+⋮----
+const now = ()
+⋮----
+const filterMessageNoise = (text: string): string =>
+⋮----
+const detectNeedsInput = (text: string) =>
+⋮----
+const collapseWhitespace = (input: string)
+⋮----
+const buildSummary = (
+  events: { chunk: string }[],
+  status: WorkspaceStatus,
+  stripAnsi: (input: string) => string
+) =>
+⋮----
+const truncateSummary = (input: string, max = 160) =>
+⋮----
+const shouldNotify = (mode: NotifyPolicy, status: WorkspaceStatus, durationSec: number) =>
+⋮----
+export class RunManager
+⋮----
+constructor(store: Store, logger?: Logger)
+⋮----
+getActiveRunsCount(): number
+⋮----
+subscribe(run_id: string, handler: Subscriber): () => void
+⋮----
+private broadcast(event:
+⋮----
+startExternalRun(input: ExternalRunStartInput): string
+⋮----
+appendExternalEvent(run_id: string, stream: RunStream, chunk: string)
+⋮----
+finalizeExternalRun(run_id: string, exit_code: number | null, errorMessage?: string)
+⋮----
+private async maybeNotify(workspace_id: string, status: WorkspaceStatus, summary: string)
+⋮----
+// ignore notification errors
+⋮----
+async startRun(input: RunStartInput): Promise<string>
+⋮----
+const finalize = (exit_code: number | null, errorMessage?: string) =>
+⋮----
+const handleChunk = (stream: RunStream, chunk: Buffer) =>
+</file>
+
+<file path="apps/server/test/bootstrap.codex.test.ts">
+import { describe, expect, test } from "vitest";
+import { resolveTemplateWithCodex } from "../src/bootstrap";
+</file>
+
+<file path="apps/server/test/bootstrap.test.ts">
+import { describe, expect, it, beforeEach, afterEach } from "vitest";
+import { mkdtempSync, mkdirSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join, resolve } from "node:path";
+import { createStore } from "../src/store";
+import {
+  buildStrapArgs,
+  checkRepoAvailability,
+  finalizeBootstrapSuccess,
+  parseTemplateDecision,
+  validateRepoName
+} from "../src/bootstrap";
+⋮----
+const makeTempDir = () =>
+⋮----
+// ignore
+</file>
+
+<file path="apps/server/test/notify.test.ts">
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { RunManager } from "../src/run_manager";
+import type { NotifyPolicy, Run, RunEvent, Workspace, Store, ThreadMeta, WorkspaceThread } from "../src/store";
+⋮----
+const now = ()
+⋮----
+const createMemoryStore = (): Store =>
+⋮----
+const waitForRun = async (store: Store, manager: RunManager, runId: string) =>
+</file>
+
+<file path="apps/server/test/workspaces.test.ts">
+import { describe, expect, it, beforeEach, afterEach } from "vitest";
+import { mkdirSync, rmSync } from "node:fs";
+import { mkdtempSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { createStore, migrateJsonData } from "../src/store";
+import { mergeThreadList } from "../src/routes/threads";
+⋮----
+const makeTempDir = () =>
+⋮----
+// sqlite keeps a handle open on windows; ignore cleanup failures
+</file>
+
+<file path="apps/ui/public/new-repo-modal.tsx">
+import { useState } from "react"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import { cn } from "@/lib/utils"
+import { Globe, Server, Code2, Layers, FolderOpen, Sparkles, ChevronRight } from "lucide-react"
+⋮----
+interface NewRepoModalProps {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+}
+⋮----
+const handleSubmit = () =>
+⋮----
+{/* Repo Name */}
+⋮----
+{/* Optional Path */}
+⋮----
+{/* Template Selection Toggle */}
+⋮----
+onClick=
+⋮----
+className=
+⋮----
+{/* Actions */}
+</file>
+
+<file path="apps/ui/public/new-repo-modal/.gitignore">
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files
+.env*
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+</file>
+
+<file path="apps/ui/public/new-repo-modal/app/globals.css">
+@custom-variant dark (&:is(.dark *));
+⋮----
+.dark {
+⋮----
+@theme inline {
+⋮----
+@layer base {
+⋮----
+* {
+body {
+</file>
+
+<file path="apps/ui/public/new-repo-modal/app/layout.tsx">
+import React from "react"
+import type { Metadata } from 'next'
+import { Geist, Geist_Mono } from 'next/font/google'
+import { Analytics } from '@vercel/analytics/next'
+⋮----
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode
+}>)
+</file>
+
+<file path="apps/ui/public/new-repo-modal/app/page.tsx">
+import { useState } from "react"
+import { Button } from "@/components/ui/button"
+import { NewRepoModal } from "@/components/new-repo-modal"
+import { Plus } from "lucide-react"
+⋮----
+export default function Page()
+</file>
+
+<file path="apps/ui/public/new-repo-modal/components.json">
+{
+  "$schema": "https://ui.shadcn.com/schema.json",
+  "style": "new-york",
+  "rsc": true,
+  "tsx": true,
+  "tailwind": {
+    "config": "",
+    "css": "app/globals.css",
+    "baseColor": "neutral",
+    "cssVariables": true,
+    "prefix": ""
+  },
+  "aliases": {
+    "components": "@/components",
+    "utils": "@/lib/utils",
+    "ui": "@/components/ui",
+    "lib": "@/lib",
+    "hooks": "@/hooks"
+  },
+  "iconLibrary": "lucide"
+}
+</file>
+
+<file path="apps/ui/public/new-repo-modal/components/new-repo-modal.tsx">
+import { useState } from "react"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import { cn } from "@/lib/utils"
+import { Globe, Server, Code2, Layers, FolderOpen, Sparkles, ChevronRight } from "lucide-react"
+⋮----
+interface NewRepoModalProps {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+}
+⋮----
+const handleSubmit = () =>
+⋮----
+{/* Repo Name */}
+⋮----
+{/* Optional Path */}
+⋮----
+{/* Template Selection Toggle */}
+⋮----
+onClick=
+⋮----
+className=
+⋮----
+{/* Actions */}
+</file>
+
+<file path="apps/ui/public/new-repo-modal/components/theme-provider.tsx">
+import {
+  ThemeProvider as NextThemesProvider,
+  type ThemeProviderProps,
+} from 'next-themes'
+⋮----
+export function ThemeProvider(
+</file>
+
+<file path="apps/ui/public/new-repo-modal/components/ui/accordion.tsx">
+import { ChevronDownIcon } from 'lucide-react'
+⋮----
+import { cn } from '@/lib/utils'
+⋮----
+function Accordion({
+  ...props
+}: React.ComponentProps<typeof AccordionPrimitive.Root>)
+⋮----
+function AccordionItem({
+  className,
+  ...props
+}: React.ComponentProps<typeof AccordionPrimitive.Item>)
+⋮----
+function AccordionTrigger({
+  className,
+  children,
+  ...props
+}: React.ComponentProps<typeof AccordionPrimitive.Trigger>)
+</file>
+
+<file path="apps/ui/public/new-repo-modal/components/ui/alert-dialog.tsx">
+import { cn } from '@/lib/utils'
+import { buttonVariants } from '@/components/ui/button'
+⋮----
+function AlertDialog({
+  ...props
+}: React.ComponentProps<typeof AlertDialogPrimitive.Root>)
+⋮----
+className=
+⋮----
+function AlertDialogDescription({
+  className,
+  ...props
+}: React.ComponentProps<typeof AlertDialogPrimitive.Description>)
+</file>
+
+<file path="apps/ui/public/new-repo-modal/components/ui/alert.tsx">
+import { cva, type VariantProps } from 'class-variance-authority'
+⋮----
+import { cn } from '@/lib/utils'
+⋮----
+className=
+</file>
+
+<file path="apps/ui/public/new-repo-modal/components/ui/aspect-ratio.tsx">
+function AspectRatio({
+  ...props
+}: React.ComponentProps<typeof AspectRatioPrimitive.Root>)
+</file>
+
+<file path="apps/ui/public/new-repo-modal/components/ui/avatar.tsx">
+import { cn } from '@/lib/utils'
+⋮----
+className=
+</file>
+
+<file path="apps/ui/public/new-repo-modal/components/ui/badge.tsx">
+import { Slot } from '@radix-ui/react-slot'
+import { cva, type VariantProps } from 'class-variance-authority'
+⋮----
+import { cn } from '@/lib/utils'
+⋮----
+function Badge({
+  className,
+  variant,
+  asChild = false,
+  ...props
+}: React.ComponentProps<'span'> &
+VariantProps<typeof badgeVariants> &
+⋮----
+className=
+</file>
+
+<file path="apps/ui/public/new-repo-modal/components/ui/breadcrumb.tsx">
+import { Slot } from '@radix-ui/react-slot'
+import { ChevronRight, MoreHorizontal } from 'lucide-react'
+⋮----
+import { cn } from '@/lib/utils'
+⋮----
+function Breadcrumb(
+⋮----
+className=
+⋮----
+{children ?? <ChevronRight />}
+    </li>
+  )
+}
+
+function BreadcrumbEllipsis({
+  className,
+  ...props
+}: React.ComponentProps<'span'>)
+</file>
+
+<file path="apps/ui/public/new-repo-modal/components/ui/button-group.tsx">
+import { Slot } from '@radix-ui/react-slot'
+import { cva, type VariantProps } from 'class-variance-authority'
+⋮----
+import { cn } from '@/lib/utils'
+import { Separator } from '@/components/ui/separator'
+⋮----
+className=
+</file>
+
+<file path="apps/ui/public/new-repo-modal/components/ui/button.tsx">
+import { Slot } from '@radix-ui/react-slot'
+import { cva, type VariantProps } from 'class-variance-authority'
+⋮----
+import { cn } from '@/lib/utils'
+⋮----
+className=
+</file>
+
+<file path="apps/ui/public/new-repo-modal/components/ui/calendar.tsx">
+import {
+  ChevronDownIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+} from 'lucide-react'
+import { DayButton, DayPicker, getDefaultClassNames } from 'react-day-picker'
+⋮----
+import { cn } from '@/lib/utils'
+import { Button, buttonVariants } from '@/components/ui/button'
+⋮----
+className=
+</file>
+
+<file path="apps/ui/public/new-repo-modal/components/ui/card.tsx">
+import { cn } from '@/lib/utils'
+⋮----
+className=
+</file>
+
+<file path="apps/ui/public/new-repo-modal/components/ui/carousel.tsx">
+import useEmblaCarousel, {
+  type UseEmblaCarouselType,
+} from 'embla-carousel-react'
+import { ArrowLeft, ArrowRight } from 'lucide-react'
+⋮----
+import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
+⋮----
+type CarouselApi = UseEmblaCarouselType[1]
+type UseCarouselParameters = Parameters<typeof useEmblaCarousel>
+type CarouselOptions = UseCarouselParameters[0]
+type CarouselPlugin = UseCarouselParameters[1]
+⋮----
+type CarouselProps = {
+  opts?: CarouselOptions
+  plugins?: CarouselPlugin
+  orientation?: 'horizontal' | 'vertical'
+  setApi?: (api: CarouselApi) => void
+}
+⋮----
+type CarouselContextProps = {
+  carouselRef: ReturnType<typeof useEmblaCarousel>[0]
+  api: ReturnType<typeof useEmblaCarousel>[1]
+  scrollPrev: () => void
+  scrollNext: () => void
+  canScrollPrev: boolean
+  canScrollNext: boolean
+} & CarouselProps
+⋮----
+function useCarousel()
+⋮----
+function Carousel({
+  orientation = 'horizontal',
+  opts,
+  setApi,
+  plugins,
+  className,
+  children,
+  ...props
+}: React.ComponentProps<'div'> & CarouselProps)
+⋮----
+className=
+⋮----
+function CarouselNext({
+  className,
+  variant = 'outline',
+  size = 'icon',
+  ...props
+}: React.ComponentProps<typeof Button>)
+</file>
+
+<file path="apps/ui/public/new-repo-modal/components/ui/chart.tsx">
+import { cn } from '@/lib/utils'
+⋮----
+// Format: { THEME_NAME: CSS_SELECTOR }
+⋮----
+export type ChartConfig = {
+  [k in string]: {
+    label?: React.ReactNode
+    icon?: React.ComponentType
+  } & (
+    | { color?: string; theme?: never }
+    | { color?: never; theme: Record<keyof typeof THEMES, string> }
+  )
+}
+⋮----
+type ChartContextProps = {
+  config: ChartConfig
+}
+⋮----
+function useChart()
+⋮----
+className=
+⋮----
+<div className=
+⋮----
+return <div className=
+⋮----
+// Helper to extract item config from a payload.
+</file>
+
+<file path="apps/ui/public/new-repo-modal/components/ui/checkbox.tsx">
+import { CheckIcon } from 'lucide-react'
+⋮----
+import { cn } from '@/lib/utils'
+⋮----
+function Checkbox({
+  className,
+  ...props
+}: React.ComponentProps<typeof CheckboxPrimitive.Root>)
+</file>
+
+<file path="apps/ui/public/new-repo-modal/components/ui/collapsible.tsx">
+function Collapsible({
+  ...props
+}: React.ComponentProps<typeof CollapsiblePrimitive.Root>)
+⋮----
+function CollapsibleTrigger({
+  ...props
+}: React.ComponentProps<typeof CollapsiblePrimitive.CollapsibleTrigger>)
+</file>
+
+<file path="apps/ui/public/new-repo-modal/components/ui/command.tsx">
+import { Command as CommandPrimitive } from 'cmdk'
+import { SearchIcon } from 'lucide-react'
+⋮----
+import { cn } from '@/lib/utils'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+⋮----
+className=
+</file>
+
+<file path="apps/ui/public/new-repo-modal/components/ui/context-menu.tsx">
+import { CheckIcon, ChevronRightIcon, CircleIcon } from 'lucide-react'
+⋮----
+import { cn } from '@/lib/utils'
+⋮----
+function ContextMenu({
+  ...props
+}: React.ComponentProps<typeof ContextMenuPrimitive.Root>)
+⋮----
+function ContextMenuRadioGroup({
+  ...props
+}: React.ComponentProps<typeof ContextMenuPrimitive.RadioGroup>)
+⋮----
+className=
+⋮----
+function ContextMenuRadioItem({
+  className,
+  children,
+  ...props
+}: React.ComponentProps<typeof ContextMenuPrimitive.RadioItem>)
+</file>
+
+<file path="apps/ui/public/new-repo-modal/components/ui/dialog.tsx">
+import { XIcon } from 'lucide-react'
+⋮----
+import { cn } from '@/lib/utils'
+⋮----
+function Dialog({
+  ...props
+}: React.ComponentProps<typeof DialogPrimitive.Root>)
+⋮----
+function DialogTrigger({
+  ...props
+}: React.ComponentProps<typeof DialogPrimitive.Trigger>)
+⋮----
+function DialogPortal({
+  ...props
+}: React.ComponentProps<typeof DialogPrimitive.Portal>)
+⋮----
+function DialogClose({
+  ...props
+}: React.ComponentProps<typeof DialogPrimitive.Close>)
+⋮----
+className=
+⋮----
+function DialogDescription({
+  className,
+  ...props
+}: React.ComponentProps<typeof DialogPrimitive.Description>)
+</file>
+
+<file path="apps/ui/public/new-repo-modal/components/ui/drawer.tsx">
+import { Drawer as DrawerPrimitive } from 'vaul'
+⋮----
+import { cn } from '@/lib/utils'
+⋮----
+function Drawer({
+  ...props
+}: React.ComponentProps<typeof DrawerPrimitive.Root>)
+⋮----
+function DrawerTrigger({
+  ...props
+}: React.ComponentProps<typeof DrawerPrimitive.Trigger>)
+⋮----
+function DrawerPortal({
+  ...props
+}: React.ComponentProps<typeof DrawerPrimitive.Portal>)
+⋮----
+function DrawerClose({
+  ...props
+}: React.ComponentProps<typeof DrawerPrimitive.Close>)
+⋮----
+function DrawerOverlay({
+  className,
+  ...props
+}: React.ComponentProps<typeof DrawerPrimitive.Overlay>)
+⋮----
+className=
+</file>
+
+<file path="apps/ui/public/new-repo-modal/components/ui/dropdown-menu.tsx">
+import { CheckIcon, ChevronRightIcon, CircleIcon } from 'lucide-react'
+⋮----
+import { cn } from '@/lib/utils'
+⋮----
+function DropdownMenu({
+  ...props
+}: React.ComponentProps<typeof DropdownMenuPrimitive.Root>)
+⋮----
+return (
+    <DropdownMenuPrimitive.Portal>
+      <DropdownMenuPrimitive.Content
+        data-slot="dropdown-menu-content"
+        sideOffset={sideOffset}
+        className={cn(
+          'bg-popover text-popover-foreground data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 z-50 max-h-(--radix-dropdown-menu-content-available-height) min-w-[8rem] origin-(--radix-dropdown-menu-content-transform-origin) overflow-x-hidden overflow-y-auto rounded-md border p-1 shadow-md',
+          className,
+        )}
+        {...props}
+      />
+    </DropdownMenuPrimitive.Portal>
+  )
+}
+
+function DropdownMenuGroup({
+  ...props
+}: React.ComponentProps<typeof DropdownMenuPrimitive.Group>)
+⋮----
+className=
+</file>
+
+<file path="apps/ui/public/new-repo-modal/components/ui/empty.tsx">
+import { cva, type VariantProps } from 'class-variance-authority'
+⋮----
+import { cn } from '@/lib/utils'
+⋮----
+className=
+</file>
+
+<file path="apps/ui/public/new-repo-modal/components/ui/field.tsx">
+import { useMemo } from 'react'
+import { cva, type VariantProps } from 'class-variance-authority'
+⋮----
+import { cn } from '@/lib/utils'
+import { Label } from '@/components/ui/label'
+import { Separator } from '@/components/ui/separator'
+⋮----
+className=
+</file>
+
+<file path="apps/ui/public/new-repo-modal/components/ui/form.tsx">
+import { Slot } from '@radix-ui/react-slot'
+import {
+  Controller,
+  FormProvider,
+  useFormContext,
+  useFormState,
+  type ControllerProps,
+  type FieldPath,
+  type FieldValues,
+} from 'react-hook-form'
+⋮----
+import { cn } from '@/lib/utils'
+import { Label } from '@/components/ui/label'
+⋮----
+type FormFieldContextValue<
+  TFieldValues extends FieldValues = FieldValues,
+  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
+> = {
+  name: TName
+}
+⋮----
+const FormField = <
+  TFieldValues extends FieldValues = FieldValues,
+  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
+>({
+  ...props
+}: ControllerProps<TFieldValues, TName>) =>
+⋮----
+const useFormField = () =>
+⋮----
+type FormItemContextValue = {
+  id: string
+}
+⋮----
+className=
+⋮----
+function FormControl(
+⋮----
+function FormDescription(
+</file>
+
+<file path="apps/ui/public/new-repo-modal/components/ui/hover-card.tsx">
+import { cn } from '@/lib/utils'
+⋮----
+function HoverCard({
+  ...props
+}: React.ComponentProps<typeof HoverCardPrimitive.Root>)
+</file>
+
+<file path="apps/ui/public/new-repo-modal/components/ui/input-group.tsx">
+import { cva, type VariantProps } from 'class-variance-authority'
+⋮----
+import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+⋮----
+className=
+⋮----
+// Variants based on alignment.
+⋮----
+// Focus state.
+⋮----
+// Error state.
+⋮----
+if ((e.target as HTMLElement).closest('button'))
+</file>
+
+<file path="apps/ui/public/new-repo-modal/components/ui/input-otp.tsx">
+import { OTPInput, OTPInputContext } from 'input-otp'
+import { MinusIcon } from 'lucide-react'
+⋮----
+import { cn } from '@/lib/utils'
+⋮----
+function InputOTP({
+  className,
+  containerClassName,
+  ...props
+}: React.ComponentProps<typeof OTPInput> & {
+  containerClassName?: string
+})
+⋮----
+containerClassName=
+⋮----
+className=
+</file>
+
+<file path="apps/ui/public/new-repo-modal/components/ui/input.tsx">
+import { cn } from '@/lib/utils'
+⋮----
+function Input(
+⋮----
+className=
+</file>
+
+<file path="apps/ui/public/new-repo-modal/components/ui/item.tsx">
+import { Slot } from '@radix-ui/react-slot'
+import { cva, type VariantProps } from 'class-variance-authority'
+⋮----
+import { cn } from '@/lib/utils'
+import { Separator } from '@/components/ui/separator'
+⋮----
+function ItemGroup(
+⋮----
+function ItemSeparator({
+  className,
+  ...props
+}: React.ComponentProps<typeof Separator>)
+⋮----
+className=
+</file>
+
+<file path="apps/ui/public/new-repo-modal/components/ui/kbd.tsx">
+import { cn } from '@/lib/utils'
+⋮----
+className=
+</file>
+
+<file path="apps/ui/public/new-repo-modal/components/ui/label.tsx">
+import { cn } from '@/lib/utils'
+⋮----
+function Label({
+  className,
+  ...props
+}: React.ComponentProps<typeof LabelPrimitive.Root>)
+</file>
+
+<file path="apps/ui/public/new-repo-modal/components/ui/menubar.tsx">
+import { CheckIcon, ChevronRightIcon, CircleIcon } from 'lucide-react'
+⋮----
+import { cn } from '@/lib/utils'
+⋮----
+function MenubarPortal({
+  ...props
+}: React.ComponentProps<typeof MenubarPrimitive.Portal>)
+⋮----
+className=
+⋮----
+function MenubarRadioItem({
+  className,
+  children,
+  ...props
+}: React.ComponentProps<typeof MenubarPrimitive.RadioItem>)
+⋮----
+function MenubarSubContent({
+  className,
+  ...props
+}: React.ComponentProps<typeof MenubarPrimitive.SubContent>)
+</file>
+
+<file path="apps/ui/public/new-repo-modal/components/ui/navigation-menu.tsx">
+import { cva } from 'class-variance-authority'
+import { ChevronDownIcon } from 'lucide-react'
+⋮----
+import { cn } from '@/lib/utils'
+⋮----
+className=
+⋮----
+function NavigationMenuTrigger({
+  className,
+  children,
+  ...props
+}: React.ComponentProps<typeof NavigationMenuPrimitive.Trigger>)
+⋮----
+function NavigationMenuContent({
+  className,
+  ...props
+}: React.ComponentProps<typeof NavigationMenuPrimitive.Content>)
+</file>
+
+<file path="apps/ui/public/new-repo-modal/components/ui/pagination.tsx">
+import {
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  MoreHorizontalIcon,
+} from 'lucide-react'
+⋮----
+import { cn } from '@/lib/utils'
+import { Button, buttonVariants } from '@/components/ui/button'
+⋮----
+className=
+⋮----
+function PaginationNext({
+  className,
+  ...props
+}: React.ComponentProps<typeof PaginationLink>)
+⋮----
+function PaginationEllipsis({
+  className,
+  ...props
+}: React.ComponentProps<'span'>)
+</file>
+
+<file path="apps/ui/public/new-repo-modal/components/ui/popover.tsx">
+import { cn } from '@/lib/utils'
+⋮----
+function Popover({
+  ...props
+}: React.ComponentProps<typeof PopoverPrimitive.Root>)
+⋮----
+function PopoverTrigger({
+  ...props
+}: React.ComponentProps<typeof PopoverPrimitive.Trigger>)
+</file>
+
+<file path="apps/ui/public/new-repo-modal/components/ui/progress.tsx">
+import { cn } from '@/lib/utils'
+</file>
+
+<file path="apps/ui/public/new-repo-modal/components/ui/radio-group.tsx">
+import { CircleIcon } from 'lucide-react'
+⋮----
+import { cn } from '@/lib/utils'
+⋮----
+function RadioGroup({
+  className,
+  ...props
+}: React.ComponentProps<typeof RadioGroupPrimitive.Root>)
+⋮----
+function RadioGroupItem({
+  className,
+  ...props
+}: React.ComponentProps<typeof RadioGroupPrimitive.Item>)
+</file>
+
+<file path="apps/ui/public/new-repo-modal/components/ui/resizable.tsx">
+import { GripVerticalIcon } from 'lucide-react'
+⋮----
+import { cn } from '@/lib/utils'
+</file>
+
+<file path="apps/ui/public/new-repo-modal/components/ui/scroll-area.tsx">
+import { cn } from '@/lib/utils'
+⋮----
+function ScrollArea({
+  className,
+  children,
+  ...props
+}: React.ComponentProps<typeof ScrollAreaPrimitive.Root>)
+⋮----
+function ScrollBar({
+  className,
+  orientation = 'vertical',
+  ...props
+}: React.ComponentProps<typeof ScrollAreaPrimitive.ScrollAreaScrollbar>)
+</file>
+
+<file path="apps/ui/public/new-repo-modal/components/ui/select.tsx">
+import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from 'lucide-react'
+⋮----
+import { cn } from '@/lib/utils'
+⋮----
+function Select({
+  ...props
+}: React.ComponentProps<typeof SelectPrimitive.Root>)
+⋮----
+function SelectGroup({
+  ...props
+}: React.ComponentProps<typeof SelectPrimitive.Group>)
+⋮----
+function SelectValue({
+  ...props
+}: React.ComponentProps<typeof SelectPrimitive.Value>)
+⋮----
+function SelectTrigger({
+  className,
+  size = 'default',
+  children,
+  ...props
+}: React.ComponentProps<typeof SelectPrimitive.Trigger> & {
+  size?: 'sm' | 'default'
+})
+⋮----
+className=
+⋮----
+function SelectLabel({
+  className,
+  ...props
+}: React.ComponentProps<typeof SelectPrimitive.Label>)
+⋮----
+function SelectItem({
+  className,
+  children,
+  ...props
+}: React.ComponentProps<typeof SelectPrimitive.Item>)
+⋮----
+function SelectSeparator({
+  className,
+  ...props
+}: React.ComponentProps<typeof SelectPrimitive.Separator>)
+⋮----
+function SelectScrollUpButton({
+  className,
+  ...props
+}: React.ComponentProps<typeof SelectPrimitive.ScrollUpButton>)
+⋮----
+function SelectScrollDownButton({
+  className,
+  ...props
+}: React.ComponentProps<typeof SelectPrimitive.ScrollDownButton>)
+</file>
+
+<file path="apps/ui/public/new-repo-modal/components/ui/separator.tsx">
+import { cn } from '@/lib/utils'
+⋮----
+function Separator({
+  className,
+  orientation = 'horizontal',
+  decorative = true,
+  ...props
+}: React.ComponentProps<typeof SeparatorPrimitive.Root>)
+</file>
+
+<file path="apps/ui/public/new-repo-modal/components/ui/sheet.tsx">
+import { XIcon } from 'lucide-react'
+⋮----
+import { cn } from '@/lib/utils'
+⋮----
+function Sheet(
+⋮----
+function SheetTrigger({
+  ...props
+}: React.ComponentProps<typeof SheetPrimitive.Trigger>)
+⋮----
+function SheetClose({
+  ...props
+}: React.ComponentProps<typeof SheetPrimitive.Close>)
+⋮----
+function SheetPortal({
+  ...props
+}: React.ComponentProps<typeof SheetPrimitive.Portal>)
+⋮----
+function SheetOverlay({
+  className,
+  ...props
+}: React.ComponentProps<typeof SheetPrimitive.Overlay>)
+⋮----
+className=
+</file>
+
+<file path="apps/ui/public/new-repo-modal/components/ui/sidebar.tsx">
+import { Slot } from '@radix-ui/react-slot'
+import { cva, VariantProps } from 'class-variance-authority'
+import { PanelLeftIcon } from 'lucide-react'
+⋮----
+import { useIsMobile } from '@/hooks/use-mobile'
+import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Separator } from '@/components/ui/separator'
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet'
+import { Skeleton } from '@/components/ui/skeleton'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
+⋮----
+type SidebarContextProps = {
+  state: 'expanded' | 'collapsed'
+  open: boolean
+  setOpen: (open: boolean) => void
+  openMobile: boolean
+  setOpenMobile: (open: boolean) => void
+  isMobile: boolean
+  toggleSidebar: () => void
+}
+⋮----
+function useSidebar()
+⋮----
+// This is the internal state of the sidebar.
+// We use openProp and setOpenProp for control from outside the component.
+⋮----
+// This sets the cookie to keep the sidebar state.
+⋮----
+// Helper to toggle the sidebar.
+⋮----
+// Adds a keyboard shortcut to toggle the sidebar.
+⋮----
+const handleKeyDown = (event: KeyboardEvent) =>
+⋮----
+// We add a state so that we can do data-state="expanded" or "collapsed".
+// This makes it easier to style the sidebar with Tailwind classes.
+⋮----
+className=
+⋮----
+{/* This is what handles the sidebar gap on desktop */}
+⋮----
+// Adjust the padding for floating and inset variants.
+⋮----
+// Increases the hit area of the button on mobile.
+⋮----
+// Increases the hit area of the button on mobile.
+⋮----
+// Random width between 50 to 90%.
+</file>
+
+<file path="apps/ui/public/new-repo-modal/components/ui/skeleton.tsx">
+import { cn } from '@/lib/utils'
+⋮----
+className=
+</file>
+
+<file path="apps/ui/public/new-repo-modal/components/ui/slider.tsx">
+import { cn } from '@/lib/utils'
+⋮----
+function Slider({
+  className,
+  defaultValue,
+  value,
+  min = 0,
+  max = 100,
+  ...props
+}: React.ComponentProps<typeof SliderPrimitive.Root>)
+className=
+</file>
+
+<file path="apps/ui/public/new-repo-modal/components/ui/sonner.tsx">
+import { useTheme } from 'next-themes'
+import { Toaster as Sonner, ToasterProps } from 'sonner'
+</file>
+
+<file path="apps/ui/public/new-repo-modal/components/ui/spinner.tsx">
+import { Loader2Icon } from 'lucide-react'
+⋮----
+import { cn } from '@/lib/utils'
+⋮----
+function Spinner(
+⋮----
+className=
+</file>
+
+<file path="apps/ui/public/new-repo-modal/components/ui/switch.tsx">
+import { cn } from '@/lib/utils'
+⋮----
+function Switch({
+  className,
+  ...props
+}: React.ComponentProps<typeof SwitchPrimitive.Root>)
+</file>
+
+<file path="apps/ui/public/new-repo-modal/components/ui/table.tsx">
+import { cn } from '@/lib/utils'
+⋮----
+className=
+</file>
+
+<file path="apps/ui/public/new-repo-modal/components/ui/tabs.tsx">
+import { cn } from '@/lib/utils'
+⋮----
+function Tabs({
+  className,
+  ...props
+}: React.ComponentProps<typeof TabsPrimitive.Root>)
+⋮----
+className=
+</file>
+
+<file path="apps/ui/public/new-repo-modal/components/ui/textarea.tsx">
+import { cn } from '@/lib/utils'
+⋮----
+className=
+</file>
+
+<file path="apps/ui/public/new-repo-modal/components/ui/toast.tsx">
+import { cva, type VariantProps } from 'class-variance-authority'
+import { X } from 'lucide-react'
+⋮----
+import { cn } from '@/lib/utils'
+</file>
+
+<file path="apps/ui/public/new-repo-modal/components/ui/toaster.tsx">
+import { useToast } from '@/hooks/use-toast'
+import {
+  Toast,
+  ToastClose,
+  ToastDescription,
+  ToastProvider,
+  ToastTitle,
+  ToastViewport,
+} from '@/components/ui/toast'
+</file>
+
+<file path="apps/ui/public/new-repo-modal/components/ui/toggle-group.tsx">
+import { type VariantProps } from 'class-variance-authority'
+⋮----
+import { cn } from '@/lib/utils'
+import { toggleVariants } from '@/components/ui/toggle'
+</file>
+
+<file path="apps/ui/public/new-repo-modal/components/ui/toggle.tsx">
+import { cva, type VariantProps } from 'class-variance-authority'
+⋮----
+import { cn } from '@/lib/utils'
+</file>
+
+<file path="apps/ui/public/new-repo-modal/components/ui/tooltip.tsx">
+import { cn } from '@/lib/utils'
+⋮----
+function TooltipContent({
+  className,
+  sideOffset = 0,
+  children,
+  ...props
+}: React.ComponentProps<typeof TooltipPrimitive.Content>)
+</file>
+
+<file path="apps/ui/public/new-repo-modal/components/ui/use-mobile.tsx">
+export function useIsMobile()
+⋮----
+const onChange = () =>
+</file>
+
+<file path="apps/ui/public/new-repo-modal/components/ui/use-toast.ts">
+// Inspired by react-hot-toast library
+⋮----
+import type { ToastActionElement, ToastProps } from '@/components/ui/toast'
+⋮----
+type ToasterToast = ToastProps & {
+  id: string
+  title?: React.ReactNode
+  description?: React.ReactNode
+  action?: ToastActionElement
+}
+⋮----
+function genId()
+⋮----
+type ActionType = typeof actionTypes
+⋮----
+type Action =
+  | {
+      type: ActionType['ADD_TOAST']
+      toast: ToasterToast
+    }
+  | {
+      type: ActionType['UPDATE_TOAST']
+      toast: Partial<ToasterToast>
+    }
+  | {
+      type: ActionType['DISMISS_TOAST']
+      toastId?: ToasterToast['id']
+    }
+  | {
+      type: ActionType['REMOVE_TOAST']
+      toastId?: ToasterToast['id']
+    }
+⋮----
+interface State {
+  toasts: ToasterToast[]
+}
+⋮----
+const addToRemoveQueue = (toastId: string) =>
+⋮----
+export const reducer = (state: State, action: Action): State =>
+⋮----
+// ! Side effects ! - This could be extracted into a dismissToast() action,
+// but I'll keep it here for simplicity
+⋮----
+function dispatch(action: Action)
+⋮----
+type Toast = Omit<ToasterToast, 'id'>
+⋮----
+function toast(
+⋮----
+const update = (props: ToasterToast)
+const dismiss = () => dispatch(
+⋮----
+function useToast()
+</file>
+
+<file path="apps/ui/public/new-repo-modal/hooks/use-mobile.ts">
+export function useIsMobile()
+⋮----
+const onChange = () =>
+</file>
+
+<file path="apps/ui/public/new-repo-modal/hooks/use-toast.ts">
+// Inspired by react-hot-toast library
+⋮----
+import type { ToastActionElement, ToastProps } from '@/components/ui/toast'
+⋮----
+type ToasterToast = ToastProps & {
+  id: string
+  title?: React.ReactNode
+  description?: React.ReactNode
+  action?: ToastActionElement
+}
+⋮----
+function genId()
+⋮----
+type ActionType = typeof actionTypes
+⋮----
+type Action =
+  | {
+      type: ActionType['ADD_TOAST']
+      toast: ToasterToast
+    }
+  | {
+      type: ActionType['UPDATE_TOAST']
+      toast: Partial<ToasterToast>
+    }
+  | {
+      type: ActionType['DISMISS_TOAST']
+      toastId?: ToasterToast['id']
+    }
+  | {
+      type: ActionType['REMOVE_TOAST']
+      toastId?: ToasterToast['id']
+    }
+⋮----
+interface State {
+  toasts: ToasterToast[]
+}
+⋮----
+const addToRemoveQueue = (toastId: string) =>
+⋮----
+export const reducer = (state: State, action: Action): State =>
+⋮----
+// ! Side effects ! - This could be extracted into a dismissToast() action,
+// but I'll keep it here for simplicity
+⋮----
+function dispatch(action: Action)
+⋮----
+type Toast = Omit<ToasterToast, 'id'>
+⋮----
+function toast(
+⋮----
+const update = (props: ToasterToast)
+const dismiss = () => dispatch(
+⋮----
+function useToast()
+</file>
+
+<file path="apps/ui/public/new-repo-modal/lib/utils.ts">
+import { clsx, type ClassValue } from 'clsx'
+import { twMerge } from 'tailwind-merge'
+⋮----
+export function cn(...inputs: ClassValue[])
+</file>
+
+<file path="apps/ui/public/new-repo-modal/next.config.mjs">
+/** @type {import('next').NextConfig} */
+</file>
+
+<file path="apps/ui/public/new-repo-modal/package.json">
+{
+  "name": "my-v0-project",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "next build",
+    "dev": "next dev",
+    "lint": "eslint .",
+    "start": "next start"
+  },
+  "dependencies": {
+    "@hookform/resolvers": "^3.10.0",
+    "@radix-ui/react-accordion": "1.2.2",
+    "@radix-ui/react-alert-dialog": "1.1.4",
+    "@radix-ui/react-aspect-ratio": "1.1.1",
+    "@radix-ui/react-avatar": "1.1.2",
+    "@radix-ui/react-checkbox": "1.1.3",
+    "@radix-ui/react-collapsible": "1.1.2",
+    "@radix-ui/react-context-menu": "2.2.4",
+    "@radix-ui/react-dialog": "1.1.4",
+    "@radix-ui/react-dropdown-menu": "2.1.4",
+    "@radix-ui/react-hover-card": "1.1.4",
+    "@radix-ui/react-label": "2.1.1",
+    "@radix-ui/react-menubar": "1.1.4",
+    "@radix-ui/react-navigation-menu": "1.2.3",
+    "@radix-ui/react-popover": "1.1.4",
+    "@radix-ui/react-progress": "1.1.1",
+    "@radix-ui/react-radio-group": "1.2.2",
+    "@radix-ui/react-scroll-area": "1.2.2",
+    "@radix-ui/react-select": "2.1.4",
+    "@radix-ui/react-separator": "1.1.1",
+    "@radix-ui/react-slider": "1.2.2",
+    "@radix-ui/react-slot": "1.1.1",
+    "@radix-ui/react-switch": "1.1.2",
+    "@radix-ui/react-tabs": "1.1.2",
+    "@radix-ui/react-toast": "1.2.4",
+    "@radix-ui/react-toggle": "1.1.1",
+    "@radix-ui/react-toggle-group": "1.1.1",
+    "@radix-ui/react-tooltip": "1.1.6",
+    "@vercel/analytics": "1.3.1",
+    "autoprefixer": "^10.4.20",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "cmdk": "1.0.4",
+    "date-fns": "4.1.0",
+    "embla-carousel-react": "8.5.1",
+    "input-otp": "1.4.1",
+    "lucide-react": "^0.454.0",
+    "next": "16.0.10",
+    "next-themes": "^0.4.6",
+    "react": "19.2.0",
+    "react-day-picker": "9.8.0",
+    "react-dom": "19.2.0",
+    "react-hook-form": "^7.60.0",
+    "react-resizable-panels": "^2.1.7",
+    "recharts": "2.15.4",
+    "sonner": "^1.7.4",
+    "tailwind-merge": "^3.3.1",
+    "tailwindcss-animate": "^1.0.7",
+    "vaul": "^1.1.2",
+    "zod": "3.25.76"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.9",
+    "@types/node": "^22",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "postcss": "^8.5",
+    "tailwindcss": "^4.1.9",
+    "tw-animate-css": "1.3.3",
+    "typescript": "^5"
+  }
+}
+</file>
+
+<file path="apps/ui/public/new-repo-modal/postcss.config.mjs">
+/** @type {import('postcss-load-config').Config} */
+</file>
+
+<file path="apps/ui/public/new-repo-modal/styles/globals.css">
+@custom-variant dark (&:is(.dark *));
+⋮----
+.dark {
+⋮----
+@theme inline {
+⋮----
+@layer base {
+⋮----
+* {
+body {
+</file>
+
+<file path="apps/ui/public/new-repo-modal/tsconfig.json">
+{
+  "compilerOptions": {
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "target": "ES6",
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": ["./*"]
+    }
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
+}
+</file>
+
+<file path="apps/ui/public/repo-main-page/.gitignore">
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files
+.env*
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+</file>
+
+<file path="apps/ui/public/repo-main-page/app/globals.css">
+@custom-variant dark (&:is(.dark *));
+⋮----
+.dark {
+⋮----
+@theme inline {
+⋮----
+@layer base {
+⋮----
+* {
+body {
+</file>
+
+<file path="apps/ui/public/repo-main-page/app/layout.tsx">
+import React from "react"
+import type { Metadata } from 'next'
+import { Geist, Geist_Mono } from 'next/font/google'
+import { Analytics } from '@vercel/analytics/next'
+⋮----
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode
+}>)
+</file>
+
+<file path="apps/ui/public/repo-main-page/app/page.tsx">
+import { RepoPage } from "@/components/repo-page"
+⋮----
+export default function Page()
+</file>
+
+<file path="apps/ui/public/repo-main-page/components.json">
+{
+  "$schema": "https://ui.shadcn.com/schema.json",
+  "style": "new-york",
+  "rsc": true,
+  "tsx": true,
+  "tailwind": {
+    "config": "",
+    "css": "app/globals.css",
+    "baseColor": "neutral",
+    "cssVariables": true,
+    "prefix": ""
+  },
+  "aliases": {
+    "components": "@/components",
+    "utils": "@/lib/utils",
+    "ui": "@/components/ui",
+    "lib": "@/lib",
+    "hooks": "@/hooks"
+  },
+  "iconLibrary": "lucide"
+}
+</file>
+
+<file path="apps/ui/public/repo-main-page/components/new-repo-modal.tsx">
+import { useState } from "react"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import { cn } from "@/lib/utils"
+import { Globe, Server, Code2, Layers, FolderOpen, Sparkles, ChevronRight } from "lucide-react"
+⋮----
+interface NewRepoModalProps {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+}
+⋮----
+const handleSubmit = () =>
+⋮----
+{/* Repo Name */}
+⋮----
+{/* Optional Path */}
+⋮----
+{/* Template Selection Toggle */}
+⋮----
+onClick=
+⋮----
+className=
+⋮----
+{/* Actions */}
+</file>
+
+<file path="apps/ui/public/repo-main-page/components/repo-page.tsx">
+import React from "react"
+⋮----
+import { useState, useRef, useEffect } from "react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu"
+import { cn } from "@/lib/utils"
+import {
+  MoreVertical,
+  FolderOpen,
+  Code2,
+  MessageSquare,
+  Trash2,
+  Bell,
+  BellOff,
+  BellRing,
+  Send,
+  Mic,
+  GitBranch,
+  GitCompare,
+  TestTube2,
+  Plus,
+  ChevronDown,
+  Star,
+} from "lucide-react"
+⋮----
+type NotifyMode = "never" | "input-needed" | "all"
+⋮----
+interface Thread {
+  id: string
+  name: string
+  date: string
+  lastMessage: string
+}
+⋮----
+interface RepoPageProps {
+  repoName: string
+}
+⋮----
+const handleSend = () =>
+⋮----
+const handleKeyDown = (e: React.KeyboardEvent) =>
+⋮----
+const handleDeleteThread = (threadId: string) =>
+⋮----
+{/* Header */}
+⋮----
+{/* Notify Mode Dropdown */}
+⋮----
+{/* Menu Button */}
+⋮----
+{/* Main Content */}
+⋮----
+{/* Main Thread - Terminal */}
+⋮----
+{/* Terminal Output */}
+⋮----
+{/* Terminal Input */}
+⋮----
+onClick=
+⋮----
+{/* Quick Action Buttons */}
+⋮----
+{/* Linked Threads Section */}
+⋮----
+{/* Scrollable Threads List */}
+⋮----
+{/* Link New Thread Button */}
+</file>
+
+<file path="apps/ui/public/repo-main-page/components/theme-provider.tsx">
+import {
+  ThemeProvider as NextThemesProvider,
+  type ThemeProviderProps,
+} from 'next-themes'
+⋮----
+export function ThemeProvider(
+</file>
+
+<file path="apps/ui/public/repo-main-page/components/ui/accordion.tsx">
+import { ChevronDownIcon } from 'lucide-react'
+⋮----
+import { cn } from '@/lib/utils'
+⋮----
+function Accordion({
+  ...props
+}: React.ComponentProps<typeof AccordionPrimitive.Root>)
+⋮----
+function AccordionItem({
+  className,
+  ...props
+}: React.ComponentProps<typeof AccordionPrimitive.Item>)
+⋮----
+function AccordionTrigger({
+  className,
+  children,
+  ...props
+}: React.ComponentProps<typeof AccordionPrimitive.Trigger>)
+</file>
+
+<file path="apps/ui/public/repo-main-page/components/ui/alert-dialog.tsx">
+import { cn } from '@/lib/utils'
+import { buttonVariants } from '@/components/ui/button'
+⋮----
+function AlertDialog({
+  ...props
+}: React.ComponentProps<typeof AlertDialogPrimitive.Root>)
+⋮----
+className=
+⋮----
+function AlertDialogDescription({
+  className,
+  ...props
+}: React.ComponentProps<typeof AlertDialogPrimitive.Description>)
+</file>
+
+<file path="apps/ui/public/repo-main-page/components/ui/alert.tsx">
+import { cva, type VariantProps } from 'class-variance-authority'
+⋮----
+import { cn } from '@/lib/utils'
+⋮----
+className=
+</file>
+
+<file path="apps/ui/public/repo-main-page/components/ui/aspect-ratio.tsx">
+function AspectRatio({
+  ...props
+}: React.ComponentProps<typeof AspectRatioPrimitive.Root>)
+</file>
+
+<file path="apps/ui/public/repo-main-page/components/ui/avatar.tsx">
+import { cn } from '@/lib/utils'
+⋮----
+className=
+</file>
+
+<file path="apps/ui/public/repo-main-page/components/ui/badge.tsx">
+import { Slot } from '@radix-ui/react-slot'
+import { cva, type VariantProps } from 'class-variance-authority'
+⋮----
+import { cn } from '@/lib/utils'
+⋮----
+function Badge({
+  className,
+  variant,
+  asChild = false,
+  ...props
+}: React.ComponentProps<'span'> &
+VariantProps<typeof badgeVariants> &
+⋮----
+className=
+</file>
+
+<file path="apps/ui/public/repo-main-page/components/ui/breadcrumb.tsx">
+import { Slot } from '@radix-ui/react-slot'
+import { ChevronRight, MoreHorizontal } from 'lucide-react'
+⋮----
+import { cn } from '@/lib/utils'
+⋮----
+function Breadcrumb(
+⋮----
+className=
+⋮----
+{children ?? <ChevronRight />}
+    </li>
+  )
+}
+
+function BreadcrumbEllipsis({
+  className,
+  ...props
+}: React.ComponentProps<'span'>)
+</file>
+
+<file path="apps/ui/public/repo-main-page/components/ui/button-group.tsx">
+import { Slot } from '@radix-ui/react-slot'
+import { cva, type VariantProps } from 'class-variance-authority'
+⋮----
+import { cn } from '@/lib/utils'
+import { Separator } from '@/components/ui/separator'
+⋮----
+className=
+</file>
+
+<file path="apps/ui/public/repo-main-page/components/ui/button.tsx">
+import { Slot } from '@radix-ui/react-slot'
+import { cva, type VariantProps } from 'class-variance-authority'
+⋮----
+import { cn } from '@/lib/utils'
+⋮----
+className=
+</file>
+
+<file path="apps/ui/public/repo-main-page/components/ui/calendar.tsx">
+import {
+  ChevronDownIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+} from 'lucide-react'
+import { DayButton, DayPicker, getDefaultClassNames } from 'react-day-picker'
+⋮----
+import { cn } from '@/lib/utils'
+import { Button, buttonVariants } from '@/components/ui/button'
+⋮----
+className=
+</file>
+
+<file path="apps/ui/public/repo-main-page/components/ui/card.tsx">
+import { cn } from '@/lib/utils'
+⋮----
+className=
+</file>
+
+<file path="apps/ui/public/repo-main-page/components/ui/carousel.tsx">
+import useEmblaCarousel, {
+  type UseEmblaCarouselType,
+} from 'embla-carousel-react'
+import { ArrowLeft, ArrowRight } from 'lucide-react'
+⋮----
+import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
+⋮----
+type CarouselApi = UseEmblaCarouselType[1]
+type UseCarouselParameters = Parameters<typeof useEmblaCarousel>
+type CarouselOptions = UseCarouselParameters[0]
+type CarouselPlugin = UseCarouselParameters[1]
+⋮----
+type CarouselProps = {
+  opts?: CarouselOptions
+  plugins?: CarouselPlugin
+  orientation?: 'horizontal' | 'vertical'
+  setApi?: (api: CarouselApi) => void
+}
+⋮----
+type CarouselContextProps = {
+  carouselRef: ReturnType<typeof useEmblaCarousel>[0]
+  api: ReturnType<typeof useEmblaCarousel>[1]
+  scrollPrev: () => void
+  scrollNext: () => void
+  canScrollPrev: boolean
+  canScrollNext: boolean
+} & CarouselProps
+⋮----
+function useCarousel()
+⋮----
+function Carousel({
+  orientation = 'horizontal',
+  opts,
+  setApi,
+  plugins,
+  className,
+  children,
+  ...props
+}: React.ComponentProps<'div'> & CarouselProps)
+⋮----
+className=
+⋮----
+function CarouselNext({
+  className,
+  variant = 'outline',
+  size = 'icon',
+  ...props
+}: React.ComponentProps<typeof Button>)
+</file>
+
+<file path="apps/ui/public/repo-main-page/components/ui/chart.tsx">
+import { cn } from '@/lib/utils'
+⋮----
+// Format: { THEME_NAME: CSS_SELECTOR }
+⋮----
+export type ChartConfig = {
+  [k in string]: {
+    label?: React.ReactNode
+    icon?: React.ComponentType
+  } & (
+    | { color?: string; theme?: never }
+    | { color?: never; theme: Record<keyof typeof THEMES, string> }
+  )
+}
+⋮----
+type ChartContextProps = {
+  config: ChartConfig
+}
+⋮----
+function useChart()
+⋮----
+className=
+⋮----
+<div className=
+⋮----
+return <div className=
+⋮----
+// Helper to extract item config from a payload.
+</file>
+
+<file path="apps/ui/public/repo-main-page/components/ui/checkbox.tsx">
+import { CheckIcon } from 'lucide-react'
+⋮----
+import { cn } from '@/lib/utils'
+⋮----
+function Checkbox({
+  className,
+  ...props
+}: React.ComponentProps<typeof CheckboxPrimitive.Root>)
+</file>
+
+<file path="apps/ui/public/repo-main-page/components/ui/collapsible.tsx">
+function Collapsible({
+  ...props
+}: React.ComponentProps<typeof CollapsiblePrimitive.Root>)
+⋮----
+function CollapsibleTrigger({
+  ...props
+}: React.ComponentProps<typeof CollapsiblePrimitive.CollapsibleTrigger>)
+</file>
+
+<file path="apps/ui/public/repo-main-page/components/ui/command.tsx">
+import { Command as CommandPrimitive } from 'cmdk'
+import { SearchIcon } from 'lucide-react'
+⋮----
+import { cn } from '@/lib/utils'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+⋮----
+className=
+</file>
+
+<file path="apps/ui/public/repo-main-page/components/ui/context-menu.tsx">
+import { CheckIcon, ChevronRightIcon, CircleIcon } from 'lucide-react'
+⋮----
+import { cn } from '@/lib/utils'
+⋮----
+function ContextMenu({
+  ...props
+}: React.ComponentProps<typeof ContextMenuPrimitive.Root>)
+⋮----
+function ContextMenuRadioGroup({
+  ...props
+}: React.ComponentProps<typeof ContextMenuPrimitive.RadioGroup>)
+⋮----
+className=
+⋮----
+function ContextMenuRadioItem({
+  className,
+  children,
+  ...props
+}: React.ComponentProps<typeof ContextMenuPrimitive.RadioItem>)
+</file>
+
+<file path="apps/ui/public/repo-main-page/components/ui/dialog.tsx">
+import { XIcon } from 'lucide-react'
+⋮----
+import { cn } from '@/lib/utils'
+⋮----
+function Dialog({
+  ...props
+}: React.ComponentProps<typeof DialogPrimitive.Root>)
+⋮----
+function DialogTrigger({
+  ...props
+}: React.ComponentProps<typeof DialogPrimitive.Trigger>)
+⋮----
+function DialogPortal({
+  ...props
+}: React.ComponentProps<typeof DialogPrimitive.Portal>)
+⋮----
+function DialogClose({
+  ...props
+}: React.ComponentProps<typeof DialogPrimitive.Close>)
+⋮----
+className=
+⋮----
+function DialogDescription({
+  className,
+  ...props
+}: React.ComponentProps<typeof DialogPrimitive.Description>)
+</file>
+
+<file path="apps/ui/public/repo-main-page/components/ui/drawer.tsx">
+import { Drawer as DrawerPrimitive } from 'vaul'
+⋮----
+import { cn } from '@/lib/utils'
+⋮----
+function Drawer({
+  ...props
+}: React.ComponentProps<typeof DrawerPrimitive.Root>)
+⋮----
+function DrawerTrigger({
+  ...props
+}: React.ComponentProps<typeof DrawerPrimitive.Trigger>)
+⋮----
+function DrawerPortal({
+  ...props
+}: React.ComponentProps<typeof DrawerPrimitive.Portal>)
+⋮----
+function DrawerClose({
+  ...props
+}: React.ComponentProps<typeof DrawerPrimitive.Close>)
+⋮----
+function DrawerOverlay({
+  className,
+  ...props
+}: React.ComponentProps<typeof DrawerPrimitive.Overlay>)
+⋮----
+className=
+</file>
+
+<file path="apps/ui/public/repo-main-page/components/ui/dropdown-menu.tsx">
+import { CheckIcon, ChevronRightIcon, CircleIcon } from 'lucide-react'
+⋮----
+import { cn } from '@/lib/utils'
+⋮----
+function DropdownMenu({
+  ...props
+}: React.ComponentProps<typeof DropdownMenuPrimitive.Root>)
+⋮----
+return (
+    <DropdownMenuPrimitive.Portal>
+      <DropdownMenuPrimitive.Content
+        data-slot="dropdown-menu-content"
+        sideOffset={sideOffset}
+        className={cn(
+          'bg-popover text-popover-foreground data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 z-50 max-h-(--radix-dropdown-menu-content-available-height) min-w-[8rem] origin-(--radix-dropdown-menu-content-transform-origin) overflow-x-hidden overflow-y-auto rounded-md border p-1 shadow-md',
+          className,
+        )}
+        {...props}
+      />
+    </DropdownMenuPrimitive.Portal>
+  )
+}
+
+function DropdownMenuGroup({
+  ...props
+}: React.ComponentProps<typeof DropdownMenuPrimitive.Group>)
+⋮----
+className=
+</file>
+
+<file path="apps/ui/public/repo-main-page/components/ui/empty.tsx">
+import { cva, type VariantProps } from 'class-variance-authority'
+⋮----
+import { cn } from '@/lib/utils'
+⋮----
+className=
+</file>
+
+<file path="apps/ui/public/repo-main-page/components/ui/field.tsx">
+import { useMemo } from 'react'
+import { cva, type VariantProps } from 'class-variance-authority'
+⋮----
+import { cn } from '@/lib/utils'
+import { Label } from '@/components/ui/label'
+import { Separator } from '@/components/ui/separator'
+⋮----
+className=
+</file>
+
+<file path="apps/ui/public/repo-main-page/components/ui/form.tsx">
+import { Slot } from '@radix-ui/react-slot'
+import {
+  Controller,
+  FormProvider,
+  useFormContext,
+  useFormState,
+  type ControllerProps,
+  type FieldPath,
+  type FieldValues,
+} from 'react-hook-form'
+⋮----
+import { cn } from '@/lib/utils'
+import { Label } from '@/components/ui/label'
+⋮----
+type FormFieldContextValue<
+  TFieldValues extends FieldValues = FieldValues,
+  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
+> = {
+  name: TName
+}
+⋮----
+const FormField = <
+  TFieldValues extends FieldValues = FieldValues,
+  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
+>({
+  ...props
+}: ControllerProps<TFieldValues, TName>) =>
+⋮----
+const useFormField = () =>
+⋮----
+type FormItemContextValue = {
+  id: string
+}
+⋮----
+className=
+⋮----
+function FormControl(
+⋮----
+function FormDescription(
+</file>
+
+<file path="apps/ui/public/repo-main-page/components/ui/hover-card.tsx">
+import { cn } from '@/lib/utils'
+⋮----
+function HoverCard({
+  ...props
+}: React.ComponentProps<typeof HoverCardPrimitive.Root>)
+</file>
+
+<file path="apps/ui/public/repo-main-page/components/ui/input-group.tsx">
+import { cva, type VariantProps } from 'class-variance-authority'
+⋮----
+import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+⋮----
+className=
+⋮----
+// Variants based on alignment.
+⋮----
+// Focus state.
+⋮----
+// Error state.
+⋮----
+if ((e.target as HTMLElement).closest('button'))
+</file>
+
+<file path="apps/ui/public/repo-main-page/components/ui/input-otp.tsx">
+import { OTPInput, OTPInputContext } from 'input-otp'
+import { MinusIcon } from 'lucide-react'
+⋮----
+import { cn } from '@/lib/utils'
+⋮----
+function InputOTP({
+  className,
+  containerClassName,
+  ...props
+}: React.ComponentProps<typeof OTPInput> & {
+  containerClassName?: string
+})
+⋮----
+containerClassName=
+⋮----
+className=
+</file>
+
+<file path="apps/ui/public/repo-main-page/components/ui/input.tsx">
+import { cn } from '@/lib/utils'
+⋮----
+function Input(
+⋮----
+className=
+</file>
+
+<file path="apps/ui/public/repo-main-page/components/ui/item.tsx">
+import { Slot } from '@radix-ui/react-slot'
+import { cva, type VariantProps } from 'class-variance-authority'
+⋮----
+import { cn } from '@/lib/utils'
+import { Separator } from '@/components/ui/separator'
+⋮----
+function ItemGroup(
+⋮----
+function ItemSeparator({
+  className,
+  ...props
+}: React.ComponentProps<typeof Separator>)
+⋮----
+className=
+</file>
+
+<file path="apps/ui/public/repo-main-page/components/ui/kbd.tsx">
+import { cn } from '@/lib/utils'
+⋮----
+className=
+</file>
+
+<file path="apps/ui/public/repo-main-page/components/ui/label.tsx">
+import { cn } from '@/lib/utils'
+⋮----
+function Label({
+  className,
+  ...props
+}: React.ComponentProps<typeof LabelPrimitive.Root>)
+</file>
+
+<file path="apps/ui/public/repo-main-page/components/ui/menubar.tsx">
+import { CheckIcon, ChevronRightIcon, CircleIcon } from 'lucide-react'
+⋮----
+import { cn } from '@/lib/utils'
+⋮----
+function MenubarPortal({
+  ...props
+}: React.ComponentProps<typeof MenubarPrimitive.Portal>)
+⋮----
+className=
+⋮----
+function MenubarRadioItem({
+  className,
+  children,
+  ...props
+}: React.ComponentProps<typeof MenubarPrimitive.RadioItem>)
+⋮----
+function MenubarSubContent({
+  className,
+  ...props
+}: React.ComponentProps<typeof MenubarPrimitive.SubContent>)
+</file>
+
+<file path="apps/ui/public/repo-main-page/components/ui/navigation-menu.tsx">
+import { cva } from 'class-variance-authority'
+import { ChevronDownIcon } from 'lucide-react'
+⋮----
+import { cn } from '@/lib/utils'
+⋮----
+className=
+⋮----
+function NavigationMenuTrigger({
+  className,
+  children,
+  ...props
+}: React.ComponentProps<typeof NavigationMenuPrimitive.Trigger>)
+⋮----
+function NavigationMenuContent({
+  className,
+  ...props
+}: React.ComponentProps<typeof NavigationMenuPrimitive.Content>)
+</file>
+
+<file path="apps/ui/public/repo-main-page/components/ui/pagination.tsx">
+import {
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  MoreHorizontalIcon,
+} from 'lucide-react'
+⋮----
+import { cn } from '@/lib/utils'
+import { Button, buttonVariants } from '@/components/ui/button'
+⋮----
+className=
+⋮----
+function PaginationNext({
+  className,
+  ...props
+}: React.ComponentProps<typeof PaginationLink>)
+⋮----
+function PaginationEllipsis({
+  className,
+  ...props
+}: React.ComponentProps<'span'>)
+</file>
+
+<file path="apps/ui/public/repo-main-page/components/ui/popover.tsx">
+import { cn } from '@/lib/utils'
+⋮----
+function Popover({
+  ...props
+}: React.ComponentProps<typeof PopoverPrimitive.Root>)
+⋮----
+function PopoverTrigger({
+  ...props
+}: React.ComponentProps<typeof PopoverPrimitive.Trigger>)
+</file>
+
+<file path="apps/ui/public/repo-main-page/components/ui/progress.tsx">
+import { cn } from '@/lib/utils'
+</file>
+
+<file path="apps/ui/public/repo-main-page/components/ui/radio-group.tsx">
+import { CircleIcon } from 'lucide-react'
+⋮----
+import { cn } from '@/lib/utils'
+⋮----
+function RadioGroup({
+  className,
+  ...props
+}: React.ComponentProps<typeof RadioGroupPrimitive.Root>)
+⋮----
+function RadioGroupItem({
+  className,
+  ...props
+}: React.ComponentProps<typeof RadioGroupPrimitive.Item>)
+</file>
+
+<file path="apps/ui/public/repo-main-page/components/ui/resizable.tsx">
+import { GripVerticalIcon } from 'lucide-react'
+⋮----
+import { cn } from '@/lib/utils'
+</file>
+
+<file path="apps/ui/public/repo-main-page/components/ui/scroll-area.tsx">
+import { cn } from '@/lib/utils'
+⋮----
+function ScrollArea({
+  className,
+  children,
+  ...props
+}: React.ComponentProps<typeof ScrollAreaPrimitive.Root>)
+⋮----
+function ScrollBar({
+  className,
+  orientation = 'vertical',
+  ...props
+}: React.ComponentProps<typeof ScrollAreaPrimitive.ScrollAreaScrollbar>)
+</file>
+
+<file path="apps/ui/public/repo-main-page/components/ui/select.tsx">
+import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from 'lucide-react'
+⋮----
+import { cn } from '@/lib/utils'
+⋮----
+function Select({
+  ...props
+}: React.ComponentProps<typeof SelectPrimitive.Root>)
+⋮----
+function SelectGroup({
+  ...props
+}: React.ComponentProps<typeof SelectPrimitive.Group>)
+⋮----
+function SelectValue({
+  ...props
+}: React.ComponentProps<typeof SelectPrimitive.Value>)
+⋮----
+function SelectTrigger({
+  className,
+  size = 'default',
+  children,
+  ...props
+}: React.ComponentProps<typeof SelectPrimitive.Trigger> & {
+  size?: 'sm' | 'default'
+})
+⋮----
+className=
+⋮----
+function SelectLabel({
+  className,
+  ...props
+}: React.ComponentProps<typeof SelectPrimitive.Label>)
+⋮----
+function SelectItem({
+  className,
+  children,
+  ...props
+}: React.ComponentProps<typeof SelectPrimitive.Item>)
+⋮----
+function SelectSeparator({
+  className,
+  ...props
+}: React.ComponentProps<typeof SelectPrimitive.Separator>)
+⋮----
+function SelectScrollUpButton({
+  className,
+  ...props
+}: React.ComponentProps<typeof SelectPrimitive.ScrollUpButton>)
+⋮----
+function SelectScrollDownButton({
+  className,
+  ...props
+}: React.ComponentProps<typeof SelectPrimitive.ScrollDownButton>)
+</file>
+
+<file path="apps/ui/public/repo-main-page/components/ui/separator.tsx">
+import { cn } from '@/lib/utils'
+⋮----
+function Separator({
+  className,
+  orientation = 'horizontal',
+  decorative = true,
+  ...props
+}: React.ComponentProps<typeof SeparatorPrimitive.Root>)
+</file>
+
+<file path="apps/ui/public/repo-main-page/components/ui/sheet.tsx">
+import { XIcon } from 'lucide-react'
+⋮----
+import { cn } from '@/lib/utils'
+⋮----
+function Sheet(
+⋮----
+function SheetTrigger({
+  ...props
+}: React.ComponentProps<typeof SheetPrimitive.Trigger>)
+⋮----
+function SheetClose({
+  ...props
+}: React.ComponentProps<typeof SheetPrimitive.Close>)
+⋮----
+function SheetPortal({
+  ...props
+}: React.ComponentProps<typeof SheetPrimitive.Portal>)
+⋮----
+function SheetOverlay({
+  className,
+  ...props
+}: React.ComponentProps<typeof SheetPrimitive.Overlay>)
+⋮----
+className=
+</file>
+
+<file path="apps/ui/public/repo-main-page/components/ui/sidebar.tsx">
+import { Slot } from '@radix-ui/react-slot'
+import { cva, VariantProps } from 'class-variance-authority'
+import { PanelLeftIcon } from 'lucide-react'
+⋮----
+import { useIsMobile } from '@/hooks/use-mobile'
+import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Separator } from '@/components/ui/separator'
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet'
+import { Skeleton } from '@/components/ui/skeleton'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
+⋮----
+type SidebarContextProps = {
+  state: 'expanded' | 'collapsed'
+  open: boolean
+  setOpen: (open: boolean) => void
+  openMobile: boolean
+  setOpenMobile: (open: boolean) => void
+  isMobile: boolean
+  toggleSidebar: () => void
+}
+⋮----
+function useSidebar()
+⋮----
+// This is the internal state of the sidebar.
+// We use openProp and setOpenProp for control from outside the component.
+⋮----
+// This sets the cookie to keep the sidebar state.
+⋮----
+// Helper to toggle the sidebar.
+⋮----
+// Adds a keyboard shortcut to toggle the sidebar.
+⋮----
+const handleKeyDown = (event: KeyboardEvent) =>
+⋮----
+// We add a state so that we can do data-state="expanded" or "collapsed".
+// This makes it easier to style the sidebar with Tailwind classes.
+⋮----
+className=
+⋮----
+{/* This is what handles the sidebar gap on desktop */}
+⋮----
+// Adjust the padding for floating and inset variants.
+⋮----
+// Increases the hit area of the button on mobile.
+⋮----
+// Increases the hit area of the button on mobile.
+⋮----
+// Random width between 50 to 90%.
+</file>
+
+<file path="apps/ui/public/repo-main-page/components/ui/skeleton.tsx">
+import { cn } from '@/lib/utils'
+⋮----
+className=
+</file>
+
+<file path="apps/ui/public/repo-main-page/components/ui/slider.tsx">
+import { cn } from '@/lib/utils'
+⋮----
+function Slider({
+  className,
+  defaultValue,
+  value,
+  min = 0,
+  max = 100,
+  ...props
+}: React.ComponentProps<typeof SliderPrimitive.Root>)
+className=
+</file>
+
+<file path="apps/ui/public/repo-main-page/components/ui/sonner.tsx">
+import { useTheme } from 'next-themes'
+import { Toaster as Sonner, ToasterProps } from 'sonner'
+</file>
+
+<file path="apps/ui/public/repo-main-page/components/ui/spinner.tsx">
+import { Loader2Icon } from 'lucide-react'
+⋮----
+import { cn } from '@/lib/utils'
+⋮----
+function Spinner(
+⋮----
+className=
+</file>
+
+<file path="apps/ui/public/repo-main-page/components/ui/switch.tsx">
+import { cn } from '@/lib/utils'
+⋮----
+function Switch({
+  className,
+  ...props
+}: React.ComponentProps<typeof SwitchPrimitive.Root>)
+</file>
+
+<file path="apps/ui/public/repo-main-page/components/ui/table.tsx">
+import { cn } from '@/lib/utils'
+⋮----
+className=
+</file>
+
+<file path="apps/ui/public/repo-main-page/components/ui/tabs.tsx">
+import { cn } from '@/lib/utils'
+⋮----
+function Tabs({
+  className,
+  ...props
+}: React.ComponentProps<typeof TabsPrimitive.Root>)
+⋮----
+className=
+</file>
+
+<file path="apps/ui/public/repo-main-page/components/ui/textarea.tsx">
+import { cn } from '@/lib/utils'
+⋮----
+className=
+</file>
+
+<file path="apps/ui/public/repo-main-page/components/ui/toast.tsx">
+import { cva, type VariantProps } from 'class-variance-authority'
+import { X } from 'lucide-react'
+⋮----
+import { cn } from '@/lib/utils'
+</file>
+
+<file path="apps/ui/public/repo-main-page/components/ui/toaster.tsx">
+import { useToast } from '@/hooks/use-toast'
+import {
+  Toast,
+  ToastClose,
+  ToastDescription,
+  ToastProvider,
+  ToastTitle,
+  ToastViewport,
+} from '@/components/ui/toast'
+</file>
+
+<file path="apps/ui/public/repo-main-page/components/ui/toggle-group.tsx">
+import { type VariantProps } from 'class-variance-authority'
+⋮----
+import { cn } from '@/lib/utils'
+import { toggleVariants } from '@/components/ui/toggle'
+</file>
+
+<file path="apps/ui/public/repo-main-page/components/ui/toggle.tsx">
+import { cva, type VariantProps } from 'class-variance-authority'
+⋮----
+import { cn } from '@/lib/utils'
+</file>
+
+<file path="apps/ui/public/repo-main-page/components/ui/tooltip.tsx">
+import { cn } from '@/lib/utils'
+⋮----
+function TooltipContent({
+  className,
+  sideOffset = 0,
+  children,
+  ...props
+}: React.ComponentProps<typeof TooltipPrimitive.Content>)
+</file>
+
+<file path="apps/ui/public/repo-main-page/components/ui/use-mobile.tsx">
+export function useIsMobile()
+⋮----
+const onChange = () =>
+</file>
+
+<file path="apps/ui/public/repo-main-page/components/ui/use-toast.ts">
+// Inspired by react-hot-toast library
+⋮----
+import type { ToastActionElement, ToastProps } from '@/components/ui/toast'
+⋮----
+type ToasterToast = ToastProps & {
+  id: string
+  title?: React.ReactNode
+  description?: React.ReactNode
+  action?: ToastActionElement
+}
+⋮----
+function genId()
+⋮----
+type ActionType = typeof actionTypes
+⋮----
+type Action =
+  | {
+      type: ActionType['ADD_TOAST']
+      toast: ToasterToast
+    }
+  | {
+      type: ActionType['UPDATE_TOAST']
+      toast: Partial<ToasterToast>
+    }
+  | {
+      type: ActionType['DISMISS_TOAST']
+      toastId?: ToasterToast['id']
+    }
+  | {
+      type: ActionType['REMOVE_TOAST']
+      toastId?: ToasterToast['id']
+    }
+⋮----
+interface State {
+  toasts: ToasterToast[]
+}
+⋮----
+const addToRemoveQueue = (toastId: string) =>
+⋮----
+export const reducer = (state: State, action: Action): State =>
+⋮----
+// ! Side effects ! - This could be extracted into a dismissToast() action,
+// but I'll keep it here for simplicity
+⋮----
+function dispatch(action: Action)
+⋮----
+type Toast = Omit<ToasterToast, 'id'>
+⋮----
+function toast(
+⋮----
+const update = (props: ToasterToast)
+const dismiss = () => dispatch(
+⋮----
+function useToast()
+</file>
+
+<file path="apps/ui/public/repo-main-page/hooks/use-mobile.ts">
+export function useIsMobile()
+⋮----
+const onChange = () =>
+</file>
+
+<file path="apps/ui/public/repo-main-page/hooks/use-toast.ts">
+// Inspired by react-hot-toast library
+⋮----
+import type { ToastActionElement, ToastProps } from '@/components/ui/toast'
+⋮----
+type ToasterToast = ToastProps & {
+  id: string
+  title?: React.ReactNode
+  description?: React.ReactNode
+  action?: ToastActionElement
+}
+⋮----
+function genId()
+⋮----
+type ActionType = typeof actionTypes
+⋮----
+type Action =
+  | {
+      type: ActionType['ADD_TOAST']
+      toast: ToasterToast
+    }
+  | {
+      type: ActionType['UPDATE_TOAST']
+      toast: Partial<ToasterToast>
+    }
+  | {
+      type: ActionType['DISMISS_TOAST']
+      toastId?: ToasterToast['id']
+    }
+  | {
+      type: ActionType['REMOVE_TOAST']
+      toastId?: ToasterToast['id']
+    }
+⋮----
+interface State {
+  toasts: ToasterToast[]
+}
+⋮----
+const addToRemoveQueue = (toastId: string) =>
+⋮----
+export const reducer = (state: State, action: Action): State =>
+⋮----
+// ! Side effects ! - This could be extracted into a dismissToast() action,
+// but I'll keep it here for simplicity
+⋮----
+function dispatch(action: Action)
+⋮----
+type Toast = Omit<ToasterToast, 'id'>
+⋮----
+function toast(
+⋮----
+const update = (props: ToasterToast)
+const dismiss = () => dispatch(
+⋮----
+function useToast()
+</file>
+
+<file path="apps/ui/public/repo-main-page/lib/utils.ts">
+import { clsx, type ClassValue } from 'clsx'
+import { twMerge } from 'tailwind-merge'
+⋮----
+export function cn(...inputs: ClassValue[])
+</file>
+
+<file path="apps/ui/public/repo-main-page/next.config.mjs">
+/** @type {import('next').NextConfig} */
+</file>
+
+<file path="apps/ui/public/repo-main-page/package.json">
+{
+  "name": "my-v0-project",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "next build",
+    "dev": "next dev",
+    "lint": "eslint .",
+    "start": "next start"
+  },
+  "dependencies": {
+    "@hookform/resolvers": "^3.10.0",
+    "@radix-ui/react-accordion": "1.2.2",
+    "@radix-ui/react-alert-dialog": "1.1.4",
+    "@radix-ui/react-aspect-ratio": "1.1.1",
+    "@radix-ui/react-avatar": "1.1.2",
+    "@radix-ui/react-checkbox": "1.1.3",
+    "@radix-ui/react-collapsible": "1.1.2",
+    "@radix-ui/react-context-menu": "2.2.4",
+    "@radix-ui/react-dialog": "1.1.4",
+    "@radix-ui/react-dropdown-menu": "2.1.4",
+    "@radix-ui/react-hover-card": "1.1.4",
+    "@radix-ui/react-label": "2.1.1",
+    "@radix-ui/react-menubar": "1.1.4",
+    "@radix-ui/react-navigation-menu": "1.2.3",
+    "@radix-ui/react-popover": "1.1.4",
+    "@radix-ui/react-progress": "1.1.1",
+    "@radix-ui/react-radio-group": "1.2.2",
+    "@radix-ui/react-scroll-area": "1.2.2",
+    "@radix-ui/react-select": "2.1.4",
+    "@radix-ui/react-separator": "1.1.1",
+    "@radix-ui/react-slider": "1.2.2",
+    "@radix-ui/react-slot": "1.1.1",
+    "@radix-ui/react-switch": "1.1.2",
+    "@radix-ui/react-tabs": "1.1.2",
+    "@radix-ui/react-toast": "1.2.4",
+    "@radix-ui/react-toggle": "1.1.1",
+    "@radix-ui/react-toggle-group": "1.1.1",
+    "@radix-ui/react-tooltip": "1.1.6",
+    "@vercel/analytics": "1.3.1",
+    "autoprefixer": "^10.4.20",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "cmdk": "1.0.4",
+    "date-fns": "4.1.0",
+    "embla-carousel-react": "8.5.1",
+    "input-otp": "1.4.1",
+    "lucide-react": "^0.454.0",
+    "next": "16.0.10",
+    "next-themes": "^0.4.6",
+    "react": "19.2.0",
+    "react-day-picker": "9.8.0",
+    "react-dom": "19.2.0",
+    "react-hook-form": "^7.60.0",
+    "react-resizable-panels": "^2.1.7",
+    "recharts": "2.15.4",
+    "sonner": "^1.7.4",
+    "tailwind-merge": "^3.3.1",
+    "tailwindcss-animate": "^1.0.7",
+    "vaul": "^1.1.2",
+    "zod": "3.25.76"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.9",
+    "@types/node": "^22",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "postcss": "^8.5",
+    "tailwindcss": "^4.1.9",
+    "tw-animate-css": "1.3.3",
+    "typescript": "^5"
+  }
+}
+</file>
+
+<file path="apps/ui/public/repo-main-page/postcss.config.mjs">
+/** @type {import('postcss-load-config').Config} */
+</file>
+
+<file path="apps/ui/public/repo-main-page/styles/globals.css">
+@custom-variant dark (&:is(.dark *));
+⋮----
+.dark {
+⋮----
+@theme inline {
+⋮----
+@layer base {
+⋮----
+* {
+body {
+</file>
+
+<file path="apps/ui/public/repo-main-page/tsconfig.json">
+{
+  "compilerOptions": {
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "target": "ES6",
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": ["./*"]
+    }
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
+}
+</file>
+
+<file path="apps/ui/src/components/layout/OfflineBanner.tsx">
+import { useOnline } from "@/hooks/useOnline";
+import { WifiOff } from "lucide-react";
+import { cn } from "@/lib/utils";
+⋮----
+export function OfflineBanner()
+</file>
+
+<file path="apps/ui/src/components/thread/MessageInput.tsx">
+import { useState, useEffect, useRef } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useDictation } from "@/hooks/useDictation";
+import { Mic, MicOff, Send, Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
+⋮----
+interface MessageInputProps {
+  onSend: (text: string) => void;
+  disabled?: boolean;
+  placeholder?: string;
+  className?: string;
+}
+⋮----
+// Append transcript to input when dictation produces results
+⋮----
+const handleSend = () =>
+⋮----
+const handleKeyDown = (e: React.KeyboardEvent) =>
+⋮----
+<div className=
+</file>
+
+<file path="apps/ui/src/components/ui/button.tsx">
+import { Slot } from "@radix-ui/react-slot";
+import { cva, type VariantProps } from "class-variance-authority";
+import { cn } from "@/lib/utils";
+⋮----
+export interface ButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+    VariantProps<typeof buttonVariants> {
+  asChild?: boolean;
+}
+⋮----
+className=
+</file>
+
+<file path="apps/ui/src/components/ui/card.tsx">
+import { HTMLAttributes, forwardRef } from "react";
+import { cn } from "@/lib/utils";
+</file>
+
+<file path="apps/ui/src/components/ui/dialog.tsx">
+import { X } from "lucide-react";
+import { cn } from "@/lib/utils";
+⋮----
+className=
+</file>
+
+<file path="apps/ui/src/components/ui/dropdown-menu.tsx">
+import { Check, ChevronRight, Circle } from "lucide-react";
+import { cn } from "@/lib/utils";
+⋮----
+className=
+</file>
+
+<file path="apps/ui/src/components/ui/input.tsx">
+import { cn } from "@/lib/utils";
+</file>
+
+<file path="apps/ui/src/components/ui/label.tsx">
+import { ComponentPropsWithoutRef, ElementRef, forwardRef } from "react";
+import { cn } from "@/lib/utils";
+</file>
+
+<file path="apps/ui/src/components/ui/scroll-area.tsx">
+import { cn } from "@/lib/utils";
+⋮----
+className=
+</file>
+
+<file path="apps/ui/src/components/ui/select.tsx">
+import { Check, ChevronDown, ChevronUp } from "lucide-react"
+⋮----
+import { cn } from "@/lib/utils"
+</file>
+
+<file path="apps/ui/src/components/ui/textarea.tsx">
+import { TextareaHTMLAttributes, forwardRef } from "react";
+import { cn } from "@/lib/utils";
+⋮----
+export interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {}
+⋮----
+className=
+</file>
+
+<file path="apps/ui/src/components/workspace/NewRepoModal.tsx">
+import { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
+import { api, Workspace } from "@/lib/api";
+import {
+  Globe,
+  Server,
+  Code2,
+  Layers,
+  FolderOpen,
+  Sparkles,
+  ChevronRight,
+  Loader2,
+} from "lucide-react";
+⋮----
+interface NewRepoModalProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onCreated?: (workspace: Workspace) => void;
+}
+⋮----
+const handleSubmit = async () =>
+⋮----
+// Reset form
+⋮----
+{/* Error Message */}
+⋮----
+{/* Repo Name */}
+⋮----
+{/* Optional Path */}
+⋮----
+{/* Template Selection Toggle */}
+⋮----
+onClick=
+⋮----
+className=
+⋮----
+{/* Actions */}
+</file>
+
+<file path="apps/ui/src/hooks/useDictation.ts">
+import { useState, useRef, useCallback, useEffect } from "react";
+⋮----
+type SpeechRecognitionType = typeof window.SpeechRecognition;
+⋮----
+export function useDictation()
+</file>
+
+<file path="apps/ui/src/hooks/useOnline.ts">
+import { useState, useEffect } from "react";
+⋮----
+export function useOnline()
+⋮----
+const handleOnline = ()
+const handleOffline = ()
+</file>
+
+<file path="apps/ui/src/lib/utils.ts">
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
+⋮----
+export function cn(...inputs: ClassValue[])
+</file>
+
+<file path="apps/ui/src/main.tsx">
+import React from "react";
+import ReactDOM from "react-dom/client";
+import { BrowserRouter } from "react-router-dom";
+import App from "./App";
+</file>
+
+<file path="apps/ui/src/pages/ShareDraftPage.tsx">
+import { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { api, Workspace } from "@/lib/api";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Loader2, Send, X } from "lucide-react";
+⋮----
+// Parse incoming share data from URL params
+⋮----
+// Fetch workspaces
+⋮----
+const fetchWorkspaces = async () =>
+⋮----
+const handleSend = async () =>
+⋮----
+// Get or create default thread
+⋮----
+// Send message to thread
+⋮----
+// Navigate to workspace
+⋮----
+const handleDiscard = () =>
+</file>
+
+<file path="apps/ui/src/styles/globals.css">
+@custom-variant dark (&:is(.dark *));
+⋮----
+@theme inline {
+⋮----
+@layer base {
+⋮----
+* {
+⋮----
+@apply border-border;
+⋮----
+body {
+</file>
+
+<file path="apps/ui/src/types/speech.d.ts">
+interface SpeechRecognitionEvent extends Event {
+  resultIndex: number;
+  results: SpeechRecognitionResultList;
+}
+⋮----
+interface SpeechRecognitionErrorEvent extends Event {
+  error: string;
+  message?: string;
+}
+⋮----
+interface SpeechRecognition extends EventTarget {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  onresult: ((event: SpeechRecognitionEvent) => void) | null;
+  onerror: ((event: SpeechRecognitionErrorEvent) => void) | null;
+  onend: (() => void) | null;
+  start(): void;
+  stop(): void;
+  abort(): void;
+}
+⋮----
+start(): void;
+stop(): void;
+abort(): void;
+⋮----
+interface SpeechRecognitionConstructor {
+  new (): SpeechRecognition;
+}
+⋮----
+interface Window {
+  SpeechRecognition: SpeechRecognitionConstructor;
+  webkitSpeechRecognition: SpeechRecognitionConstructor;
+}
+</file>
+
+<file path="apps/ui/src/vite-env.d.ts">
+/// <reference types="vite/client" />
+/// <reference types="vite-plugin-pwa/client" />
+</file>
+
+<file path="apps/ui/tsconfig.json">
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": ["src"]
+}
+</file>
+
+<file path="PM2_CONFIG.md">
+# PM2 Configuration Options
+
+There are two PM2 configuration approaches available. Both work reliably, but in case one fails after merge, you can switch to the other.
+
+## Default (Script-Based) - Currently Active
+
+**File:** `ecosystem.config.cjs`
+
+Uses a cmd.exe wrapper script that handles environment setup.
+
+```bash
+pm2 start ecosystem.config.cjs
+# or
+pm2 start
+```
+
+This is the original approach from main branch.
+
+## Alternative (Direct Script)
+
+**File:** `ecosystem.config.direct.cjs`
+
+Directly runs the Node.js server with inline environment variables.
+
+```bash
+pm2 start ecosystem.config.direct.cjs
+```
+
+## Switching Between Configurations
+
+If the default configuration doesn't work after merge:
+
+```bash
+# Stop current PM2 process
+pm2 delete godex
+
+# Try the alternative configuration
+pm2 start ecosystem.config.direct.cjs
+pm2 save
+```
+
+To switch back:
+
+```bash
+pm2 delete godex
+pm2 start ecosystem.config.cjs
+pm2 save
+```
+
+## Manual PM2 Start (No Config File)
+
+If both config files fail, you can always start manually:
+
+```bash
+cd P:\software\godex
+pnpm build
+pm2 start "P:\software\godex\apps\server\dist\index.js" --name godex --cwd "P:\software\godex\apps\server"
+pm2 save
+```
+</file>
+
+<file path="scripts/godex-pm2-start.cmd">
+@echo off
+setlocal
+set "REPO_ROOT=%~dp0.."
+cd /d "%REPO_ROOT%"
+
+set "LOG=%REPO_ROOT%\.godex\pm2-start.log"
+if not exist "%REPO_ROOT%\.godex" mkdir "%REPO_ROOT%\.godex"
+echo [%date% %time%] starting > "%LOG%"
+echo repo=%REPO_ROOT%>> "%LOG%"
+echo path=%PATH%>> "%LOG%"
+
+for %%i in (pnpm.cmd) do set "PNPM_CMD=%%~$PATH:i"
+if not defined PNPM_CMD set "PNPM_CMD=C:\nvm4w\nodejs\pnpm.cmd"
+echo pnpm=%PNPM_CMD%>> "%LOG%"
+
+call "%PNPM_CMD%" start >> "%LOG%" 2>&1
+echo [%date% %time%] exit=%errorlevel%>> "%LOG%"
+exit /b %errorlevel%
+</file>
+
+<file path="scripts/godex-pm2-start.ps1">
+$repoRoot = Resolve-Path (Join-Path $PSScriptRoot "..")
+Set-Location $repoRoot
+
+& pnpm start
+exit $LASTEXITCODE
+</file>
+
+<file path="start-caddy.cmd">
+@echo off
+caddy run --config P:\software\godex\caddy\Caddyfile
+</file>
+
+<file path="start-godex.cmd">
+@echo off
+pnpm build
+if errorlevel 1 exit /b %errorlevel%
+pnpm start
+</file>
+
+<file path="AGENTS.md">
+# Agents
+
+Repo: godex
+
+## Guardrails
+- Keep changes small and reviewable.
+- Put automation in `scripts/` or `tools/`.
+- On Windows, if a `.ps1` sibling exists, prefer `pwsh -File <script>` over spawning `.cmd`/`.bat`; otherwise use `shell: true` (or `cmd.exe /c`) to avoid `spawn EINVAL`.
+
+## Project Memory System
+
+This project maintains institutional knowledge in `docs/project_notes/` for consistency across sessions.
+Project notes are updated automatically by a post-commit maintainer (triggered by meaningful commits).
+
+### Memory Files (non-overlapping)
+
+- **operating_brief.md** — Entry point: what this project is, goals, current state, hazards, and next steps. Read this first when starting a fresh chat.
+- **key_facts.md** — Lookupable truths: commands, ports, URLs, paths, env var *names*, deployment targets. Prefer documented facts over assumptions.
+- **adrs.md** — **Constraints (ADRs)**: long-lived rules/invariants + rationale future changes must respect. If it doesn’t create a constraint, it doesn’t belong.
+- **bugs.md** — Recurring/scary bugs: symptom → root cause → fix → prevention.
+- **worklog.md** — **Checkpoints**: outcomes + local intent for completed work. May link ADRs/bugs/key facts; must not duplicate them.
+
+### Memory-Aware Protocol
+
+**Before proposing changes:**
+- Read `docs/project_notes/operating_brief.md` first.
+- Check `docs/project_notes/adrs.md` before proposing architectural or data-model changes.
+- Check `docs/project_notes/key_facts.md` before asserting commands/ports/paths/URLs/env-var names.
+
+**When encountering errors or bugs:**
+- Search `docs/project_notes/bugs.md` first.
+- If the issue was expensive/non-obvious or likely to recur, update `bugs.md` (symptom → root cause → fix → prevention).
+
+**After completing meaningful work (ready to keep):**
+- Verify the change (run relevant tests / quick sanity checks).
+- If the user has approved the change (or you are confident it is correct and intended), commit the work using `$git-commit-helper`.
+- Ownership:
+- The main coding agent should **not** edit docs/project_notes/* directly.
+- Only the post-commit maintainer edits those files (unless user explicitly requests manual edits).
+
+**If work appears complete but is not yet approved:**
+- Ask the user if they want to commit now.
+- If approved, commit using `$git-commit-helper`.
+- If not approved, leave changes uncommitted and do not update `docs/project_notes/*`.
+
+**Notes update policy:**
+- `docs/project_notes/*` is maintained automatically after meaningful commits.
+- If no meaningful notes updates are needed, the maintainer will leave them unchanged.
+
+### Anti-Redundancy Rules
+
+- `worklog.md` must not duplicate ADR rationale, bug writeups, or key facts.
+- If details belong elsewhere, link to `adrs.md`, `bugs.md`, or `key_facts.md`.
+- `operating_brief.md` is curated (rewrite allowed). Keep it short.
+- If no meaningful doc changes are needed, say `No project_notes updates needed for this change.`
+</file>
+
+<file path="apps/server/SERVER_PORT=7777">
+
+</file>
+
+<file path="apps/server/src/store.ts">
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { resolve } from "node:path";
+import { randomUUID } from "node:crypto";
+⋮----
+export type WorkspaceStatus = "idle" | "failed" | "needs_input";
+export type NotifyPolicy = "off" | "needs_input+failed" | "all";
+export type RunStatus = "running" | "done";
+export type RunStream = "stdout" | "stderr";
+⋮----
+export interface Workspace {
+  id: string;
+  title: string;
+  repo_path: string;
+  status: WorkspaceStatus;
+  notify_policy: NotifyPolicy;
+  default_thread_id: string | null;
+  test_command_override: string | null;
+  created_at: string;
+  updated_at: string;
+}
+⋮----
+export interface Run {
+  id: string;
+  workspace_id: string | null;
+  type: string;
+  command: string;
+  cwd: string;
+  status: RunStatus;
+  exit_code: number | null;
+  created_at: string;
+  updated_at: string;
+  last_snippet: string | null;
+  meta?: Record<string, unknown> | null;
+}
+⋮----
+export interface RunEvent {
+  run_id: string;
+  seq: number;
+  ts: string;
+  stream: RunStream;
+  chunk: string;
+}
+⋮----
+export interface ThreadMeta {
+  thread_id: string;
+  title_override: string | null;
+  last_seen_at: string;
+  pinned: boolean;
+  archived: boolean;
+}
+⋮----
+export interface WorkspaceThread {
+  workspace_id: string;
+  thread_id: string;
+  created_at: string;
+}
+⋮----
+export interface Store {
+  init: () => void;
+  listWorkspaces: () => Workspace[];
+  getWorkspace: (id: string) => Workspace | null;
+  createWorkspace: (input: { title: string; repo_path: string }) => Workspace;
+  updateWorkspace: (id: string, patch: Partial<Workspace>) => Workspace | null;
+  deleteWorkspace: (id: string) => boolean;
+  listRunsByWorkspace: (workspace_id: string, limit?: number) => Run[];
+  getRun: (id: string) => Run | null;
+  createRun: (input: Omit<Run, "created_at" | "updated_at" | "status" | "exit_code" | "last_snippet">) => Run;
+  updateRun: (id: string, patch: Partial<Run>) => Run | null;
+  appendRunEvent: (event: Omit<RunEvent, "seq">) => RunEvent;
+  getRunEvents: (run_id: string, limit: number) => RunEvent[];
+  clearRunsForWorkspace: (workspace_id: string) => number;
+  markStaleRuns: () => number;
+  listThreadMeta: () => ThreadMeta[];
+  getThreadMeta: (thread_id: string) => ThreadMeta | null;
+  upsertThreadMeta: (input: {
+    thread_id: string;
+    title_override?: string | null;
+    last_seen_at?: string;
+    pinned?: boolean;
+    archived?: boolean;
+  }) => ThreadMeta;
+  listWorkspaceThreads: () => WorkspaceThread[];
+  attachThreadToWorkspace: (workspace_id: string, thread_id: string) => WorkspaceThread;
+  detachThreadFromWorkspace: (workspace_id: string, thread_id: string) => boolean;
+  countWorkspaces: () => number;
+  countWorkspaceThreads: () => number;
+}
+⋮----
+const now = ()
+⋮----
+const normalizeWorkspace = (workspace: Workspace): Workspace =>
+⋮----
+const normalizeThreadMeta = (meta: ThreadMeta): ThreadMeta => (
+⋮----
+const parseRunMeta = (value: unknown): Record<string, unknown> | null =>
+⋮----
+const normalizeRun = (run: Run): Run => (
+⋮----
+const defaultDataDir = ()
+⋮----
+interface JsonData {
+  workspaces: Workspace[];
+  runs: Run[];
+  run_events: Record<string, RunEvent[]>;
+  thread_meta: ThreadMeta[];
+  workspace_threads: WorkspaceThread[];
+}
+⋮----
+const emptyJsonData = (): JsonData => (
+⋮----
+export const migrateJsonData = (raw: any): JsonData =>
+⋮----
+const loadJson = (filePath: string): JsonData =>
+⋮----
+const saveJson = (filePath: string, data: JsonData) =>
+⋮----
+const createJsonStore = (dataDir: string): Store =>
+⋮----
+const ensure = () =>
+⋮----
+const withData = <T>(fn: (data: JsonData) => T): T =>
+⋮----
+const createSqliteStore = (dataDir: string, dbPath: string): Store =>
+⋮----
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+⋮----
+const tableExists = (name: string): boolean =>
+⋮----
+const columnExists = (table: string, column: string): boolean =>
+⋮----
+const init = () =>
+⋮----
+export const createStore = ():
+</file>
+
+<file path="apps/server/test/bootstrap.route.test.ts">
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import Fastify from "fastify";
+import { mkdtempSync, mkdirSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join, resolve } from "node:path";
+import { EventEmitter } from "node:events";
+import { spawn } from "node:child_process";
+import { authGuard } from "../src/auth";
+import { createStore } from "../src/store";
+import { RunManager } from "../src/run_manager";
+import { registerWorkspaceRoutes } from "../src/routes/workspaces";
+import { resolveTemplateWithCodex } from "../src/bootstrap";
+⋮----
+const makeTempDir = ()
+⋮----
+const waitForRun = async (store: ReturnType<typeof createStore>["store"], manager: RunManager, runId: string) =>
+⋮----
+// ignore in test
+⋮----
+// sqlite keeps handles open on windows; ignore cleanup failures
+</file>
+
+<file path="apps/ui/index.html">
+<!DOCTYPE html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="theme-color" content="#000000" />
+    <link rel="icon" type="image/png" href="/ui/godex.png" />
+    <link rel="apple-touch-icon" href="/ui/pwa-192.png" />
+    <link rel="manifest" href="/ui/manifest.webmanifest" />
+    <title>godex</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+</file>
+
+<file path="apps/ui/src/components/layout/ActionsMenu.tsx">
+import {
+  MoreVertical,
+  FolderOpen,
+  Code2,
+  MessageSquare,
+  Trash2,
+  RefreshCw,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { api, Workspace } from "@/lib/api";
+⋮----
+interface ActionsMenuProps {
+  workspace: Workspace | null;
+}
+⋮----
+const handleOpenFolder = async () =>
+⋮----
+const handleOpenCode = async () =>
+⋮----
+const handleRestart = async () =>
+⋮----
+const handleDelete = async () =>
+</file>
+
+<file path="apps/ui/src/components/thread/LinkWorkspaceDialog.tsx">
+import { useState, useEffect } from "react";
+import { api, Workspace } from "@/lib/api";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { X } from "lucide-react";
+⋮----
+interface LinkWorkspaceDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  threadId: string;
+}
+⋮----
+const fetchWorkspaces = async () =>
+⋮----
+const fetchLinkedWorkspaces = async () =>
+⋮----
+const handleLink = async () =>
+⋮----
+onOpenChange(false); // Close modal after linking
+⋮----
+const handleUnlink = async (workspaceId: string) =>
+⋮----
+{/* Currently Linked Workspaces */}
+⋮----
+{/* Add Workspace */}
+</file>
+
+<file path="apps/ui/src/contexts/AuthContext.tsx">
+import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+⋮----
+interface AuthContextType {
+  token: string | null;
+  isAuthenticated: boolean;
+}
+⋮----
+export function AuthProvider(
+⋮----
+// Clean URL
+⋮----
+export function useAuth()
+</file>
+
+<file path="apps/ui/src/hooks/useSSE.ts">
+import { useEffect, useRef, useCallback, useState } from "react";
+import { api } from "@/lib/api";
+⋮----
+export type SSEEvent = {
+  type: "chunk" | "final" | "ping" | "error";
+  data: string;
+};
+⋮----
+export type UseSSEOptions = {
+  onChunk?: (data: string) => void;
+  onFinal?: (data: string) => void;
+  onError?: (error: Error) => void;
+};
+⋮----
+export function useSSE(runId: string | null, options: UseSSEOptions =
+⋮----
+// Only process stdout chunks (skip stderr/notification chunks)
+⋮----
+// Keep-alive, no action needed
+</file>
+
+<file path="CLAUDE.md">
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Quick Reference
+
+- Install: `pnpm install`
+- Dev (both apps): `pnpm dev`
+- Build: `pnpm build`
+- Test all: `pnpm test`
+- Test server only: `pnpm test:server`
+- Test single file: `cd apps/server && pnpm vitest run test/<filename>.test.ts`
+- Typecheck: `pnpm typecheck`
+- Smoke test: `pnpm smoke`
+
+## Running the Server (PM2)
+
+PM2 is the standard way to run the server (enables UI restart button, reliable restarts).
+
+**Initial setup:**
+```
+pnpm build
+pm2 start "P:\software\godex\apps\server\dist\index.js" --name godex --cwd "P:\software\godex\apps\server"
+pm2 save
+```
+
+**Daily operations:**
+- Stop: `pm2 stop godex`
+- Start: `pm2 start godex`
+- Restart: `pm2 restart godex`
+- Logs: `pm2 logs godex`
+
+**Caddy (required for phone access):**
+Run `start-caddy.cmd` in a separate terminal for HTTPS reverse proxy. Without Caddy, secure connections from the phone won't work.
+
+## Architecture
+
+pnpm monorepo with three packages:
+- `apps/server` — Fastify API server + SSE streams, serves built UI at `/ui`
+- `apps/ui` — Vite SPA (PWA-enabled), uses Vite dev server during development
+- `packages/shared` — shared TypeScript types
+
+Key concepts:
+- **Workspaces**: repo profiles (not conversations) with fields like `repo_path`, `notify_policy`, `test_command_override`
+- **Threads**: Codex app-server conversations; server spawns `codex app-server` to proxy thread operations
+- **Runs**: execution sessions with SSE streaming at `/runs/:id/stream`
+
+Data flow: UI → Server API (auth via `Authorization: Bearer <CODEX_RELAY_TOKEN>`) → Codex app-server
+
+## Windows Caveats
+
+- Prefer `pwsh -File <script>.ps1` over spawning `.cmd`/`.bat`; otherwise use `shell: true` for spawn calls
+- PM2 restart helpers: use `scripts/godex-pm2-start.ps1` or `ecosystem.config.cjs`
+
+## Project Memory System
+
+Institutional knowledge is maintained in `docs/project_notes/` (updated automatically by post-commit maintainer).
+
+### Memory Files (non-overlapping)
+
+- **operating_brief.md** — Entry point: what this project is, goals, current state, hazards, and next steps. Read this first when starting a fresh chat.
+- **key_facts.md** — Lookupable truths: commands, ports, URLs, paths, env var *names*, deployment targets. Prefer documented facts over assumptions.
+- **adrs.md** — **Constraints (ADRs)**: long-lived rules/invariants + rationale future changes must respect. If it doesn’t create a constraint, it doesn’t belong.
+- **bugs.md** — Recurring/scary bugs: symptom → root cause → fix → prevention.
+- **worklog.md** — **Checkpoints**: outcomes + local intent for completed work. May link ADRs/bugs/key facts; must not duplicate them.
+
+### Memory-Aware Protocol
+
+**Before proposing changes:**
+- Read `docs/project_notes/operating_brief.md` first.
+- Check `docs/project_notes/adrs.md` before proposing architectural or data-model changes.
+- Check `docs/project_notes/key_facts.md` before asserting commands/ports/paths/URLs/env-var names.
+
+**When encountering errors or bugs:**
+- Search `docs/project_notes/bugs.md` first.
+- If the issue was expensive/non-obvious or likely to recur, update `bugs.md` (symptom → root cause → fix → prevention).
+
+**After completing meaningful work (ready to keep):**
+- Verify the change (run relevant tests / quick sanity checks).
+- If the user has approved the change (or you are confident it is correct and intended), commit the work using `$git-commit-helper`.
+- Ownership:
+- The main coding agent should **not** edit docs/project_notes/* directly.
+- Only the post-commit maintainer edits those files (unless user explicitly requests manual edits).
+
+**If work appears complete but is not yet approved:**
+- Ask the user if they want to commit now.
+- If approved, commit using `$git-commit-helper`.
+- If not approved, leave changes uncommitted and do not update `docs/project_notes/*`.
+
+**Notes update policy:**
+- `docs/project_notes/*` is maintained automatically after meaningful commits.
+- If no meaningful notes updates are needed, the maintainer will leave them unchanged.
+
+### Anti-Redundancy Rules
+
+- `worklog.md` must not duplicate ADR rationale, bug writeups, or key facts.
+- If details belong elsewhere, link to `adrs.md`, `bugs.md`, or `key_facts.md`.
+- `operating_brief.md` is curated (rewrite allowed). Keep it short.
+- If no meaningful doc changes are needed, say `No project_notes updates needed for this change.`
+</file>
+
+<file path="ecosystem.config.direct.cjs">
+
+</file>
+
+<file path="PM2_SWITCH.md">
+# PM2 Management for Worktree
+
+## Current Setup
+PM2 is running the UI rewrite from the worktree:
+```bash
+pm2 list  # Shows "godex-ui-rewrite"
+```
+
+## Switch Back to Main
+When ready to merge or abandon this worktree:
+
+```bash
+# Stop worktree server
+pm2 delete godex-ui-rewrite
+
+# Build and start from main
+cd P:\software\godex
+pnpm build
+pm2 start "P:\software\godex\apps\server\dist\index.js" --name godex --cwd "P:\software\godex\apps\server"
+pm2 save
+```
+
+## Switch to Worktree (if needed again)
+```bash
+pm2 delete godex
+cd P:\software\godex\.worktrees\ui-rewrite
+pnpm build
+pm2 start "P:\software\godex\.worktrees\ui-rewrite\apps\server\dist\index.js" --name godex-ui-rewrite --cwd "P:\software\godex\.worktrees\ui-rewrite\apps\server"
+pm2 save
+```
+</file>
+
+<file path="apps/server/src/routes/diag.ts">
+import { FastifyInstance } from "fastify";
+import { spawn } from "node:child_process";
+import { appendFileSync, mkdirSync } from "node:fs";
+import { resolve } from "node:path";
+import { CodexAppServerManager, buildCodexCommandSpec } from "../codex_app_server_manager.js";
+⋮----
+const truncate = (value: string, max = 2000) =>
+⋮----
+const runCommand = (command: string, args: string[], options?:
+⋮----
+export const registerDiagRoutes = (app: FastifyInstance, appServer: CodexAppServerManager) =>
+⋮----
+const pickFirstPath = (value: string)
+</file>
+
+<file path="apps/ui/src/components/layout/Header.tsx">
+import { useState } from "react";
+import { WorkspaceSwitcher } from "./WorkspaceSwitcher";
+import { ActionsMenu } from "./ActionsMenu";
+import { NewRepoModal } from "@/components/workspace/NewRepoModal";
+import { useWorkspace } from "@/contexts/WorkspaceContext";
+⋮----
+export function Header()
+⋮----
+const handleRepoCreated = async (workspace:
+⋮----
+<WorkspaceSwitcher onNewRepo=
+</file>
+
+<file path="docs/project_notes/bugs.md">
+# Bug Playbook
+
+### 2026-01-26 - Service worker register script served as HTML
+- **Symptom:** Service worker registration fails with `Unexpected token <` in `registerSW.js`.
+- **Root cause:** `registerSW.js` was not included in the server root static file list, so the UI path returned HTML instead of JavaScript.
+- **Fix:** Add `registerSW.js` to the server root files list so it is served as JavaScript.
+- **Prevention:** Keep PWA/static root file allowlists in sync with UI build assets when adding new root-level scripts.
+- **References:** commit `f5450d00f5cdda73eedafa18ef7a3922fd3e63d4`
+
+### 2026-01-25 - PM2 restart fails on Windows
+- **Symptom:** Restart button fails under PM2 on Windows; server restart doesn't trigger reliably.
+- **Root cause:** PM2 restart path invoked via pnpm/.cmd without Windows shell or resolved paths, causing spawn failures.
+- **Fix:** Add `/diag/restart` to resolve pnpm/pm2 paths and run build+restart with shell, logging output to `.godex/restart.log`.
+- **Prevention:** Use the Windows PM2 start helpers and keep restart logic shell-aware for `.cmd`/`.bat`.
+- **References:** commit `84183cba90f72ed6aef8f1099fd97cfefe1193b0`
+
+### 2026-01-24 - Windows strap spawn fails for .cmd/.bat
+- **Symptom:** `POST /workspaces/bootstrap` fails when the strap command is a `.cmd`/`.bat` on Windows (spawn error).
+- **Root cause:** `child_process.spawn` was invoked without `shell: true` for `.cmd`/`.bat`, which Windows requires.
+- **Fix:** Detect `.cmd`/`.bat` strap command and spawn with `shell: true`.
+- **Prevention:** Keep the Windows shell guard in bootstrap route; prefer `.exe` or set `STRAP_BIN` explicitly.
+- **References:** commit `60d96b8f33e83ef02093d8b940c570625a0f163c`
+</file>
+
+<file path="ecosystem.config.cjs">
+
+</file>
+
+<file path="apps/server/src/routes/threads.ts">
+import { FastifyInstance } from "fastify";
+import { CodexAppServerManager } from "../codex_app_server_manager.js";
+import { RunManager } from "../run_manager.js";
+import { Store, ThreadMeta, WorkspaceThread } from "../store.js";
+⋮----
+const extractString = (value: unknown): string | null =>
+⋮----
+const extractThreadId = (message: any): string | null =>
+⋮----
+const extractThreadIdFromResponse = (result: any): string | null =>
+⋮----
+const extractTurnId = (message: any): string | null =>
+⋮----
+const extractDeltaText = (message: any): string | null =>
+⋮----
+const extractMessageText = (message: any): string | null =>
+⋮----
+const normalizeTimestamp = (value: unknown): string | null =>
+⋮----
+const summarizeNotification = (message: any): string =>
+⋮----
+export const mergeThreadList = (
+  items: any[],
+  metaList: ThreadMeta[],
+  links: WorkspaceThread[],
+  includeArchived: boolean
+) =>
+⋮----
+const buildAttachmentMap = (links: WorkspaceThread[]): Map<string, string[]> =>
+⋮----
+const normalizeThreadItem = (item: any, meta: ThreadMeta | null, attached: string[]) =>
+⋮----
+const build503 = (reply: any, appServer: CodexAppServerManager) =>
+⋮----
+const createThread = async (appServer: CodexAppServerManager, title?: string) =>
+⋮----
+export const registerThreadRoutes = (
+  app: FastifyInstance,
+  store: Store,
+  runManager: RunManager,
+  appServer: CodexAppServerManager
+) =>
+⋮----
+const fetchList = async (cursorValue?: string, useSearch?: boolean) =>
+⋮----
+// Filter by workspace_id if provided
+⋮----
+const tryRead = async () => appServer.request("thread/read",
+const tryResume = async () => appServer.request("thread/resume",
+</file>
+
+<file path="apps/server/src/routes/workspaces.ts">
+import { FastifyInstance } from "fastify";
+import { existsSync, statSync, mkdirSync } from "node:fs";
+import { resolve, dirname } from "node:path";
+import { spawn, spawnSync } from "node:child_process";
+import { RunManager } from "../run_manager.js";
+import { CodexAppServerManager } from "../codex_app_server_manager.js";
+import { NotifyPolicy, Store } from "../store.js";
+import {
+  BootstrapTemplate,
+  TemplateUsed,
+  buildStrapArgs,
+  checkRepoAvailability,
+  finalizeBootstrapSuccess,
+  resolveRepoRoot,
+  resolveTemplateWithCodex,
+  validateRepoName
+} from "../bootstrap.js";
+⋮----
+const normalizeRepoPath = (input: string): string =>
+⋮----
+const ensureDirectory = (path: string): boolean =>
+⋮----
+const buildCodexArgs = (prompt: string):
+⋮----
+const parseTestCommand = (command?: string):
+⋮----
+const autoDetectTestCommand = (repoPath: string):
+⋮----
+const isNotifyPolicy = (value: unknown): value is NotifyPolicy =>
+⋮----
+const ensureBlankSuggestion = (items: string[] | undefined) =>
+⋮----
+const resolveStrapCommand = (): string =>
+⋮----
+const isWindowsCmd = (command: string): boolean =>
+⋮----
+const buildStrapInvocation = (command: string, args: string[]) =>
+⋮----
+const sendBootstrapNotify = async (input: {
+  name: string;
+  status: "success" | "failed";
+  message?: string;
+  workspace_id?: string | null;
+  repo_path?: string;
+  template_used?: string;
+}) =>
+⋮----
+// ignore notification errors
+⋮----
+const hasCodeCli = (): boolean =>
+⋮----
+const launchDetached = (command: string, args: string[], cwd?: string) =>
+⋮----
+export const registerWorkspaceRoutes = (
+  app: FastifyInstance,
+  store: Store,
+  runManager: RunManager,
+  appServer: CodexAppServerManager
+) =>
+⋮----
+const finalizeFailure = (message: string, code = 1) =>
+</file>
+
+<file path="apps/ui/src/components/layout/WorkspaceSwitcher.tsx">
+import { ChevronDown, Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useWorkspace, GLOBAL_WORKSPACE } from "@/contexts/WorkspaceContext";
+⋮----
+interface WorkspaceSwitcherProps {
+  onNewRepo?: () => void;
+}
+⋮----
+export function WorkspaceSwitcher(
+</file>
+
+<file path="apps/ui/src/lib/api.ts">
+const getBaseUrl = (): string =>
+⋮----
+const getToken = (): string | null =>
+⋮----
+async fetch<T>(path: string, options: RequestInit =
+⋮----
+get<T>(path: string): Promise<T>
+⋮----
+post<T>(path: string, body?: unknown): Promise<T>
+⋮----
+patch<T>(path: string, body: unknown): Promise<T>
+⋮----
+delete<T>(path: string): Promise<T>
+⋮----
+export type Workspace = {
+  id: string;
+  title: string;
+  repo_path: string;
+  notify_policy?: string;
+  default_thread_id?: string;
+  test_command_override?: string;
+};
+⋮----
+export type Thread = {
+  thread_id: string;
+  title?: string;
+  title_override?: string;
+  pinned?: boolean;
+  archived?: boolean;
+  attached_workspace_ids?: string[];
+  summary?: string;
+  updated_at?: string;
+  last_seen_at?: string | null;
+};
+⋮----
+export type Message = {
+  id: string;
+  role: "user" | "assistant" | "system";
+  content: string;
+  timestamp?: string;
+};
+⋮----
+export type ThreadDetail = {
+  thread: Thread & {
+    turns?: Array<{
+      id: string;
+      role?: string;
+      content?: string;
+      items?: Array<{
+        id: string;
+        type: string;
+        role?: string;
+        content?: string | Array<{ type: string; text?: string }>;
+        text?: string;
+      }>;
+    }>;
+    items?: Message[];
+  };
+  items?: Message[];
+  turns?: Array<{
+    id: string;
+    role: string;
+    content?: string;
+    items?: Message[];
+  }>;
+  meta?: {
+    thread_id: string;
+    title_override?: string | null;
+    pinned?: boolean;
+    archived?: boolean;
+    last_seen_at?: string;
+  };
+  attached_workspace_ids?: string[];
+};
+</file>
+
+<file path="apps/ui/vite.config.ts">
+import dotenv from "dotenv";
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import tailwindcss from "@tailwindcss/vite";
+import { VitePWA } from "vite-plugin-pwa";
+import path from "path";
+⋮----
+maxAgeSeconds: 5 * 60 // 5 minutes
+</file>
+
+<file path="apps/server/src/server.ts">
+import { resolve } from "node:path";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
+import dotenv from "dotenv";
+import Fastify from "fastify";
+import cors from "@fastify/cors";
+import fastifyStatic from "@fastify/static";
+import { authGuard } from "./auth.js";
+import { createStore } from "./store.js";
+import { RunManager } from "./run_manager.js";
+import { CodexAppServerManager } from "./codex_app_server_manager.js";
+import { registerRunRoutes } from "./routes/runs.js";
+import { registerWorkspaceRoutes } from "./routes/workspaces.js";
+import { resolveDefaultRepoRoot } from "./bootstrap.js";
+import { registerThreadRoutes } from "./routes/threads.js";
+import { registerDiagRoutes } from "./routes/diag.js";
+⋮----
+export const buildServer = () =>
+⋮----
+const serveUi = async (_req: unknown, reply: any) =>
+</file>
+
+<file path="apps/ui/package.json">
+{
+  "name": "godex-ui",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@radix-ui/react-dialog": "^1.1.4",
+    "@radix-ui/react-dropdown-menu": "^2.1.4",
+    "@radix-ui/react-label": "^2.1.1",
+    "@radix-ui/react-scroll-area": "^1.2.2",
+    "@radix-ui/react-select": "^2.2.6",
+    "@radix-ui/react-slot": "^1.1.1",
+    "@radix-ui/react-tabs": "^1.1.2",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.454.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.28.0",
+    "tailwind-merge": "^2.5.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.0.0",
+    "@types/node": "^20.11.30",
+    "@types/react": "^18.3.0",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.0",
+    "autoprefixer": "^10.4.20",
+    "dotenv": "^16.4.5",
+    "tailwindcss": "^4.0.0",
+    "typescript": "^5.6.2",
+    "vite": "^5.4.7",
+    "vite-plugin-pwa": "^0.20.5",
+    "workbox-window": "^7.0.0"
+  }
+}
+</file>
+
+<file path="apps/ui/src/contexts/WorkspaceContext.tsx">
+import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { api, Workspace } from "@/lib/api";
+⋮----
+interface WorkspaceContextType {
+  workspaces: Workspace[];
+  currentWorkspace: Workspace | null;
+  setCurrentWorkspace: (workspace: Workspace | null) => void;
+  refreshWorkspaces: () => Promise<void>;
+  loading: boolean;
+}
+⋮----
+const STALE_THRESHOLD_MS = 24 * 60 * 60 * 1000; // 24 hours
+⋮----
+// Synthetic global workspace for threads not attached to any workspace
+⋮----
+export function WorkspaceProvider(
+⋮----
+const refreshWorkspaces = async (): Promise<void> =>
+⋮----
+// Prepend global workspace for all threads
+⋮----
+const setCurrentWorkspace = (workspace: Workspace | null) =>
+⋮----
+const init = async () =>
+⋮----
+// Prepend global workspace for all threads
+⋮----
+// Check for recent workspace
+⋮----
+export function useWorkspace()
+</file>
+
+<file path="apps/ui/src/pages/ThreadDetailPage.tsx">
+import { useState, useEffect, useRef, useCallback } from "react";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
+import { api, ThreadDetail } from "@/lib/api";
+import { useSSE } from "@/hooks/useSSE";
+import { MessageInput } from "@/components/thread/MessageInput";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Input } from "@/components/ui/input";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { ArrowLeft, User, Bot, Loader2, MoreVertical, Search } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { LinkWorkspaceDialog } from "@/components/thread/LinkWorkspaceDialog";
+⋮----
+type DisplayMessage = {
+  id: string;
+  role: "user" | "assistant" | "system";
+  content: string;
+  isStreaming?: boolean;
+};
+⋮----
+// Check for run_id in URL params (from new thread creation)
+⋮----
+// Clean up the URL
+⋮----
+// Scroll to bottom when messages change
+⋮----
+// Fetch thread detail
+⋮----
+const fetchThread = async () =>
+⋮----
+// Parse messages from turns or items
+⋮----
+// Turns are nested inside data.thread.turns
+⋮----
+// Extract text from content array if needed
+⋮----
+// SSE streaming
+⋮----
+// Skip echo of user message (first chunk often echoes the user's input)
+⋮----
+// Move streaming content to messages using state updater to avoid stale closure
+⋮----
+// Send message
+const handleSend = async (text: string) =>
+⋮----
+// Track the user message to filter out echo
+⋮----
+// Add user message immediately
+⋮----
+const handleCopyThreadId = () =>
+⋮----
+// Could add toast notification here if available
+⋮----
+const handleDelete = async () =>
+⋮----
+// Filter messages by search query
+⋮----
+{/* Thread Header */}
+⋮----
+<DropdownMenuItem onClick=
+⋮----
+{/* Search Input (Mobile-First) */}
+⋮----
+{/* Messages */}
+⋮----
+{/* Streaming message */}
+⋮----
+{/* Loading indicator while waiting for stream */}
+⋮----
+{/* Input */}
+⋮----
+{/* Link to Workspace Dialog */}
+⋮----
+<div className=
+⋮----
+<Card className=
+</file>
+
+<file path="README.md">
+# godex
+
+Use Codex CLI on a Windows host from your phone (via Tailscale) with a minimal web UI.
+
+## Setup
+
+1) Install dependencies
+
+```
+pnpm install
+```
+
+2) Create `.env` at repo root
+
+```
+SERVER_HOST=0.0.0.0
+SERVER_PORT=6969
+
+UI_HOST=0.0.0.0
+UI_PORT=5174
+
+CODEX_RELAY_TOKEN=change-me
+```
+
+Notes:
+- For a single-port entrypoint later, set `SERVER_PORT=7777` and use that in your phone URL.
+- `CODEX_RELAY_TOKEN` is required for every API call and SSE stream.
+
+## Dev
+
+Run both apps (server + UI dev server):
+
+```
+pnpm dev
+```
+
+Open UI:
+
+```
+http://central-command:5174/ui?token=YOUR_TOKEN
+```
+
+If you changed server port, add `serverPort=7777`:
+
+```
+http://central-command:5174/ui?token=YOUR_TOKEN&serverPort=7777
+```
+
+## Build + Start
+
+```
+pnpm build
+pnpm start
+```
+
+If the UI has been built, the server will serve it at:
+
+```
+http://central-command:SERVER_PORT/ui?token=YOUR_TOKEN
+```
+
+If UI assets are not built, use the Vite dev server as described above.
+
+## Run with PM2 (recommended for reliable restarts)
+
+Run the server under PM2 so the UI restart button can rebuild and restart it.
+
+Initial start (after a build):
+
+```
+pnpm build
+pm2 start "P:\software\godex\apps\server\dist\index.js" --name godex --cwd "P:\software\godex\apps\server"
+pm2 save
+```
+
+Stop / start / restart:
+
+```
+pm2 stop godex
+pm2 start godex
+pm2 restart godex
+```
+
+Restart via API (the UI button uses this):
+
+```
+POST /diag/restart
+```
+
+Notes:
+- The restart endpoint runs `pnpm build` then `pm2 restart godex`.
+- Logs go to `.godex/restart.log`.
+- The API requires `Authorization: Bearer <CODEX_RELAY_TOKEN>`.
+
+## Caddy (HTTPS + reverse proxy)
+
+`start-caddy.cmd` must be running in a separate terminal during normal use.
+
+## PWA + dictation + share
+
+- Install: open the UI in Chrome (Android) and use the browser menu "Install app".
+- Offline: the UI shell loads from cache and shows an "Offline / Server unreachable" banner when the server is down.
+- Dictation: tap the mic button next to message inputs (Chrome only; requires mic permission).
+- Share sheet: from Android, Share text or a URL to "godex" to create a draft message.
+
+Notes:
+- Start the backend before using the UI: run `pnpm start`.
+- If using HTTPS via Caddy, run `caddy run --config P:\software\godex\caddy\Caddyfile` in a separate terminal.
+- For SSE stability, add no-buffer headers in Caddy (example below).
+- The app still needs a valid token in localStorage. If you have not set one, open the UI once with `?token=...` first.
+- Share drafts are stored locally and survive refresh until sent or cleared.
+
+Caddy SSE headers example:
+```
+central-command:443 {
+  tls internal
+
+  @sse path /runs/*/stream
+  header @sse {
+    Cache-Control "no-cache"
+    X-Accel-Buffering "no"
+  }
+
+  reverse_proxy 127.0.0.1:7777
+}
+
+http://central-command {
+  redir https://{host}{uri}
+}
+```
+
+## Concepts
+
+- **Workspaces**: repo profiles (not conversations). Fields include `title`, `repo_path`, `notify_policy`, `default_thread_id`, and `test_command_override`.
+- **Threads**: Codex app-server conversations. We store local metadata (title override, pinned, archived) and attachments to workspaces.
+
+## API requirements
+
+- Auth: `Authorization: Bearer <CODEX_RELAY_TOKEN>` on every request.
+- SSE: `/runs/:id/stream` accepts `?token=<CODEX_RELAY_TOKEN>` (EventSource cannot send headers).
+
+## Workspaces API
+
+- `GET /workspaces`
+- `POST /workspaces` `{ repo_path, title? }`
+- `GET /workspaces/:id`
+- `PATCH /workspaces/:id` `{ title?, notify_policy?, default_thread_id?, test_command_override? }`
+- `DELETE /workspaces/:id`
+- `POST /workspaces/:id/threads` `{ thread_id }`
+- `DELETE /workspaces/:id/threads/:thread_id`
+- `POST /workspaces/:id/git/status`
+- `POST /workspaces/:id/git/diff`
+- `POST /workspaces/:id/test`
+- `POST /workspaces/:id/runs/clear`
+- `POST /workspaces/:id/open-folder`
+- `POST /workspaces/:id/open-code`
+
+## New Repo bootstrap
+
+- Requires `strap` on PATH.
+- Optional env: `GODEX_DEFAULT_REPO_ROOT` sets the default repo root used by the bootstrap endpoint.
+- When `template` is `auto`, the server asks Codex (strap-bootstrapper skill) to suggest a template.
+- If suggestions are ambiguous, you can choose `blank` to create an empty repo (folder + git init).
+
+Endpoint:
+
+```
+POST /workspaces/bootstrap
+```
+
+Body:
+
+```
+{
+  "name": "my-new-repo",
+  "path": "P:\software",
+  "template": "mono" | "service" | "web" | "python" | "blank" | "auto",
+  "description": "optional description used for auto",
+  "start": false
+}
+```
+
+Example:
+
+```
+curl -X POST http://central-command:7777/workspaces/bootstrap   -H "Authorization: Bearer YOUR_TOKEN"   -H "Content-Type: application/json"   -d '{"name":"demo","template":"mono","path":"P:\software"}'
+```
+
+## Threads (Codex app-server)
+
+- `GET /threads` (merged list: remote threads + local meta + attached workspace ids)
+- `GET /threads/:thread_id`
+- `POST /threads/:thread_id/message` `{ text, workspace_id? }`
+- `POST /threads/create` (best-effort thread/create)
+- `GET /threads/meta`
+- `PATCH /threads/:thread_id/meta` `{ title_override?, pinned?, archived? }`
+
+Notes:
+- The server spawns `codex app-server` automatically (requires `codex` on PATH).
+- Optional: set `CODEX_BIN` to override the binary used for spawning codex.
+- Optional: set `GODEX_APP_SERVER_CWD` to control the app-server working directory.
+- Thread detail view: `/ui/t/:thread_id`.
+
+Diagnostics:
+- `GET /diag/codex` shows the spawn config and `codex --version` output.
+- `GET /health` includes workspace/thread counts and app-server state.
+- `pnpm smoke` calls `/diag/codex` and fails if codex cannot execute.
+
+## Optional notifications
+
+Set both `NTFY_URL` and `NTFY_TOPIC` to send a short notification when a run ends in `failed` or `needs_input`.
+
+```
+NTFY_URL=https://ntfy.sh
+NTFY_TOPIC=godex
+```
+</file>
+
+<file path="apps/ui/src/pages/WorkspaceListPage.tsx">
+import { useWorkspace } from "@/contexts/WorkspaceContext";
+import { Card, CardContent } from "@/components/ui/card";
+import { Folder, Loader2 } from "lucide-react";
+</file>
+
+<file path="apps/ui/src/App.tsx">
+import { Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { WorkspaceProvider, useWorkspace } from "@/contexts/WorkspaceContext";
+import { Header } from "@/components/layout/Header";
+import { OfflineBanner } from "@/components/layout/OfflineBanner";
+import { WorkspaceListPage } from "@/pages/WorkspaceListPage";
+import { WorkspaceDetailPage } from "@/pages/WorkspaceDetailPage";
+import { ThreadDetailPage } from "@/pages/ThreadDetailPage";
+import { ShareDraftPage } from "@/pages/ShareDraftPage";
+⋮----
+function AppContent()
+⋮----
+function ThreadPage()
+⋮----
+export default function App()
+</file>
+
+<file path="apps/ui/src/pages/WorkspaceDetailPage.tsx">
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useWorkspace } from "@/contexts/WorkspaceContext";
+import { api, Thread } from "@/lib/api";
+import { MessageInput } from "@/components/thread/MessageInput";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  GitBranch,
+  GitCompare,
+  Play,
+  MessageSquare,
+  ChevronRight,
+} from "lucide-react";
+⋮----
+const fetchThreads = async () =>
+⋮----
+const handleQuickAction = async (action: "status" | "diff" | "test") =>
+⋮----
+const handleSendMessage = async (text: string) =>
+⋮----
+// Create a new thread
+⋮----
+// Link the thread to this workspace
+⋮----
+// Send the message to the new thread
+⋮----
+// Navigate to the thread detail page with the run_id to continue streaming
+⋮----
+{/* Main Content */}
+⋮----
+{/* Quick Actions - only show for real workspaces, not global */}
+⋮----
+{/* New Thread Input - only show for real workspaces, not global */}
+⋮----
+{/* Global workspace message */}
+⋮----
+{/* Threads Section */}
+</file>
+
+<file path="docs/project_notes/operating_brief.md">
+# Operating Brief
+
+## One-liner
+- Use Codex CLI on a Windows host from your phone (via Tailscale) with a minimal web UI.
+
+## Goals
+- Provide remote access to Codex CLI runs from a phone through a lightweight UI.
+- Serve the UI via Vite dev server during development or from built assets via the server.
+- Clarify repo profiles (workspaces) vs conversational threads, with workspace defaults and attachments.
+
+## Current state
+- Working: pnpm workspace with `apps/server` and `apps/ui`, plus root scripts for dev/build/start.
+- Working: server serves built UI at `/ui`; dev uses Vite UI on `UI_PORT` when assets are not built.
+- Working: sessions persist `notify_mode`; server can send ntfy notifications and UI exposes per-session controls.
+- Working: Threads UI bridges to `codex app-server` so existing Codex threads can be listed and resumed.
+- Working: Threads list aligns to the server response shape, supports workspace filtering, and includes a synthetic "Unlinked Threads" workspace for orphaned threads (with message/actions disabled).
+- Working: Workspaces are stored server-side as repo profiles; threads can be attached with local metadata (pinned/archived/title override).
+- Working: New repo bootstrap flow in the UI plus `/workspaces/bootstrap` endpoint can scaffold repos (strap + optional auto template).
+- Working: UI is installable as a PWA, shows an offline/server-unreachable banner, and serves PWA root assets from the server build output.
+- Working: Threads streaming aggregates deltas to hide raw SSE tags, adds manual/auto refresh on thread detail, plus UI restart controls and service-worker update toasts.
+- Working: Thread view shows a working spinner/status while streaming replies.
+- Working: Thread detail uses a dedicated header with in-thread search, actions, and workspace link management.
+- Working: App shell header components are in place (header, actions menu, workspace switcher).
+- Working: Workspace detail sends messages via the shared MessageInput and streams replies via SSE.
+- Working: Share drafts flow at `/ui/share` saves incoming share text/URLs to localStorage before sending.
+- Working: Dictation is available via mic controls on workspace/thread inputs (Chrome + mic permission).
+- Working: Windows restart tooling includes a PM2 ecosystem config for `godex`.
+
+## Repo map
+- `apps/server`: backend server for API + SSE, and optional static UI serving.
+- `apps/ui`: web UI (Vite dev server in development).
+- `packages/`: shared packages.
+- `scripts/`: automation scripts.
+- `tools/`: tooling.
+
+## System map
+- Components:
+  - UI: browser client from `apps/ui` (Vite dev server or served by `apps/server`).
+  - Server: API + SSE endpoints in `apps/server`.
+  - Codex app-server: spawned by the server to fetch existing Codex threads.
+- Data flow:
+  1) UI loads with `?token=<CODEX_RELAY_TOKEN>` (and optional `serverPort`).
+  2) UI calls server API with `Authorization: Bearer <CODEX_RELAY_TOKEN>`; SSE uses `?token=`.
+  3) Threads UI calls server routes, which proxy to the local `codex app-server`.
+
+## Active constraints
+- None yet. (When you add one, reference ADR-### from `adrs.md`.)
+
+## Known hazards
+- `CODEX_RELAY_TOKEN` is required for API requests and SSE streams; missing/incorrect tokens break UI and API access.
+- Setting `CODEX_FULL_ACCESS=1` allows full-access Codex runs; use only when explicitly needed.
+- Threads require `codex` on PATH (or `CODEX_BIN` set) so the server can spawn `codex app-server`.
+- PWA/share flows still require a valid token in localStorage (open UI once with `?token=...` to set it).
+
+## How to get oriented fast
+- Start here: `README.md`
+- Key facts: `docs/project_notes/key_facts.md`
+- ADR constraints: `docs/project_notes/adrs.md`
+- Work checkpoints: `docs/project_notes/worklog.md`
+- Bug playbook: `docs/project_notes/bugs.md`
+</file>
+
+<file path="docs/project_notes/key_facts.md">
+# Key Facts
+
+## Quick start
+- Install: `pnpm install`
+- Configure env: create `.env` at repo root (see `README.md` for required vars)
+- Dev: `pnpm dev`
+- Test: `pnpm test`
+
+## Local development
+- Runtime: Node.js (pnpm workspace)
+- Package manager: pnpm@9.12.3
+- Env var names: `SERVER_HOST`, `SERVER_PORT`, `UI_HOST`, `UI_PORT`, `CODEX_RELAY_TOKEN`, `CODEX_FULL_ACCESS`, `CODEX_BIN`, `GODEX_APP_SERVER_CWD`, `GODEX_DEFAULT_REPO_ROOT`, `STRAP_BIN`, `NTFY_URL`, `NTFY_TOPIC`
+- Default hosts: `SERVER_HOST=0.0.0.0`, `UI_HOST=0.0.0.0`
+- Ports: server `SERVER_PORT` (default 6969), UI dev server `UI_PORT` (default 5174)
+- Auth: API requires `Authorization: Bearer <CODEX_RELAY_TOKEN>`; SSE uses `?token=<CODEX_RELAY_TOKEN>`
+- UI token storage: `?token=` is stored in localStorage as `godex_token` and removed from the URL.
+- Runs SSE stream: `/runs/:id/stream` accepts `replay=0` to skip replaying recent events
+- Common paths: `apps/server`, `apps/ui`, `packages`
+ - PM2 process name (ui-rewrite worktree): `godex-ui-rewrite`
+
+## Notifications
+- Session notify modes: `off`, `needs_input_failed`, `all` (default `needs_input_failed`)
+- Update notify mode: `PATCH /sessions/:id` with JSON `{ "notify_mode": "<mode>" }`
+
+## Data storage
+- Local store files live in `.godex/`: `data.json` and `godex.sqlite`
+- Restart logs: `.godex/restart.log` (diag restart)
+
+## Deployment
+- Build: `pnpm build`
+- Start: `pnpm start` (builds then starts `apps/server`)
+
+## PWA + share + dictation
+- PWA install: open `/ui` in Chrome (Android) and use the "Install app" browser menu.
+- Offline behavior: UI shell loads from cache and shows an offline/server-unreachable banner if the server is down.
+- Share sheet route: `/ui/share` ingests shared text/URLs and stores drafts in localStorage until sent/cleared.
+- Dictation: mic button on message inputs (Chrome only; requires mic permission).
+- HTTPS dev helper: `caddy run --config P:\software\godex\caddy\Caddyfile`
+- Caddy SSE headers: add no-buffer headers for `/runs/*/stream` (`Cache-Control: no-cache`, `X-Accel-Buffering: no`).
+- Token requirement: PWA/share flows still need `CODEX_RELAY_TOKEN` in localStorage (open UI once with `?token=...`).
+
+## Threads + diagnostics
+- Threads UI uses `codex app-server` (spawned by the server); requires `codex` on PATH or `CODEX_BIN` set.
+- Threads list endpoint: `GET /threads` (optional `workspace_id`) returns `{ ok, data: [...] }`.
+- Thread detail route: `/ui/t/:thread_id`
+- Diagnostics: `GET /diag/codex` returns spawn config + `codex --version`
+- Diagnostics: `POST /diag/restart` runs build + server restart and logs to `.godex/restart.log`
+- Smoke check: `pnpm smoke` (calls `/diag/codex`)
+
+## Workspaces
+- Workspaces are repo profiles with fields: `title`, `repo_path`, `notify_policy`, `default_thread_id`, `test_command_override`.
+- Workspaces API: `GET/POST /workspaces`, `GET/PATCH/DELETE /workspaces/:id`.
+- Workspace actions: attach threads (`POST /workspaces/:id/threads`), git status/diff (`POST /workspaces/:id/git/status`, `/git/diff`), tests (`POST /workspaces/:id/test`), and utility actions (`POST /workspaces/:id/open-folder`, `/open-code`, `/runs/clear`).
+
+## Repo bootstrap
+- Requires `strap` on PATH.
+- Default repo root env: `GODEX_DEFAULT_REPO_ROOT`.
+- Override strap command: `STRAP_BIN` (supports full path or `.cmd`/`.bat` on Windows).
+- Endpoint: `POST /workspaces/bootstrap`.
+- Templates: `mono`, `service`, `web`, `python`, `blank`, `auto` (auto can use a description to request suggestions).
+
+## External services
+- Optional notifications: `NTFY_URL`, `NTFY_TOPIC` (uses ntfy.sh by default)
+
+## Operational commands
+- `pnpm build`
+- `pnpm start`
+- `pnpm smoke`
+- `pnpm typecheck`
+- `pnpm test:server`
+- `pnpm test:ui`
+- `pm2 start "P:\software\godex\apps\server\dist\index.js" --name godex-ui-rewrite --cwd "P:\software\godex\apps\server"`
+- `pm2 stop godex-ui-rewrite`
+- `pm2 start godex-ui-rewrite`
+- `pm2 restart godex-ui-rewrite`
+- `start-godex.cmd` (builds then starts the server)
+- `start-caddy.cmd` (runs Caddy with `P:\software\godex\caddy\Caddyfile`)
+- `scripts/godex-pm2-start.ps1` (PM2 start helper for Windows)
+- `scripts/godex-pm2-start.cmd` (PM2 start helper for Windows)
+- `ecosystem.config.cjs` (PM2 config for running `godex` via the Windows helper)
+
+## Repo map
+- `.`: pnpm workspace root.
+- `apps/`: application packages.
+- `packages/`: shared packages.
+- `scripts/`: automation scripts.
+- `tools/`: tooling.
+
+## Deprecations / gotchas
+- UI requires a token: `http://<host>:<ui_port>/ui?token=<CODEX_RELAY_TOKEN>` (add `serverPort=<port>` if server port differs).
+- Built UI is served by the server at `http://<host>:<server_port>/ui?token=<CODEX_RELAY_TOKEN>` when assets exist.
+
+## Linkouts
+- Operating brief: `docs/project_notes/operating_brief.md`
+- ADR constraints: `docs/project_notes/adrs.md`
+- Bug playbook: `docs/project_notes/bugs.md`
+- Work checkpoints: `docs/project_notes/worklog.md`
+</file>
+
+<file path="docs/project_notes/worklog.md">
+# Worklog
+
+### 2026-01-26 - Thread header mobile-first menu alignment
+- **Outcome:** Thread detail header is mobile-first with a right-aligned actions menu, search moved into the menu, and a collapsible search input below the header.
+- **Why:** Improve mobile spacing while keeping search reachable without dedicating header space.
+- **Links:** commit `12d03eb031e7395c7e20c3904f58f67d6f439a6c`
+
+### 2026-01-26 - Thread detail header + workspace linking
+- **Outcome:** Thread detail now has its own header with back navigation, in-thread search, and an actions menu plus a dialog to manage workspace links.
+- **Why:** Make thread navigation faster, enable quick message filtering, and allow linking/unlinking workspaces directly from the thread view.
+- **Links:** commit `d4d343459df7334b8588ebaac5b2bebf1756dba5`
+
+### 2026-01-26 - Global workspace thread filtering
+- **Outcome:** `/threads?workspace_id=__global__` now returns only unattached threads by filtering on empty `attached_workspace_ids`.
+- **Why:** Keep the "Unlinked Threads" workspace aligned with server-side filtering without affecting real workspace queries.
+- **Links:** commit `dc5276ee38efe94b40740733612fc0357283209a`
+
+### 2026-01-26 - Workspace detail global workspace polish
+- **Outcome:** Workspace detail always sends `workspace_id` (including `__global__`), global workspace help text mentions linking, the label reads "Unlinked Threads", and mobile layout uses safer width/overflow utilities.
+- **Why:** Keep global workspace filtering consistent and prevent mobile overflow regressions while clarifying what unlinked threads represent.
+- **Links:** commit `70e50888bdb6bf7ab1c423877419585b5e328cb8`
+
+### 2026-01-26 - Workspace switcher menu ordering
+- **Outcome:** Workspace switcher now hides the `__global__` entry, orders menu items as Workspaces → All Workspaces → Unlinked Threads → New Repo, and highlights Unlinked Threads when selected.
+- **Why:** Keep the workspace switcher focused on user-relevant options and make the unlinked threads state more obvious.
+- **Links:** commit `5d6a90652c32e101aaa17eea1e03698828d8382c`
+
+### 2026-01-25 - Threads list response + global workspace
+- **Outcome:** Threads list now reads the server `data` wrapper, supports `/threads?workspace_id=...`, and adds a synthetic "All Threads" workspace for orphaned threads with actions/messaging disabled.
+- **Why:** Keep UI in sync with the server response shape and surface unassigned threads safely.
+- **Links:** commit `8363563605748ee1f10f60f9aa454365cfa6f82e`
+
+### 2026-01-25 - Workspace list loading states
+- **Outcome:** Workspace list shows explicit loading states while data fetches.
+- **Why:** Make list behavior clearer on slower connections and avoid empty-state confusion.
+- **Links:** commit `15384b8448827d59a6bd2e990e346f4b75b5c0a5`
+
+### 2026-01-25 - Mobile responsive utilities in UI pages
+- **Outcome:** Header, thread detail, and workspace detail views use updated responsive utility classes for better mobile layout behavior.
+- **Why:** Improve phone usability by tightening layout and spacing for small screens.
+- **Links:** commit `1cda25ccba612b2c4005d8f9d03f7249c795a776`
+
+### 2026-01-25 - Offline banner for network status
+- **Outcome:** UI now shows an offline/server-unreachable banner when the network status indicates the server is down.
+- **Why:** Make connectivity issues obvious so users can distinguish offline states from app errors.
+- **Links:** commit `20b9481bde80f4497fad3ed34f95e237ac2b737e`
+
+### 2026-01-25 - Share draft page for shared content
+- **Outcome:** UI now has a dedicated ShareDraftPage to capture shared text/URLs and route them into the draft flow.
+- **Why:** Ensure share-intent payloads land in the UI with a purpose-built entry point for users coming from the OS share sheet.
+- **Links:** commit `2c59303b7ad979f2db3de78c8ef0ddbec2bbb5a2`
+
+### 2026-01-25 - Workspace detail SSE messaging
+- **Outcome:** Workspace detail now sends messages with the shared MessageInput, creates a default thread if missing, and streams replies via SSE.
+- **Why:** Make the workspace detail page usable for sending prompts and seeing live responses without leaving the workspace view.
+- **Links:** commit `bfc013b120c773bd839ce559e3667a7b32bbabd7`
+
+### 2026-01-25 - Workspace detail thread navigation
+- **Outcome:** Linked threads on the workspace detail page now navigate directly to the thread detail view.
+- **Why:** Allow faster drill-down from a workspace overview into a specific thread.
+- **Links:** commit `cdd8d48c96f7641c0c3a9df2dcd809b7542e1053`
+
+### 2026-01-25 - Thread detail route wiring
+- **Outcome:** Thread detail view is reachable via the `/t/:threadId` route in the UI.
+- **Why:** Enable direct navigation to a specific thread detail page.
+- **Links:** commit `8cdc4346e9b204a4e3ae9451b78d79e2531e0000`
+
+### 2026-01-25 - Shared MessageInput component with dictation
+- **Outcome:** UI now has a reusable `MessageInput` component that includes dictation support for composing messages.
+- **Why:** Standardize the message composer behavior across UI surfaces and keep dictation support consistent.
+- **Links:** commit `779fa947296b6ffa2280a95968de3a4cd2186f22`
+
+### 2026-01-25 - Workspace detail UI quick actions + linked threads
+- **Outcome:** Workspace detail page now includes quick actions (git status/diff/tests), a main output area with message input, and a linked threads list powered by `/threads?workspace_id=...`.
+- **Why:** Provide an actionable workspace home view and surface linked threads at a glance.
+- **Links:** commit `0a77c803678ba0bca3ea10cdd1b67f9723559559`
+
+### 2026-01-25 - Workspace API response shape handling
+- **Outcome:** UI workspace context now supports the `/workspaces` response wrapper `{ ok, workspaces: [...] }` instead of assuming a bare array.
+- **Why:** Keep workspace list and detail views aligned with the server response format.
+- **Links:** commit `3fd070dfc259b50ee6c7ec6e5996e304bd0b9bfc`
+
+### 2026-01-25 - App shell header components
+- **Outcome:** UI now includes app shell header components for the main layout (header, actions menu, workspace switcher).
+- **Why:** Establish the top-level navigation and controls for upcoming layout and workflow work.
+- **Links:** commit `7193b6e1e4d4929497f375be4dbf7524daaadf03`
+
+### 2026-01-25 - UI auth context
+- **Outcome:** UI now has an auth context that captures `?token=` into localStorage and exposes authenticated state to consumers.
+- **Why:** Centralize token handling and make auth state available to UI components.
+- **Links:** commit `c0192310863a61469ce4880e328f59fbb1943be6`
+
+### 2026-01-25 - Core shadcn/ui components
+- **Outcome:** UI now has baseline shadcn/ui components (button, dialog, dropdown menu, input, scroll area).
+- **Why:** Establish reusable UI primitives for upcoming interface work.
+- **Links:** commit `f49189ccc6a6b2000ebba410664c1abb8e22b32c`
+
+### 2026-01-25 - React entry point wiring
+- **Outcome:** UI entry point now uses a React `main.tsx` entry with updated `index.html` wiring.
+- **Why:** Align the UI bootstrapping with React conventions for upcoming component work.
+- **Links:** commit `c49f33cbab533a5cbd968b23e9519325a8be498a`
+
+### 2026-01-25 - UI React + shadcn dependencies
+- **Outcome:** `apps/ui` now includes React/ReactDOM plus shadcn stack dependencies (Radix UI, CVA, Tailwind utilities).
+- **Why:** Establish the UI component stack for upcoming shadcn-based work.
+- **Links:** commit `22e9fa5ef2b73189c2f4462f7c2f30dce8670ea1`
+
+### 2026-01-25 - Thread working state indicator
+- **Outcome:** Thread view shows a working spinner/status during streaming replies.
+- **Why:** Provide clear feedback while replies stream.
+- **Links:** commit `f7cd88b5f89d6abeebd748383c85e69305fd00c8`
+
+### 2026-01-25 - Thread streaming cleanup + refresh controls
+- **Outcome:** Thread view aggregates SSE deltas to hide raw event tags, adds manual/auto refresh with no-store fetch, and README now documents PM2 stop/start/restart plus `/diag/restart`; unused `.godex/restart-run.cmd` removed.
+- **Why:** Keep live thread output readable and make restart workflows clearer.
+- **Links:** commit `e26f717e85c00bdee60bbc1cc8a4aab4bb3d7906`
+
+### 2026-01-25 - Threads UI restart controls + PM2 config
+- **Outcome:** Threads transcripts render more clearly, UI exposes restart controls with update toasts, and a PM2 ecosystem config was added for Windows ops.
+- **Why:** Make thread context easier to scan and provide a reliable restart path for local/PM2 workflows.
+- **Links:** commit `6b7c83b96dfb6e74603aa02ce3bddfb49a53eda9`
+
+### 2026-01-25 - Reliable PM2 restart flow
+- **Outcome:** Server restart uses `/diag/restart` with resolved pnpm/pm2 paths, shell execution, and logs to `.godex/restart.log`; Windows PM2 start helpers added.
+- **Why:** Make the restart button reliable under PM2 on Windows for local ops.
+- **Links:** commit `84183cba90f72ed6aef8f1099fd97cfefe1193b0`, bug entry `docs/project_notes/bugs.md`
+
+### 2026-01-24 - Bootstrap command reliability
+- **Outcome:** Bootstrap now supports `STRAP_BIN` overrides and spawns `.cmd`/`.bat` with Windows shell when needed.
+- **Why:** Make repo bootstrap work reliably when strap is installed via a Windows shim.
+- **Links:** commit `60d96b8f33e83ef02093d8b940c570625a0f163c`, bug entry `docs/project_notes/bugs.md`
+
+### 2026-01-24 - Repo bootstrap flow
+- **Outcome:** UI exposes a bootstrap modal and the server provides `/workspaces/bootstrap` to scaffold new repos (template/auto) and return workspace metadata.
+- **Why:** Create new repos from the phone UI and register them as workspaces without manual setup.
+- **Links:** commit `70736853291269942c060b3c578b27f4dd8580a3`
+
+### 2026-01-23 - UI icons + ticker marquee
+- **Outcome:** UI uses consistent inline SVG icons and the status ticker scrolls with vanilla-marquee plus controlled pause.
+- **Why:** Improve readability with consistent iconography and make the top ticker behave like a real marquee.
+- **Links:** commit `a29eaa4795ffbb53e2e3f256feeab78a65b913fe`
+
+### 2026-01-23 - Thread rename flow + startup helpers
+- **Outcome:** Threads can be renamed via a modal with title overrides shown in list/detail, Android dictation avoids repeated transcripts, and `start-godex.cmd`/`start-caddy.cmd` helpers exist.
+- **Why:** Make thread lists easier to scan, reduce duplicate dictation input on Android, and simplify local startup.
+- **Links:** commit `4d4d36f2242cd574a223622729a6b097a47959be`
+
+### 2026-01-23 - PWA install, share drafts, and dictation
+- **Outcome:** UI is installable as a PWA with offline banner/toasts, supports share-to-godex drafts at `/ui/share`, and adds mic-driven dictation on message inputs.
+- **Why:** Enable installable offline-capable UI on Android and faster prompt entry via share + voice.
+- **Links:** commit `0eee4a68f49c9d05466f05c26c2d254a7771fe2b`
+
+### 2026-01-23 - Workspaces model + thread attachments
+- **Outcome:** Server stores workspace profiles, exposes workspace routes/actions, and threads carry local metadata plus workspace attachments in the UI.
+- **Why:** Separate repo profiles from conversations, allow per-workspace defaults, and support thread attachments in the interface.
+- **Links:** commit `4ee6ca7a9fee8b39f92e835fbc9d55c2a1542b73`
+
+### 2026-01-23 - Codex app-server threads bridge
+- **Outcome:** Server spawns `codex app-server`, exposes thread routes, and UI ships a Threads tab with diagnostics + smoke check.
+- **Why:** Surface existing Codex threads in the phone UI and make app-server spawning easier to diagnose.
+- **Links:** commit `e5f4b2b530400d96b93b4999f29437624ec2c881`
+
+### 2026-01-23 - SSE replay toggle + local store tracked
+- **Outcome:** Runs SSE stream can skip replay with `replay=0`, post-commit prompts are passed via a temp stdin file, and `.godex` store files are committed.
+- **Why:** Prevent duplicate output when UI opts out of replay and capture local store state per request.
+- **Links:** commit `6bc34a098236ce3b18739d1f9b9359f56e13af02`
+
+### 2026-01-23 - Session notification modes + UI control
+- **Outcome:** Sessions now track notification preferences, ntfy messages are gated by per-session mode, and the UI exposes the notify control plus improved run/output handling.
+- **Why:** Allow per-session notification preferences, reduce false needs-input alerts, and tighten UI flow for status/output.
+- **Links:** commit `1f8b78e9a4c640922ed45ee19acf02ea5604a1cc`
+</file>
+
+</files>

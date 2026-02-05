@@ -13,7 +13,7 @@ module.exports = {
     {
       name: "caddy",
       script: "caddy",
-      args: "run --config P:\\software\\caddy\\Caddyfile",
+      args: "run --config P:\\software\\godex\\caddy\\Caddyfile",
       cwd: "P:\\software\\godex"
     }
   ]
