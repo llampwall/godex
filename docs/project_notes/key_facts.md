@@ -16,7 +16,7 @@
 - UI token storage: `?token=` is stored in localStorage as `godex_token` and removed from the URL.
 - Runs SSE stream: `/runs/:id/stream` accepts `replay=0` to skip replaying recent events
 - Common paths: `apps/server`, `apps/ui`, `packages`
- - PM2 process name (ui-rewrite worktree): `godex-ui-rewrite`
+- PM2 process name: `godex`
 
 ## Notifications
 - Session notify modes: `off`, `needs_input_failed`, `all` (default `needs_input_failed`)
@@ -35,7 +35,7 @@
 - Offline behavior: UI shell loads from cache and shows an offline/server-unreachable banner if the server is down.
 - Share sheet route: `/ui/share` ingests shared text/URLs and stores drafts in localStorage until sent/cleared.
 - Dictation: mic button on message inputs (Chrome only; requires mic permission).
-- HTTPS dev helper: `caddy run --config P:\software\caddy\Caddyfile`
+- HTTPS dev helper: `caddy run --config P:\software\godex\caddy\Caddyfile`
 - Caddy SSE headers: add no-buffer headers for `/runs/*/stream` (`Cache-Control: no-cache`, `X-Accel-Buffering: no`).
 - Token requirement: PWA/share flows still need `CODEX_RELAY_TOKEN` in localStorage (open UI once with `?token=...`).
 
@@ -69,12 +69,12 @@
 - `pnpm typecheck`
 - `pnpm test:server`
 - `pnpm test:ui`
-- `pm2 start "P:\software\godex\apps\server\dist\index.js" --name godex-ui-rewrite --cwd "P:\software\godex\apps\server"`
-- `pm2 stop godex-ui-rewrite`
-- `pm2 start godex-ui-rewrite`
-- `pm2 restart godex-ui-rewrite`
+- `pm2 start "P:\software\godex\apps\server\dist\index.js" --name godex --cwd "P:\software\godex\apps\server"`
+- `pm2 stop godex`
+- `pm2 start godex`
+- `pm2 restart godex`
 - `start-godex.cmd` (builds then starts the server)
-- `start-caddy.cmd` (runs Caddy with `P:\software\caddy\Caddyfile`)
+- `start-caddy.cmd` (runs Caddy with `P:\software\godex\caddy\Caddyfile`)
 - `scripts/godex-pm2-start.ps1` (PM2 start helper for Windows)
 - `scripts/godex-pm2-start.cmd` (PM2 start helper for Windows)
 - `ecosystem.config.cjs` (PM2 config for running `godex` via the Windows helper)

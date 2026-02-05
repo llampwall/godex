@@ -1,5 +1,10 @@
 # Worklog
 
+### 2026-02-05 - Repo folder move to P:\software\godex
+- **Outcome:** Ops helpers and PM2 naming align with the new repo root path and `godex` process name.
+- **Why:** Keep Windows automation and HTTPS proxy commands consistent after relocating the repo.
+- **Links:** commit `4626a2cf5cb639fb531aeb37e2635da69a94705c`
+
 ### 2026-01-26 - Thread header mobile-first menu alignment
 - **Outcome:** Thread detail header is mobile-first with a right-aligned actions menu, search moved into the menu, and a collapsible search input below the header.
 - **Why:** Improve mobile spacing while keeping search reachable without dedicating header space.
