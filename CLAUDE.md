@@ -54,46 +54,28 @@ Data flow: UI → Server API (auth via `Authorization: Bearer <CODEX_RELAY_TOKEN
 
 ## Project Memory System
 
-Institutional knowledge is maintained in `docs/project_notes/` (updated automatically by post-commit maintainer).
+Institutional knowledge is maintained in `docs/memory/` (updated via `/update-memory` skill).
 
-### Memory Files (non-overlapping)
+### Memory Files
 
-- **operating_brief.md** — Entry point: what this project is, goals, current state, hazards, and next steps. Read this first when starting a fresh chat.
-- **key_facts.md** — Lookupable truths: commands, ports, URLs, paths, env var *names*, deployment targets. Prefer documented facts over assumptions.
-- **adrs.md** — **Constraints (ADRs)**: long-lived rules/invariants + rationale future changes must respect. If it doesn’t create a constraint, it doesn’t belong.
-- **bugs.md** — Recurring/scary bugs: symptom → root cause → fix → prevention.
-- **worklog.md** — **Checkpoints**: outcomes + local intent for completed work. May link ADRs/bugs/key facts; must not duplicate them.
+- **STATE.md** — Current objective, active work, blockers, next actions, quick reference commands
+- **CONSTRAINTS.md** — Infrastructure facts, rules, key facts, hazards (merge-only, never delete)
+- **DECISIONS.md** — Dated decision log with evidence (commit hashes), bug fixes with symptom/root cause/fix/prevention
 
 ### Memory-Aware Protocol
 
+**When opening a repo:**
+- If STATE.md shows "ACTION REQUIRED" or bootstrap templates, offer to run `/update-memory`
+- Read `docs/memory/STATE.md` first to understand current state and objectives
+
 **Before proposing changes:**
-- Read `docs/project_notes/operating_brief.md` first.
-- Check `docs/project_notes/adrs.md` before proposing architectural or data-model changes.
-- Check `docs/project_notes/key_facts.md` before asserting commands/ports/paths/URLs/env-var names.
+- Check `docs/memory/CONSTRAINTS.md` for infrastructure requirements and architectural rules
+- Verify commands/ports/paths against documented facts
 
-**When encountering errors or bugs:**
-- Search `docs/project_notes/bugs.md` first.
-- If the issue was expensive/non-obvious or likely to recur, update `bugs.md` (symptom → root cause → fix → prevention).
+**When encountering bugs:**
+- Search `docs/memory/DECISIONS.md` for similar issues and their solutions
+- Document expensive/recurring bugs in DECISIONS.md with full symptom/root cause/fix/prevention
 
-**After completing meaningful work (ready to keep):**
-- Verify the change (run relevant tests / quick sanity checks).
-- If the user has approved the change (or you are confident it is correct and intended), commit the work using `$git-commit-helper`.
-- Ownership:
-- The main coding agent should **not** edit docs/project_notes/* directly.
-- Only the post-commit maintainer edits those files (unless user explicitly requests manual edits).
-
-**If work appears complete but is not yet approved:**
-- Ask the user if they want to commit now.
-- If approved, commit using `$git-commit-helper`.
-- If not approved, leave changes uncommitted and do not update `docs/project_notes/*`.
-
-**Notes update policy:**
-- `docs/project_notes/*` is maintained automatically after meaningful commits.
-- If no meaningful notes updates are needed, the maintainer will leave them unchanged.
-
-### Anti-Redundancy Rules
-
-- `worklog.md` must not duplicate ADR rationale, bug writeups, or key facts.
-- If details belong elsewhere, link to `adrs.md`, `bugs.md`, or `key_facts.md`.
-- `operating_brief.md` is curated (rewrite allowed). Keep it short.
-- If no meaningful doc changes are needed, say `No project_notes updates needed for this change.`
+**After completing work:**
+- Run `/update-memory` to analyze commits and update memory files
+- Memory files are maintained by the update-memory skill, not manually
